@@ -13,7 +13,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <title>WANDER</title>
-<script>window.APP_V="1794806947";</script>
+<script>window.APP_V="1794808440";</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -380,6 +380,42 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
 
 .info-i{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;font:700 11px var(--font-brand);margin-left:6px;vertical-align:middle;line-height:1;opacity:.8}
 
+/* 훈장 */
+.medals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px}
+.medal{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;font-size:12px;font-weight:800;line-height:1.3;color:var(--muted)}
+.medal .mk{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:var(--bg2);color:#B5B8CC;border:2px dashed #D3D6EA}
+.medal .mk svg{width:26px;height:26px}
+.medal.on{color:var(--ink)}
+.medal.on .mk{background:linear-gradient(135deg,#FFE9A8,#F5B642);color:#7A4B00;border:2px solid #fff;box-shadow:0 6px 16px rgba(245,182,66,.45)}
+
+/* 프로필 · 레벨 · 마이페이지 */
+#meBtn{width:auto;min-width:40px;padding:0 4px}
+.lvpill{display:inline-flex;align-items:center;border-radius:999px;padding:6px 11px;background:var(--accent-soft);color:var(--deep);font:800 12px var(--font-brand)}
+.avatar{display:inline-grid;place-items:center;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;flex:none}
+.avatar.gold{background:linear-gradient(135deg,#FFE9A8,#F5B642);color:#7A4B00;box-shadow:0 6px 16px rgba(245,182,66,.45)}
+.avatar.gold svg{width:52%;height:52%}
+.profile-card{display:flex;align-items:center;gap:14px;background:var(--surface);border-radius:22px;padding:14px;box-shadow:var(--shadow)}
+.pc-main{flex:1;min-width:0}.pc-name{font-size:20px;font-weight:800;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc-medal{display:inline-flex;align-items:center;gap:5px;margin-top:5px;border-radius:999px;padding:4px 10px;background:#FFF1D2;color:#7A4B00;font-size:12px;font-weight:800}
+.pc-medal svg{width:14px;height:14px}.pc-medal.none{background:var(--bg2);color:var(--muted)}
+.lv-card{background:var(--surface);border-radius:20px;padding:14px;margin-top:10px;box-shadow:var(--shadow)}
+.lv-top{display:flex;justify-content:space-between;align-items:baseline}.lv-top b{font-size:16px}.lv-top span{font:700 12px var(--font-brand);color:var(--muted)}
+.mpc{background:var(--surface);border-radius:20px;padding:14px;margin-top:10px;box-shadow:var(--shadow);cursor:pointer;display:block}
+.mpc.static{cursor:default}
+.mpc-head{display:flex;justify-content:space-between;align-items:center}.mpc-head b{font-size:16px;font-weight:800}
+.mpc-sub{font-size:13px;color:var(--muted);margin-top:8px}
+.mpc-strip{display:flex;gap:8px;margin-top:10px}.mpc-strip img{width:48px;height:48px;border-radius:12px;object-fit:cover;background:var(--bg2)}
+.mpc-line{font-size:13px;font-weight:700;margin-top:8px;line-height:1.4}.mpc-line small{display:block;font-weight:500;color:var(--muted);margin-top:1px}
+.mini-stats{display:flex;gap:18px;margin-top:10px}.mini-stats span{font-size:12px;color:var(--muted);font-weight:700}.mini-stats b{display:block;font:800 20px var(--font-brand);color:var(--ink)}
+.mini-medals{display:flex;gap:8px;margin-top:10px}
+.mm{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--bg2);color:#B5B8CC}.mm svg{width:16px;height:16px}
+.mm.on{background:linear-gradient(135deg,#FFE9A8,#F5B642);color:#7A4B00}
+.dot-inline{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:9px;background:var(--pink);color:#fff;font-size:11px;font-weight:800;padding:0 5px;margin-left:6px;vertical-align:middle}
+button.medal{background:none;border:0;padding:0;font:inherit}
+button.medal:disabled{opacity:.6}
+.medal small{font-size:10px;font-weight:600;color:var(--muted);line-height:1.2}
+.medal.sel .mk{outline:3px solid var(--accent);outline-offset:3px}
+
 </style>
 <div class="app" id="app">
   <!-- HOME -->
@@ -489,25 +525,27 @@ const HOUR=3600e3,DAY=24*HOUR;
 const T0=Date.now();
 const cat=k=>'assets/cats/'+k+'.jpg';
 const SAMPLES=[
-  {id:'s1',breed:'코리안 숏헤어',no:12,name:'담장 위 고등어',species:'cat',coat:'mackerel',traits:['고등어 무늬','초록 눈','흰 양말'],photo:cat('godeungeo'),x:235,y:115,seen:1,createdAt:T0-3*HOUR,lastSeen:T0-3*HOUR,sample:true,zone:'궁동 일대'},
+  {id:'s1',breed:'아메리칸 숏헤어',no:12,name:'담장 위 고등어',species:'cat',coat:'mackerel',traits:['고등어 무늬','초록 눈','흰 양말'],photo:cat('godeungeo'),x:235,y:115,seen:1,createdAt:T0-3*HOUR,lastSeen:T0-3*HOUR,sample:true,zone:'궁동 일대'},
   {id:'s2',breed:'코리안 숏헤어',no:7,name:'화분 옆 치즈',species:'cat',coat:'cheese',traits:['치즈 무늬','흰 가슴','줄무늬 꼬리'],photo:cat('cheese'),x:-210,y:160,seen:5,createdAt:T0-19*DAY,lastSeen:T0-8*HOUR,sample:true,zone:'궁동 일대'},
-  {id:'s3',breed:'코리안 숏헤어',no:9,name:'회색 대장',species:'cat',coat:'mackerel',traits:['회색','흰 가슴','흰 양말'],photo:cat('hoesaek'),x:70,y:-30,seen:4,createdAt:T0-13*DAY,lastSeen:T0-26*HOUR,sample:true,zone:'궁동 일대'},
-  {id:'s4',breed:'코리안 숏헤어',no:11,name:'까망이',species:'cat',coat:'black',traits:['올블랙'],photo:cat('kkamangi'),x:195,y:-225,seen:2,createdAt:T0-7*DAY,lastSeen:T0-2*DAY,sample:true,zone:'궁동 일대'},
-  {id:'s5',breed:'코리안 숏헤어',no:5,name:'삼색 공주',species:'cat',coat:'calico',traits:['삼색 무늬','줄무늬 꼬리'],photo:cat('samsaek'),x:-165,y:-150,seen:3,createdAt:T0-15*DAY,lastSeen:T0-3*DAY,sample:true,zone:'궁동 일대'},
-  {id:'s6',breed:'코리안 숏헤어',no:4,name:'턱시도 신사',species:'cat',coat:'tuxedo',traits:['턱시도','흰 양말'],photo:cat('tuxedo'),x:330,y:-60,seen:2,createdAt:T0-16*DAY,lastSeen:T0-4*DAY,sample:true,zone:'궁동 일대'},
-  {id:'s7',breed:'믹스',no:3,name:'솜털이',species:'cat',coat:'white',traits:['장모','털복숭이','초록 눈'],photo:cat('nunsong'),x:-30,y:265,seen:3,createdAt:T0-18*DAY,lastSeen:T0-5*DAY,sample:true,zone:'궁동 일대'},
-  {id:'s8',breed:'아메리칸 숏헤어',no:8,name:'밥때 손님',species:'cat',coat:'tuxedo',traits:['흰 털','검은 얼룩'],photo:cat('eunbit'),x:-335,y:-25,seen:1,createdAt:T0-9*DAY,lastSeen:T0-9*DAY,sample:true,zone:'궁동 일대'},
-  {id:'s9',breed:'코리안 숏헤어',no:10,name:'카오스',species:'cat',coat:'calico',traits:['삼색 무늬','긴 꼬리'],photo:cat('chaos'),x:180,y:-210,seen:2,createdAt:T0-10*DAY,lastSeen:T0-6*DAY,sample:true,zone:'궁동 일대'}
+  {id:'s3',breed:'브리티시 숏헤어',no:9,name:'회색 대장',species:'cat',coat:'mackerel',traits:['회색','흰 가슴','흰 양말'],photo:cat('hoesaek'),x:70,y:-30,seen:4,createdAt:T0-13*DAY,lastSeen:T0-26*HOUR,sample:true,zone:'궁동 일대'},
+  {id:'s4',breed:'봄베이',no:11,name:'까망이',species:'cat',coat:'black',traits:['올블랙'],photo:cat('kkamangi'),x:195,y:-225,seen:2,createdAt:T0-7*DAY,lastSeen:T0-2*DAY,sample:true,zone:'궁동 일대'},
+  {id:'s5',breed:'재패니즈 밥테일',no:5,name:'삼색 공주',species:'cat',coat:'calico',traits:['삼색 무늬','줄무늬 꼬리'],photo:cat('samsaek'),x:-165,y:-150,seen:3,createdAt:T0-15*DAY,lastSeen:T0-3*DAY,sample:true,zone:'궁동 일대'},
+  {id:'s6',breed:'터키시 반',no:4,name:'턱시도 신사',species:'cat',coat:'tuxedo',traits:['턱시도','흰 양말'],photo:cat('tuxedo'),x:330,y:-60,seen:2,createdAt:T0-16*DAY,lastSeen:T0-4*DAY,sample:true,zone:'궁동 일대'},
+  {id:'s7',breed:'노르웨이 숲',no:3,name:'솜털이',species:'cat',coat:'white',traits:['장모','털복숭이','초록 눈'],photo:cat('nunsong'),x:-30,y:265,seen:3,createdAt:T0-18*DAY,lastSeen:T0-5*DAY,sample:true,zone:'궁동 일대'},
+  {id:'s8',breed:'터키시 반',no:8,name:'밥때 손님',species:'cat',coat:'tuxedo',traits:['흰 털','검은 얼룩'],photo:cat('eunbit'),x:-335,y:-25,seen:1,createdAt:T0-9*DAY,lastSeen:T0-9*DAY,sample:true,zone:'궁동 일대'},
+  {id:'s9',breed:'재패니즈 밥테일',no:10,name:'카오스',species:'cat',coat:'calico',traits:['삼색 무늬','긴 꼬리'],photo:cat('chaos'),x:180,y:-210,seen:2,createdAt:T0-10*DAY,lastSeen:T0-6*DAY,sample:true,zone:'궁동 일대'}
 ];
 const isNew=c=>Date.now()-(c.createdAt||0)<DAY;
 
 /* 종(품종): 카드에는 별명 아래에 실제 종을 보여요. 도감 위에는 모은 마릿수와 종 수만 보여요. */
 const BREEDS={
-  cat:['코리안 숏헤어','브리티시 숏헤어','아메리칸 숏헤어','러시안 블루','터키시 앙고라','스코티시 폴드','페르시안','샴','노르웨이 숲','벵갈','먼치킨','믹스'],
+  cat:['코리안 숏헤어','브리티시 숏헤어','아메리칸 숏헤어','러시안 블루','터키시 앙고라','터키시 반','스코티시 폴드','페르시안','샴','노르웨이 숲','벵갈','먼치킨','봄베이','재패니즈 밥테일','아비시니안','믹스'],
   dog:['말티즈','푸들','포메라니안','진돗개','시츄','믹스견'],
   bird:['비둘기','참새','까치','기타 새'],
   etc:['기타']};
-const breedOf=c=>c.breed||'종 모름';
+/* 털 색깔로 고른 그럴듯한 종 이름 (카드를 만들 때 자동으로 채우고, 바꿀 수 있어요) */
+const BREED_BY_COAT={cheese:'코리안 숏헤어',mackerel:'아메리칸 숏헤어',calico:'재패니즈 밥테일',tuxedo:'터키시 반',white:'터키시 앙고라',black:'봄베이',brown:'아비시니안'};
+const breedOf=c=>c.breed||(c.species==='cat'?BREED_BY_COAT[c.coat]:null)||'종 모름';
 const speciesCount=cards=>new Set(cards.map(breedOf).filter(b=>b!=='종 모름')).size;
 
 /* 공통 좌표: 모든 폰이 같은 기준점(REF, 궁동)에서 잰 미터(x=동쪽, y=남쪽)를 써요.
@@ -517,6 +555,17 @@ const ll2xy=(lat,lng)=>({x:(lng-REF.lng)*111320*Math.cos(REF.lat*Math.PI/180),y:
 const xy2ll=(x,y)=>({lat:REF.lat-y/110540,lng:REF.lng+x/(111320*Math.cos(REF.lat*Math.PI/180))});
 const REAL=!(window.claude&&window.claude.use);   // 웹 버전이면 실제 지도, Claude 링크 안이면 그림 지도
 const getHome=()=>{try{return JSON.parse(localStorage.getItem('wander2.home')||'null')||{x:0,y:0}}catch(e){return{x:0,y:0}}};
+
+/* 알림 예시 (처음 열었을 때 비어 보이지 않게). 레벨 · 훈장 계산에는 세지 않아요. */
+const SAMPLE_ALERTS=[
+  {id:'a2',type:'thanks',to:null,cardId:'s2',cardName:'화분 옆 치즈',cardNo:7,lostName:'콩이',msg:'덕분에 집에 데려왔어요. 고마워요!',sample:true,at:T0-25*60e3},
+  {id:'a1',type:'clue',to:null,cardId:'s2',cardName:'화분 옆 치즈',cardNo:7,lostName:'콩이',sample:true,at:T0-40*60e3},
+  {id:'a3',type:'clue',to:null,cardId:'s4',cardName:'까망이',cardNo:11,lostName:'밤이',sample:true,at:T0-3*HOUR}];
+const SAMPLE_REQUESTS=[
+  {id:'r1',cardId:'s3',cardNo:9,cardName:'회색 대장',lostName:'보리',from:'sample',to:null,status:'pending',score:0.83,sample:true,at:T0-10*60e3}];
+
+/* 예시 카드는 '내 위치 기준 거리'로 기억해 둬요. 앱을 열 때 GPS를 읽으면 항상 지금 있는 곳 주변으로 옮겨져요. */
+SAMPLES.forEach(c=>{c.ox=c.x;c.oy=c.y;c.lsAgo=T0-c.lastSeen;c.caAgo=T0-c.createdAt});
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -578,7 +627,7 @@ const Store={mode:'loading',cards:[],alerts:[],requests:[],posts:[],me:'local',s
       db.collection('posts').orderBy('at','desc').limit(100).onSnapshot(s=>{this.posts=s.docs.map(d=>({id:d.id,...d.data()}));this.emit()},()=>{});
     }catch(e){clearTimeout(timer);this.useLocal()}
   },
-  useLocal(){this.mode='local';this.cards=lsGet('wander2.cards',null)||SAMPLES.slice();this.alerts=lsGet('wander2.alerts',[]);this.requests=lsGet('wander2.requests',[]);this.posts=lsGet('wander2.posts',[]);this.emit()},
+  useLocal(){this.mode='local';this.cards=lsGet('wander2.cards',null)||SAMPLES.map(c=>({...c}));const sa=lsGet('wander2.alerts',[]),sr=lsGet('wander2.requests',[]);this.alerts=sa.length?sa:SAMPLE_ALERTS.map(x=>({...x}));this.requests=sr.length?sr:SAMPLE_REQUESTS.map(x=>({...x}));this.posts=lsGet('wander2.posts',[]);relocateSamples();this.emit()},
   saveLocal(){lsSet('wander2.cards',this.cards);lsSet('wander2.alerts',this.alerts);lsSet('wander2.requests',this.requests);lsSet('wander2.posts',this.posts);this.emit()},
   nextNo(){return this.cards.reduce((m,c)=>Math.max(m,c.no||0),0)+1},
   async add(card){
@@ -771,6 +820,22 @@ function tipsFor(L,r){
   t.push(['익숙한 냄새를 집 앞에',`평소 쓰던 모래, 담요와 ${L.snack&&L.snack!=='기타'?L.snack:'좋아하는 간식'}를 집 앞에 두면 돌아올 길을 찾는 데 도움이 돼요.`]);
   if(L.how==='door'||L.how==='window')t.push(['나간 곳 바로 앞부터',(L.how==='door'?'열린 문':'창문 아래')+' 주변 10m 안을 먼저 꼼꼼히 확인하세요. 가장 가까운 곳에 숨어 있는 경우가 많아요.']);
   return t;
+}
+
+/* 시연하는 곳이 어디든 지도와 찾기를 바로 써 볼 수 있게, 예시 카드를 지금 있는 곳 주변에 둬요 */
+function relocateSamples(){
+  if(Store.mode!=='local')return;
+  const hm=getHome();let ch=false;
+  Store.cards.forEach(c=>{
+    if(!c.sample)return;
+    const base=SAMPLES.find(s=>s.id===c.id);
+    if(c.ox===undefined&&base){c.ox=base.ox;c.oy=base.oy;c.lsAgo=base.lsAgo;c.caAgo=base.caAgo}
+    if(c.ox===undefined)return;
+    const nx=hm.x+c.ox,ny=hm.y+c.oy;
+    if(c.x!==nx||c.y!==ny||c.zone!==ZONE){c.x=nx;c.y=ny;c.zone=ZONE;ch=true}
+    c.lastSeen=Date.now()-c.lsAgo;c.createdAt=Date.now()-c.caAgo;
+  });
+  if(ch)Store.saveLocal();
 }
 
 /* =====================================================================
@@ -987,24 +1052,48 @@ function showExact(r){
 
 /* ---------- 내 기여 ---------- */
 function myStats(){
-  const me=Store.me,mine=Store.cards.filter(c=>c.by===me||(Store.mode==='local'&&!c.sample));
+  const me=Store.me,mine=Store.cards.slice();   // 내 도감에 있는 동물 전부를 내가 수집한 것으로 세요
   const toMe=a=>!a.to||a.to===me;
-  const clues=Store.alerts.filter(a=>(a.type||'clue')==='clue'&&toMe(a)).length,thanks=Store.alerts.filter(a=>a.type==='thanks'&&toMe(a));
-  return{mine,seen:mine.reduce((s,c)=>s+(c.seen||1),0),clues,thanks};
+  const clues=Store.alerts.filter(a=>(a.type||'clue')==='clue'&&toMe(a)&&!a.sample).length,thanks=Store.alerts.filter(a=>a.type==='thanks'&&toMe(a)&&!a.sample);
+  return{mine,seen:mine.reduce((s,c)=>s+(c.seen||1),0),clues,thanks,posts:Store.posts.filter(p=>p.by===me).length};
 }
+/* ---------- 프로필 · 훈장 · 레벨 ---------- */
+const MEDAL_ICON={first:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',area:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',collect:'<rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><path d="M14 15h6M14 19h6"/>',clue:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',post:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>'};
+const medalList=S=>[
+  {k:'first',name:'첫 기록',ok:S.mine.length>=1,need:'카드 1장'},
+  {k:'area',name:'동네 기록가',ok:S.mine.length>=5,need:'카드 5장'},
+  {k:'collect',name:'도감 수집가',ok:S.mine.length>=10,need:'카드 10장'},
+  {k:'clue',name:'단서 제공자',ok:S.clues>=1,need:'내 사진이 수색 후보가 됨'},
+  {k:'home',name:'귀가 도우미',ok:S.thanks.length>=1,need:'귀가에 도움이 됨'},
+  {k:'post',name:'수색 지킴이',ok:S.posts>=1,need:'찾기 글 등록'}];
+const medalSVG=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${MEDAL_ICON[k]}</svg>`;
+/* 카드를 많이 찾을수록 레벨이 올라요: 카드 1장 +10 · 단서가 되면 +20 · 귀가를 도우면 +30 · 찾기 글 +5 */
+const LEVELS=[[1,0,'새내기 관찰자'],[2,30,'골목 친구'],[3,80,'동네 탐험가'],[4,150,'관찰 달인'],[5,250,'동네 지킴이'],[6,400,'어슬렁 마스터'],[7,600,'전설의 어슬렁러']];
+const getProfile=()=>({name:'',medal:'',...lsGet('wander2.profile',{})});
+const setProfile=p=>lsSet('wander2.profile',p);
+function levelInfo(){
+  const S=myStats(),exp=S.mine.length*10+S.clues*20+S.thanks.length*30+S.posts*5;
+  let i=0;LEVELS.forEach((l,k)=>{if(exp>=l[1])i=k});
+  const cur=LEVELS[i],nx=LEVELS[i+1]||null;
+  return{lv:cur[0],name:cur[2],exp,S,next:nx?{lv:nx[0],name:nx[2],need:nx[1]-exp,cards:Math.ceil((nx[1]-exp)/10)}:null,pct:nx?Math.round((exp-cur[1])/(nx[1]-cur[1])*100):100};
+}
+const levelHintHTML=()=>{const L=levelInfo();return `<br><b class="hl">Lv.${L.lv} ${h(L.name)}</b>${L.next?` · 다음 레벨까지 카드 ${L.next.cards}장`:''}`};
+const avatarHTML=(size,name,medalKey)=>{const m=medalKey?medalList(myStats()).find(x=>x.k===medalKey&&x.ok):null;
+  return m?`<span class="avatar gold" style="width:${size}px;height:${size}px">${medalSVG(m.k)}</span>`:`<span class="avatar" style="width:${size}px;height:${size}px;font-size:${Math.round(size*.42)}px">${h((name||'나').slice(0,1))}</span>`};
+
 function openContrib(){
-  const S=myStats();
-  const badges=[['첫 기록',S.mine.length>=1,'카드 1장'],['동네 기록가',S.mine.length>=5,'카드 5장'],['단서 제공자',S.clues>=1,'내 사진이 수색 후보로 1번'],['귀가 도우미',S.thanks.length>=1,'귀가를 1번 도움']];
-  const cert=`WANDER 기여 기록\n목격 카드 ${S.mine.length}장 · 목격 기록 ${S.seen}회\n수색 단서로 쓰인 횟수 ${S.clues}회\n귀가 도움 ${S.thanks.length}회\n${fmtDate(Date.now())} 기준`;
+  const L=levelInfo(),S=L.S,ml=medalList(S);
+  const cert=`WANDER 기여 기록\nLv.${L.lv} ${L.name}\n수집한 동물 ${S.mine.length}마리 · 목격 기록 ${S.seen}회\n수색 단서로 쓰인 횟수 ${S.clues}회\n귀가 도움 ${S.thanks.length}회\n${fmtDate(Date.now())} 기준`;
   const el=openSheet(`${topBar('내 기여')}<div class="sheet-body gut">
     <div class="kpis"><div class="fact"><b>${S.mine.length}</b><span>내가 수집한 동물</span></div><div class="fact"><b>${S.seen}</b><span>목격 기록</span></div><div class="fact"><b>${S.clues}</b><span>단서로 쓰인 횟수</span></div><div class="fact"><b>${S.thanks.length}</b><span>귀가 도움</span></div></div>
-    <div class="sec-label">배지</div><div class="chips">${badges.map(([t,ok,d])=>`<span class="qq ${ok?'ok':'warn'}" style="font-size:13px;padding:6px 10px">${ok?'✓ ':''}${t} · ${d}</span>`).join('')}</div>
+    <div class="sec-label">훈장</div><div class="medals">${ml.map(m=>`<div class="medal${m.ok?' on':''}"><span class="mk">${medalSVG(m.k)}</span>${m.name}</div>`).join('')}</div>
+    <p class="notice">${ml.map(m=>`${m.name}: ${m.need}`).join(' · ')}</p>
     <div class="sec-label">받은 감사 메시지</div>
     ${S.thanks.length?S.thanks.map(a=>`<div class="alert"><div><small>${ago(a.at)} · ${h(a.lostName)} 보호자</small><p>“${h(a.msg||'고마워요')}”</p></div></div>`).join(''):'<div class="tip">아직 없어요. 내 카드가 귀가에 쓰이면 보호자의 감사 메시지가 여기 모여요.</div>'}
     <div class="sec-label">기여 확인서</div><div class="slide" id="certTxt">${h(cert)}</div>
     <div class="mini-actions"><button class="btn soft" id="copyCert">확인서 복사</button></div>
   </div>`);wireClose(el);
-  $('#copyCert').onclick=async()=>{try{await navigator.clipboard.writeText(cert);toast('확인서를 복사했어요')}catch(e){const r=document.createRange();r.selectNodeContents($('#certTxt'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('선택된 글을 길게 눌러 복사하세요')}};
+  $('#copyCert').onclick=async()=>{try{await navigator.clipboard.writeText(cert);toast('확인서를 복사했어요')}catch(e){const r=document.createRange();r.selectNodeContents($('#certTxt'));const g=getSelection();g.removeAllRanges();g.addRange(r);toast('선택된 글을 길게 눌러 복사하세요')}};
 }
 
 /* ---------- 알림 (요청 · 승인 · 감사) ---------- */
@@ -1318,26 +1407,55 @@ function openPost(id){
   };
   base();
 }
+function alertLine(a){
+  if(a.type==='lostmatch')return `${a.postName} 찾기 글과 닮은 기록 · ${a.cardName}`;
+  if(a.type==='thanks')return `${a.lostName} 집에 돌아왔어요 · “${a.msg||'고마워요'}”`;
+  return `${a.cardName} 카드가 ${a.lostName} 찾기의 단서가 됐어요`;
+}
 function openMyPage(){
-  const me=Store.me,mine=Store.posts.filter(p=>p.by===me).sort((a,b)=>b.at-a.at);
-  const cnt=p=>Store.alerts.filter(a=>a.type==='lostmatch'&&a.postId===p.id).length;
-  const ic=d=>`<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg></span>`;
+  const me=Store.me,pf=getProfile(),LV=levelInfo(),S=LV.S,ml=medalList(S),rep=ml.find(m=>m.k===pf.medal&&m.ok);
+  const mine=Store.posts.filter(x=>x.by===me).sort((a,b)=>b.at-a.at);
+  const cnt=x=>Store.alerts.filter(a=>a.type==='lostmatch'&&a.postId===x.id).length;
+  const myAl=Store.alerts.filter(a=>!a.to||a.to===me).sort((a,b)=>b.at-a.at);
+  const pend=Store.requests.filter(r=>r.status==='pending'&&(!r.to||r.to===me)).length;
+  const recent=Store.cards.slice().sort((a,b)=>(b.lastSeen||0)-(a.lastSeen||0)).slice(0,5);
+  const head=(t,extra='')=>`<div class="mpc-head"><b>${t}${extra}</b><span class="more">전체 ›</span></div>`;
   const el=openSheet(`${topBar('마이페이지')}<div class="sheet-body gut">
-    <div class="sec" style="margin-top:6px">내가 등록한 찾기 글 <small>${mine.length}건</small></div>
-    ${mine.length?mine.map(p=>`<button class="cand-row" data-post="${h(p.id)}" style="margin-bottom:8px"><img src="${p.photos[0]||''}" alt=""><div><b>${h(p.name)}</b><small>${p.status==='found'?'찾았어요':'찾는 중'} · ${whenLabel(p.at)} 등록 · 닮은 기록 ${cnt(p)}건</small></div><span class="more">›</span></button>`).join(''):'<div class="tip">아직 등록한 글이 없어요. 찾기 탭에서 등록할 수 있어요.</div>'}
-    <button class="btn soft wide" style="margin-top:8px" id="mpNew">찾기 글 등록하기</button>
-    <div class="sec">내 활동</div>
-    <div class="list">
-      <button class="lrow" id="mpDex">${ic('<rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><path d="M14 15h6M14 19h6"/>')}<div><b>내 도감</b><span>내가 수집한 동물 ${Store.cards.length}마리 · 도감으로 가기</span></div><span>›</span></button>
-      <button class="lrow" id="mpAlerts">${ic('<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>')}<div><b>알림</b><span>단서가 된 카드, 닮은 기록, 위치 열람 요청</span></div><span>›</span></button>
-      <button class="lrow" id="mpContrib">${ic('<path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/>')}<div><b>내 기여</b><span>단서가 된 횟수, 귀가 도움, 감사 메시지</span></div><span>›</span></button>
-    </div>
+    <div class="profile-card">${avatarHTML(64,pf.name,pf.medal)}<div class="pc-main"><div class="pc-name">${h(pf.name||'나')}</div>${rep?`<span class="pc-medal">${medalSVG(rep.k)}${h(rep.name)}</span>`:'<span class="pc-medal none">대표 훈장을 골라 보세요</span>'}</div><button class="btn soft small" id="mpEdit">편집</button></div>
+    <div class="lv-card"><div class="lv-top"><b>Lv.${LV.lv} ${h(LV.name)}</b><span>${LV.exp} XP</span></div><div class="progress"><i style="width:${LV.pct}%"></i></div>
+      <div class="notice" style="padding:6px 0 0">${LV.next?`다음 레벨까지 카드 ${LV.next.cards}장 · Lv.${LV.next.lv} ${h(LV.next.name)}`:'최고 레벨이에요'}</div>
+      <div class="notice" style="padding:0">카드 1장 +10 · 단서가 되면 +20 · 귀가를 도우면 +30 · 찾기 글 +5</div></div>
+    <div class="mpc" id="mpDex" role="button" tabindex="0">${head('내 도감')}<div class="mpc-sub">수집 <b class="hl">${Store.cards.length}마리</b> · <b class="hl">${speciesCount(Store.cards)}종</b></div><div class="mpc-strip">${recent.map(c=>`<img src="${c.photo||''}" alt="">`).join('')}</div></div>
+    <div class="mpc" id="mpAlerts" role="button" tabindex="0">${head('알림',(myAl.length+pend)?`<span class="dot-inline">${myAl.length+pend}</span>`:'')}${pend?`<div class="mpc-line">위치 열람 요청 ${pend}건 · 승인이 필요해요</div>`:''}${myAl.slice(0,2).map(a=>`<div class="mpc-line">${h(alertLine(a))}<small>${ago(a.at)}</small></div>`).join('')||(pend?'':'<div class="mpc-sub">아직 알림이 없어요</div>')}</div>
+    <div class="mpc" id="mpContrib" role="button" tabindex="0">${head('내 기여')}<div class="mini-stats"><span><b>${S.clues}</b>단서</span><span><b>${S.thanks.length}</b>귀가 도움</span><span><b>${ml.filter(m=>m.ok).length}/${ml.length}</b>훈장</span></div><div class="mini-medals">${ml.map(m=>`<span class="mm${m.ok?' on':''}">${medalSVG(m.k)}</span>`).join('')}</div></div>
+    <div class="mpc static"><div class="mpc-head"><b>내가 등록한 찾기 글 <span class="hl">${mine.length}건</span></b></div>
+      ${mine.length?mine.map(x=>`<button class="cand-row" data-post="${h(x.id)}" style="margin-top:8px"><img src="${x.photos[0]||''}" alt=""><div><b>${h(x.name)}</b><small>${x.status==='found'?'찾았어요':'찾는 중'} · ${whenLabel(x.at)} 등록 · 닮은 기록 ${cnt(x)}건</small></div><span class="more">›</span></button>`).join(''):'<div class="mpc-sub">아직 등록한 글이 없어요</div>'}
+      <button class="btn soft wide" style="margin-top:10px" id="mpNew">찾기 글 등록하기</button></div>
   </div>`);
   wireClose(el);
   el.querySelectorAll('[data-post]').forEach(b=>b.onclick=()=>openPost(b.dataset.post));
-  $('#mpNew').onclick=()=>{closeSheet();F=newFind();F.mode='register';lsSet('wander2.find',{...F});show('find')};
+  $('#mpEdit').onclick=openProfileEdit;
   $('#mpDex').onclick=()=>{closeSheet();show('dex')};
   $('#mpAlerts').onclick=()=>openAlerts();$('#mpContrib').onclick=()=>openContrib();
+  $('#mpNew').onclick=()=>{closeSheet();F=newFind();F.mode='register';lsSet('wander2.find',{...F});show('find')};
+}
+function openProfileEdit(){
+  const pf=getProfile(),ml=medalList(myStats());let medal=pf.medal;
+  const el=openSheet(`${topBar('프로필 편집','back')}<div class="sheet-body gut">
+    <div style="display:flex;justify-content:center;margin:8px 0 4px" id="peAv"></div>
+    <div class="field"><label for="peName">내 이름</label><input class="txt" id="peName" maxlength="12" placeholder="예: 길냥이 집사" value="${h(pf.name)}" autocomplete="off"></div>
+    <div class="field"><span class="lab">대표 훈장 (얻은 훈장만 고를 수 있어요)</span><div class="medals" id="peMedals"></div></div>
+  </div><div class="foot gut"><button class="btn primary wide" id="peSave">저장</button></div>`);
+  wireClose(el);
+  const paint=()=>{
+    $('#peAv').innerHTML=avatarHTML(84,$('#peName').value,medal);
+    $('#peMedals').innerHTML=ml.map(m=>`<button class="medal${m.ok?' on':''}${medal===m.k?' sel':''}" data-m="${m.k}" ${m.ok?'':'disabled'}><span class="mk">${medalSVG(m.k)}</span>${m.name}${m.ok?'':`<small>${m.need}</small>`}</button>`).join('')
+      +`<button class="medal${!medal?' sel':''}" data-m=""><span class="mk" style="font-size:20px;font-weight:800">–</span>없음</button>`;
+    $('#peMedals').querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{if(b.disabled)return;medal=b.dataset.m;paint()});
+  };
+  $('#peName').oninput=()=>{$('#peAv').innerHTML=avatarHTML(84,$('#peName').value,medal)};
+  paint();
+  $('#peSave').onclick=()=>{setProfile({name:$('#peName').value.trim(),medal});toast('프로필을 저장했어요');renderHome();openMyPage()};
 }
 
 /* ---------- views ---------- */
@@ -1387,6 +1505,7 @@ function renderHome(){
   bindCards($('#v-home'));
   const me=Store.me,nA=Store.alerts.filter(a=>!a.to||a.to===me).length,pend=Store.requests.filter(r=>r.status==='pending'&&(!r.to||r.to===me)).length;
   $('#bellBadge').hidden=!(nA+pend);$('#bellBadge').textContent=nA+pend;
+  $('#meBtn').innerHTML=`<span class="lvpill">Lv.${levelInfo().lv}</span>`;
 }
 function renderDex(){
   const cards=Store.cards,n=cards.length;
@@ -1447,6 +1566,7 @@ async function startCreate(file,hint){
   if(here){d.x=here.x;d.y=here.y;d.gps=true}else{const L=LANDMARKS[Math.floor(Math.random()*LANDMARKS.length)];d.x=L.x+Math.random()*80-40;d.y=L.y+Math.random()*80-40}
   d.traits=COATS[d.coat].traits.slice();
   if(!d.name)d.name=COATS[d.coat].names[Math.floor(Math.random()*COATS[d.coat].names.length)];
+  if(!d.breed&&d.species==='cat')d.breed=BREED_BY_COAT[d.coat]||'';
   URL.revokeObjectURL(url);
   if(!$('#sheetRoot .sheet'))return;
   const k=d.known&&Store.cards.find(c=>c.id===d.known);
@@ -1462,7 +1582,7 @@ function editCard(d){
     <p class="notice" id="aiNote" style="text-align:center"></p>
     <div class="field" id="knownField"><span class="lab">또 만난 친구인가요?</span><div class="chips" id="cKnown"></div></div>
     <div class="field"><label for="cName">별명</label><input class="txt" id="cName" maxlength="12" autocomplete="off"></div>
-    <div class="field" id="breedField"><span class="lab">종 (모르면 비워 두세요)</span><div class="chips" id="cBreed"></div></div>
+    <div class="field" id="breedField"><span class="lab">종 (털 색깔로 골랐어요 · 바꿀 수 있어요)</span><div class="chips" id="cBreed"></div></div>
     <div class="field"><span class="lab">생김새</span><div class="chips" id="cTraits"></div><form class="answer-input" id="cTraitForm" style="margin-top:8px"><input class="txt" id="cTraitIn" maxlength="30" placeholder="직접 입력 (예: 꼬리 끝이 하얘요)" autocomplete="off"><button class="btn soft small">추가</button></form></div>
     <div class="field"><span class="lab">어떤 동물인가요</span><div class="chips" id="cSpecies"></div></div>
     <div class="field"><span class="lab">구역</span><div class="tip" style="font-size:13px"><b>${ZONE}</b>${d.gps?'지금 위치로 기록했어요. 다른 사람에게는 150m 구역으로만 보여요.':'위치를 쓸 수 없어 동네 안 구역으로 기록했어요. 공개는 150m 구역 단위예요.'}</div></div>
@@ -1485,7 +1605,7 @@ function editCard(d){
     $('#cTraits').innerHTML=tl.map(t=>`<button class="chip" aria-pressed="${d.traits.includes(t)}" data-t="${h(t)}">${h(t)}</button>`).join('');
     $('#cTraits').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const t=b.dataset.t;d.traits=d.traits.includes(t)?d.traits.filter(x=>x!==t):[...d.traits,t];paint()});
     $('#cSpecies').innerHTML=Object.entries(SPECIES).map(([k2,l])=>`<button class="chip" aria-pressed="${d.species===k2}" data-s="${k2}">${l}</button>`).join('');
-    $('#cSpecies').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{d.species=b.dataset.s;d.breed='';paint()});
+    $('#cSpecies').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{d.species=b.dataset.s;d.breed=d.species==='cat'?(BREED_BY_COAT[d.coat]||''):'';paint()});
   };
   const syncName=()=>{const k=d.known&&Store.cards.find(c=>c.id===d.known);$('#cName').value=k?k.name:d.name;$('#cName').disabled=!!k};
   $('#cName').oninput=e=>{d.name=e.target.value;if(!d.known)paint()};
@@ -1502,14 +1622,14 @@ function editCard(d){
         await Store.update(k.id,{seen,lastSeen:saved.lastSeen,photo:d.photo,x:snap(d.x),y:snap(d.y),traits,zone:ZONE});revealCard(saved,'level');checkLostPosts(saved)}
       else{const name=(d.name||'').trim()||COATS[d.coat].names[0];
         saved={id:d.id,no:Store.nextNo(),name,species:d.species,breed:d.breed,coat:d.coat,traits:d.traits,photo:d.photo,x:snap(d.x),y:snap(d.y),zone:ZONE,by:Store.me,seen:1,createdAt:d.createdAt,lastSeen:d.lastSeen};
-        await Store.saveExact(saved.id,d);await Store.add(saved);revealCard(saved,'new');checkLostPosts(saved)}
+        const lv0=levelInfo().lv;await Store.saveExact(saved.id,d);await Store.add(saved);revealCard(saved,'new');checkLostPosts(saved);setTimeout(()=>{const LV=levelInfo();if(LV.lv>lv0)toast(`레벨 업! Lv.${LV.lv} ${LV.name}`)},700)}
     }catch(err){btn.disabled=false;btn.textContent='카드 저장';toast('저장하지 못했어요. 잠시 후 다시 눌러 주세요.');if(err&&err.code==='not_granted')Store.useLocal()}
   };
 }
 function revealCard(c,kind){
   const up=kind==='level';
   const el=openSheet(`<div class="sheet-body gut" style="display:flex;flex-direction:column;justify-content:center">
-    <div class="done-hero"><h2>${up?`${h(c.name)} 또 만났어요`:'도감에 새 친구가 생겼어요'}</h2><p>${up?`${c.seen}번째 만남이에요`:`도감에서 ${Store.cards.length}번째 친구예요`}</p></div>
+    <div class="done-hero"><h2>${up?`${h(c.name)} 또 만났어요`:'도감에 새 친구가 생겼어요'}</h2><p>${up?`${c.seen}번째 만남이에요`:`도감에서 ${Store.cards.length}번째 친구예요${levelHintHTML()}`}</p></div>
     <div class="reveal-wrap" style="position:relative;margin-top:18px">${bigCard(c,{id:'revCard'})}<div class="sparkle"></div></div>
   </div><div class="foot gut"><div class="row2"><button class="btn light" id="moreShot">계속 찍기</button><button class="btn primary" id="toDex">도감에서 보기</button></div></div>`);
   setTimeout(()=>tilt($('#revCard')),900);
@@ -1728,7 +1848,7 @@ $('#meBtn').onclick=()=>openMyPage();
    GPS -> OpenStreetMap reverse geocoding (Nominatim) -> 동 이름. Cached; asked again only after moving ~300m or a day later.
    Coordinates are rounded to ~100m before they leave the phone. Without GPS the last known name (or 궁동) stays. */
 function setNB(n){
-  if(!n)return;NB=n;ZONE=n+' 일대';
+  if(!n)return;NB=n;ZONE=n+' 일대';relocateSamples();
   $('#camZone').innerHTML='<i></i>'+h(ZONE);
   renderHome();renderDex();
 }
@@ -1736,7 +1856,7 @@ async function locateHood(){
   if(!navigator.geolocation||!window.isSecureContext)return;
   const pos=await new Promise(res=>{const to=setTimeout(()=>res(null),9000);try{navigator.geolocation.getCurrentPosition(p=>{clearTimeout(to);res(p.coords)},()=>{clearTimeout(to);res(null)},{enableHighAccuracy:false,timeout:8000,maximumAge:300000})}catch(e){clearTimeout(to);res(null)}});
   if(!pos)return;
-  lsSet('wander2.home',ll2xy(pos.latitude,pos.longitude));
+  lsSet('wander2.home',ll2xy(pos.latitude,pos.longitude));relocateSamples();
   const c=lsGet('wander2.hood',null);
   const moved=c?Math.hypot((pos.longitude-c.lng)*111320*Math.cos(pos.latitude*Math.PI/180),(pos.latitude-c.lat)*110540):1e9;
   if(c&&c.name&&moved<300&&Date.now()-c.at<DAY){setNB(c.name);return}
