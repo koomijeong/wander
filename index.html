@@ -1,0 +1,1672 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#F2F3FB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WANDER">
+<meta name="format-detection" content="telephone=no">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>WANDER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+<style>
+/* WANDER app v4 — design follows the WANDER_app_v3 film:
+   light lavender ground, white rounded cards, periwinkle actions, deep indigo banner,
+   rarity frames (일반 회색 · 레어 블루 ◆ · 스페셜 골드 ★ · 단서 홀로그램 ✦).
+   Deliberately single-theme (light), like the film; the camera is always dark. */
+:root{
+  --bg:#F2F3FB; --bg2:#E9EBFA; --surface:#FFFFFF; --ink:#1D2140; --ink2:#3A3F63; --muted:#8A8FAD; --line:#E5E7F3;
+  --accent:#6573E3; --accent-ink:#FFFFFF; --accent-soft:#E9EBFC; --accent-text:#5262D9; --deep:#3D4AB5;
+  --pink:#E2457A; --pink-soft:#FDE8EF;
+  --r-normal:#A6AABF; --r-rare:#6D7BE6; --r-special:#E8A43A; --r-clue:#C77DF0;
+  --ok-bg:#E2F6EA; --ok-ink:#1E6B3D; --warn-bg:#FFF1DA; --warn-ink:#80510A;
+  --shadow:0 8px 24px rgba(61,74,181,.10); --shadow-lg:0 18px 40px rgba(61,74,181,.18);
+  --font-ui:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
+  --font-brand:"Outfit",-apple-system,"Apple SD Gothic Neo",sans-serif;
+  --coral:#F0607E; --on-coral:#FFFFFF; --indigo:#6573E3; --map-ground:#EEF0F8;
+  color-scheme:light;
+}
+html{box-sizing:border-box;height:100%;background:var(--bg)}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;-webkit-tap-highlight-color:transparent;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+input{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+img{max-width:100%}
+.gut{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+
+/* app frame */
+.app{height:100%;display:flex;flex-direction:column;max-width:520px;margin:0 auto;background:var(--bg);position:relative}
+@media (min-width:600px){.app{box-shadow:0 0 0 1px var(--line)}}
+.view{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:16px}
+.wordmark{font-family:var(--font-brand);font-weight:700;letter-spacing:.16em;font-size:13px;color:var(--ink)}
+.eyebrow{font-size:13px;color:var(--muted);text-align:center;font-weight:600}
+h1.title{margin:6px 0 0;font-size:26px;line-height:1.3;font-weight:800;letter-spacing:-.03em;text-wrap:balance}
+h1.title em,.hl{font-style:normal;color:var(--accent-text)}
+.sub{color:var(--muted);font-size:14px;margin-top:6px}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding-block:14px 4px}
+.icon-btn{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;position:relative;color:var(--ink)}
+.icon-btn svg{width:24px;height:24px}
+.dot-badge{position:absolute;top:6px;right:6px;min-width:16px;height:16px;border-radius:8px;background:var(--pink);color:#fff;font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+.panel{background:var(--surface);border-radius:24px;padding:16px;box-shadow:var(--shadow);margin-top:14px}
+.panel-head{display:flex;justify-content:space-between;align-items:center}
+.panel-head b{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.more{font-size:13px;color:var(--muted);font-weight:600}
+.progress{height:8px;border-radius:4px;background:var(--bg2);overflow:hidden;margin-top:12px}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .5s}
+
+/* tab bar with raised camera button */
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);align-items:end;background:var(--surface);border-top:1px solid var(--line);padding-block:6px 6px;padding-left:max(6px,env(safe-area-inset-left,0px));padding-right:max(6px,env(safe-area-inset-right,0px));position:relative;z-index:5}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;font-size:11px;font-weight:700;color:#B5B8CC}
+.tab svg{width:24px;height:24px}
+.tab[aria-selected="true"]{color:var(--ink)}
+.fab{justify-self:center;width:62px;height:62px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px rgba(101,115,227,.45);margin-top:-30px;border:5px solid var(--bg)}
+.fab svg{width:26px;height:26px}
+
+/* chips */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;background:var(--surface);color:var(--ink2);border:1px solid var(--line)}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip.ans{color:var(--ink2)}
+.chip.ans[aria-pressed="true"]{background:var(--deep);border-color:var(--deep);color:#fff}
+.tag{display:inline-flex;align-items:center;border-radius:8px;padding:3px 8px;font-size:12px;font-weight:700;background:var(--accent-soft);color:var(--deep)}
+.pill-pink{display:inline-flex;border-radius:8px;padding:4px 9px;font-size:12px;font-weight:800;background:var(--pink-soft);color:var(--pink)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:16px;padding:15px 20px;font-weight:800;font-size:16px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.primary:disabled{opacity:.45}
+.btn.light{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.btn.soft{background:var(--accent-soft);color:var(--deep)}
+.btn.ink{background:var(--ink);color:#fff}
+.btn.small{padding:9px 14px;font-size:13px;border-radius:12px}
+.btn.wide{width:100%}
+.foot{padding-block:10px 14px;display:flex;flex-direction:column;gap:8px;background:linear-gradient(to bottom,rgba(242,243,251,0),var(--bg) 30%)}
+.foot .note{text-align:center;font-size:12px;color:var(--muted)}
+.foot .row2{display:flex;gap:10px}.foot .row2 .btn{flex:1}
+
+/* rarity */
+.r-normal{--rc:var(--r-normal)}.r-rare{--rc:var(--r-rare)}.r-special{--rc:var(--r-special)}.r-clue{--rc:var(--r-clue)}
+.rglyph{color:var(--rc);font-size:10px;margin-right:4px}
+
+/* dex mini card (grid) */
+.dex-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.mcard{position:relative;background:var(--surface);border-radius:18px;padding:6px 6px 8px;text-align:left;border:1.5px solid var(--line);display:flex;flex-direction:column;gap:6px;min-width:0;transition:transform .15s}
+.mcard:active{transform:perspective(500px) rotateX(5deg) rotateY(-5deg) scale(.98)}
+.mcard.r-rare{border-color:var(--r-rare)}
+.mcard.r-special{border-color:var(--r-special);box-shadow:0 0 0 2px rgba(232,164,58,.18)}
+.mcard.r-clue{border:2px solid transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(135deg,#8FD3FF,#C77DF0,#FF9EC4,#FFD27A,#8FE3B5) border-box}
+.mcard .ph{aspect-ratio:1;border-radius:13px;overflow:hidden;background:var(--bg2);display:grid;place-items:center;max-width:100%}
+.mcard .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.mcard .ph svg{width:80%;height:80%}
+.mcard b{font-size:13px;font-weight:800;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;padding:0 2px}
+.mcard small{font-size:11px;color:var(--muted);padding:0 2px}
+.new-badge{position:absolute;top:10px;left:10px;background:var(--accent);color:#fff;font:800 9px var(--font-brand);letter-spacing:.06em;border-radius:6px;padding:2px 6px;z-index:1}
+.slot-empty{aspect-ratio:.78;border-radius:18px;border:1.5px dashed #D3D6EA;display:grid;place-items:center;color:#C3C6DA;font:800 20px var(--font-brand)}
+
+/* home */
+.dex-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:14px}
+.dex-strip .t{aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--bg2);display:grid;place-items:center;color:var(--muted);font-weight:800}
+.dex-strip .t img{width:100%;height:100%;object-fit:cover}
+.dex-strip .t.q{border:1.5px dashed #CDD0E6;background:var(--surface)}
+.recent{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.banner{position:relative;overflow:hidden;background:var(--deep);color:#fff;border-radius:24px;padding:20px;margin-top:14px;min-height:150px}
+.banner b{display:block;font-size:20px;line-height:1.35;font-weight:800;letter-spacing:-.02em;max-width:62%}
+.banner p{margin:8px 0 14px;font-size:13px;opacity:.85;max-width:60%}
+.banner .go{background:#fff;color:var(--deep);border-radius:12px;padding:10px 14px;font-weight:800;font-size:14px}
+.banner img{position:absolute;right:14px;bottom:14px;width:30%;max-width:120px;border-radius:16px;transform:rotate(-6deg);border:3px solid #fff;box-shadow:0 8px 18px rgba(0,0,0,.25)}
+.list{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);margin-top:14px;overflow:hidden}
+.lrow{display:flex;align-items:center;gap:12px;padding:14px 16px;width:100%;text-align:left}
+.lrow+.lrow{border-top:1px solid var(--line)}
+.lrow .ic{width:36px;height:36px;border-radius:12px;background:var(--accent-soft);color:var(--deep);display:grid;place-items:center;flex:none}
+.lrow .ic svg{width:20px;height:20px}
+.lrow div{flex:1;min-width:0}.lrow b{display:block;font-size:15px}.lrow span{font-size:12px;color:var(--muted)}
+
+/* full WANDER card (video style) */
+.wcard{background:var(--surface);border-radius:22px;overflow:hidden;box-shadow:var(--shadow-lg);border:2px solid var(--line);transform-style:preserve-3d;transition:transform .25s ease;will-change:transform;position:relative}
+.wcard.r-rare{border-color:var(--r-rare)}
+.wcard.r-special{border-color:var(--r-special)}
+.wcard.r-clue{border:3px solid transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(135deg,#8FD3FF,#C77DF0,#FF9EC4,#FFD27A,#8FE3B5) border-box}
+.wcard .hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.wcard .hd b{font-size:18px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:6px;min-width:0}
+.wcard .hd b span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wcard.r-clue .hd b,.wcard.r-clue .lv b{background:linear-gradient(90deg,#7A6BF0,#C77DF0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lv{font:600 12px var(--font-brand);color:var(--muted);white-space:nowrap}.lv b{font-size:22px;color:var(--ink);margin-left:2px}
+.wcard.r-special .lv b{color:var(--r-special)}
+.wcard .pic{margin:0 12px;aspect-ratio:1.18;border-radius:16px;overflow:hidden;position:relative;background-color:#F4F5FB;background-image:radial-gradient(#D7DAEC 1.2px,transparent 1.3px);background-size:14px 14px;max-width:100%}
+.wcard.r-rare .pic{background-color:#EEF0FD;background-image:linear-gradient(45deg,#E2E6FB 25%,transparent 25%,transparent 75%,#E2E6FB 75%),linear-gradient(45deg,#E2E6FB 25%,transparent 25%,transparent 75%,#E2E6FB 75%);background-size:18px 18px;background-position:0 0,9px 9px}
+.wcard.r-special .pic{background:repeating-conic-gradient(from 0deg at 50% 60%,#FFE9B8 0deg 10deg,#FFD884 10deg 20deg)}
+.wcard.r-clue .pic{background:linear-gradient(135deg,#FFD9EC,#FFF2C7 30%,#D8F6E6 55%,#D6E6FF 78%,#EBD9FF)}
+.wcard .pic img{width:100%;height:100%;object-fit:cover;display:block}
+.wcard .pic svg{width:70%;height:70%;margin:auto;display:block;position:absolute;inset:0}
+.wcard .pic .clue-badge{position:absolute;right:10px;bottom:10px;background:linear-gradient(90deg,#FF7EB6,#B57CF7);color:#fff;font-size:12px;font-weight:800;border-radius:10px;padding:5px 10px}
+.wcard .meta{padding:12px 16px 4px;display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font-size:13px;align-items:center}
+.wcard .meta span{color:var(--muted);font-size:12px}
+.wcard .meta b{font-weight:700;display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-width:0}
+.wcard .ft{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;margin-top:8px;background:#F6F7FC;font-size:12px;font-weight:700;color:var(--ink2)}
+.wcard .ft small{font:700 9px var(--font-brand);letter-spacing:.12em;color:var(--muted)}
+.wcard .shine{position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.55),transparent 55%);opacity:0;transition:opacity .2s;z-index:2}
+.tilting .shine{opacity:1}
+.zone-ic{width:12px;height:12px;border:1.5px dashed var(--muted);border-radius:3px;display:inline-block}
+
+/* sheets */
+.sheet{position:fixed;inset:0;max-width:520px;margin:0 auto;z-index:30;background:var(--bg);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);animation:up .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(24px);opacity:.4}to{transform:none;opacity:1}}
+.sheet-top{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding-block:8px}
+.sheet-top b{text-align:center;font-size:17px;font-weight:800}
+.sheet-body{flex:1;min-height:0;overflow-y:auto;padding-block:4px 20px}
+.field{margin-top:18px}
+.field>.lab,.field>label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:0 2px 8px}
+.txt{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:13px 14px;font-size:16px}
+.notice{font-size:12px;color:var(--muted);line-height:1.55;padding:8px 2px}
+.empty{text-align:center;padding:36px 16px;color:var(--muted);line-height:1.6}
+.empty strong{display:block;color:var(--ink);font-size:17px;margin-bottom:6px}
+.sec{font-size:17px;font-weight:800;margin:22px 2px 10px;letter-spacing:-.02em}
+.sec small{font-size:13px;color:var(--muted);font-weight:600;margin-left:4px}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:80;background:var(--ink);color:#fff;border-radius:16px;padding:12px 16px;font-size:14px;font-weight:700;max-width:calc(100% - 32px);box-shadow:var(--shadow-lg);animation:up .25s}
+.push{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(500px,calc(100% - 20px));z-index:90;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:12px 14px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow-lg);text-align:left;animation:drop .4s cubic-bezier(.2,.9,.2,1.1)}
+@keyframes drop{from{transform:translate(-50%,-120%)}to{transform:translate(-50%,0)}}
+.push .app-ic{width:40px;height:40px;border-radius:11px;background:var(--ink);color:#fff;font:700 6px var(--font-brand);letter-spacing:.08em;display:grid;place-items:center;flex:none}
+.push div{flex:1;min-width:0}.push small{font:700 11px var(--font-brand);letter-spacing:.08em;color:var(--muted)}.push p{margin:2px 0 0;font-weight:700;font-size:14px;line-height:1.4}
+.push time{font-size:11px;color:var(--muted);align-self:flex-start}
+
+/* camera / AR */
+.cam{position:fixed;inset:0;z-index:40;background:#0E0F18;color:#fff;overflow:hidden}
+.cam video,.cam .cam-still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cam .cam-still{background:radial-gradient(120% 80% at 50% 30%,#3B3F63,#14152A)}
+.cam .shade{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent 18%,transparent 70%,rgba(0,0,0,.45));pointer-events:none}
+.cam-top{position:absolute;left:0;right:0;top:0;padding-top:calc(12px + env(safe-area-inset-top,0px));display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;z-index:3}
+.glass{background:rgba(30,32,52,.38);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18)}
+.cam-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff}
+.cam-btn svg{width:22px;height:22px}
+.cam-btn[aria-pressed="true"]{background:#FFD45C;color:#1D2140}
+.zone-pill{justify-self:center;display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:9px 14px;font-size:14px;font-weight:700;color:#fff}
+.zone-pill i{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.75)}
+.ar{position:absolute;inset:0;z-index:2;pointer-events:none}
+.ar-box{position:absolute;border:3px solid rgba(255,255,255,.95);border-radius:22px;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 0 30px rgba(255,255,255,.18);transition:left .18s linear,top .18s linear,width .18s linear,height .18s linear,opacity .25s}
+.ar-box.guide{border-style:dashed;border-color:rgba(255,255,255,.6);box-shadow:none}
+.ar-label{position:absolute;display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--ink);border-radius:999px;padding:8px 14px 8px 8px;font-size:14px;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.2);transition:left .18s linear,top .18s linear,opacity .25s;white-space:nowrap;pointer-events:auto}
+.ar-label .ck{width:22px;height:22px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#fff}
+.ar-label .ck svg{width:13px;height:13px}
+.ar-label small{font-weight:700;color:var(--muted);font-size:12px}
+.ar-hint{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);text-align:center;font-weight:700;font-size:15px;text-shadow:0 1px 6px rgba(0,0,0,.6);width:80%}
+.ar-hint small{display:block;font-weight:500;font-size:13px;opacity:.85;margin-top:6px}
+.cam-bottom{position:absolute;left:0;right:0;bottom:0;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:3;padding-left:16px;padding-right:16px}
+.cam-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-radius:30px;padding:12px 18px;max-width:440px;margin:0 auto}
+.cam-side{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#fff;position:relative}
+.cam-side .sq{width:50px;height:50px;border-radius:14px;background:#fff;overflow:hidden;display:grid;place-items:center;color:var(--deep)}
+.cam-side .sq img{width:100%;height:100%;object-fit:cover}
+.cam-side .sq svg{width:26px;height:26px}
+.cam-side .cnt{position:absolute;top:-6px;right:calc(50% - 32px);background:var(--accent);color:#fff;font-size:10px;font-weight:800;border-radius:9px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px;border:2px solid #fff}
+.shutter{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(from 200deg,#B7A3F5,#8D9BFF,#D7A4E8,#B7A3F5);padding:5px;transition:transform .12s}
+.shutter span{width:100%;height:100%;border-radius:50%;background:#fff;border:3px solid rgba(29,33,64,.12)}
+.shutter:active{transform:scale(.92)}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:4;transition:opacity .3s}
+.flash.on{opacity:.9;transition:none}
+.cam-msg{position:absolute;left:16px;right:16px;bottom:calc(140px + env(safe-area-inset-bottom,0px));text-align:center;font-size:12px;opacity:.8;z-index:3}
+.cam-msg button{color:#fff;text-decoration:underline;font-weight:700}
+
+/* reveal */
+.reveal-wrap{perspective:1200px;margin:6px auto 0;max-width:330px}
+.reveal-wrap .wcard{animation:flipin .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes flipin{0%{transform:rotateY(-100deg) scale(.7);opacity:0}60%{transform:rotateY(12deg) scale(1.02);opacity:1}100%{transform:none}}
+.sparkle{position:absolute;inset:-30px;pointer-events:none;background:radial-gradient(circle,rgba(255,255,255,.9) 1.5px,transparent 2px) 0 0/34px 34px;opacity:0;animation:spark 1.6s .4s ease-out}
+@keyframes spark{0%{opacity:0}30%{opacity:.9}100%{opacity:0}}
+
+/* scan */
+.scan{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:1;max-width:100%;background:var(--surface)}
+.scan img{width:100%;height:100%;object-fit:cover}
+.scan::after{content:"";position:absolute;left:0;right:0;height:30%;background:linear-gradient(to bottom,transparent,rgba(255,255,255,.7),transparent);animation:scanmv 1.1s ease-in-out infinite}
+@keyframes scanmv{from{top:-30%}to{top:100%}}
+.scan.done::after{display:none}
+.scan-label{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:2;background:#fff;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;box-shadow:var(--shadow);white-space:nowrap}
+
+/* find flow */
+.profile{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:18px;padding:12px;box-shadow:var(--shadow)}
+.profile img,.profile .noimg{width:52px;height:52px;border-radius:14px;object-fit:cover;background:var(--bg2);flex:none}
+.profile div{flex:1;min-width:0}.profile b{font-size:16px;display:block}.profile span{font-size:12px;color:var(--muted)}
+.msgs{display:flex;flex-direction:column;gap:12px;padding-block:14px 8px}
+.q{display:flex;gap:10px;align-items:flex-start}
+.q .w{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font:800 12px var(--font-brand);display:grid;place-items:center;flex:none}
+.q .bub{background:var(--surface);border-radius:16px;padding:11px 14px;font-weight:700;font-size:15px;box-shadow:var(--shadow);line-height:1.45}
+.ansrow{padding-left:38px;display:flex;gap:8px;flex-wrap:wrap}
+.photo-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pslot{aspect-ratio:1;border-radius:14px;border:1.5px dashed #CDD0E6;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:700;color:var(--muted);overflow:hidden;position:relative;max-width:100%}
+.pslot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pslot.req{border-color:var(--accent);color:var(--accent-text)}
+.pslot .qb{position:absolute;left:4px;right:4px;bottom:4px;font-size:9px;border-radius:6px;padding:2px 4px;text-align:center;z-index:1}
+.zone-map{position:relative;border-radius:20px;overflow:hidden;background:#EEF0F8;aspect-ratio:1.9;max-width:100%;box-shadow:var(--shadow)}
+.zone-map svg{width:100%;height:100%;display:block}
+.zm-label{position:absolute;bottom:10px;background:#fff;border-radius:8px;padding:5px 9px;font-size:12px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.cand-row{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:16px;padding:10px 12px;border:1.5px solid transparent;width:100%;text-align:left;box-shadow:var(--shadow)}
+.cand-row+.cand-row,.cand-block+.cand-block{margin-top:8px}
+.cand-row[aria-pressed="true"]{border-color:var(--accent)}
+.cand-row .n{width:16px;color:var(--muted);font-weight:700;font-size:13px;flex:none}
+.cand-row img,.cand-row .ph{width:48px;height:48px;border-radius:12px;object-fit:cover;flex:none;background:var(--bg2)}
+.cand-row div{flex:1;min-width:0}.cand-row b{font-size:15px}.cand-row small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.radio{width:24px;height:24px;border-radius:50%;border:2px solid #CDD0E6;flex:none;display:grid;place-items:center}
+.cand-row[aria-pressed="true"] .radio{background:var(--accent);border-color:var(--accent);color:#fff}
+.radio svg{width:13px;height:13px}
+.why{font-size:12px;color:var(--accent-text);font-weight:700;padding:6px 2px 0 40px}
+.done-hero{text-align:center;margin-top:8px}
+.done-hero h2{margin:0;font-size:26px;font-weight:800;letter-spacing:-.03em}
+.done-hero p{margin:8px 0 0;color:var(--muted)}
+.thanks{display:flex;gap:12px;align-items:center;background:var(--surface);border-radius:16px;padding:12px;box-shadow:var(--shadow);margin-top:16px;font-size:14px}
+.thanks img{width:40px;height:40px;border-radius:10px;object-fit:cover}
+
+/* map tab (WMap) */
+.map-wrap{position:relative;flex:1;min-height:300px;overflow:hidden;background:#EEF0F8;touch-action:none}
+.map-wrap svg{width:100%;height:100%;display:block}
+.mb{fill:#E1E4F2}.mp{fill:#DCEFDF}.mw{fill:none;stroke:#D3E2F6;stroke-linecap:round}
+.mlabel{font:700 12px var(--font-ui);fill:#5A5F82}
+.map-ui{position:absolute;top:10px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none}
+.map-ui>*{pointer-events:auto}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;background:var(--surface);box-shadow:var(--shadow)}
+.zoom{display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
+.zoom button{width:40px;height:40px;font-size:20px;font-weight:700}.zoom button+button{border-top:1px solid var(--line)}
+.scale{position:absolute;left:12px;bottom:12px;font:700 11px var(--font-brand);background:var(--surface);border-radius:10px;padding:6px 8px;box-shadow:var(--shadow)}
+.scale i{display:block;height:4px;background:var(--ink);border-radius:2px;margin-top:3px}
+.popup{position:absolute;left:12px;right:12px;bottom:12px;border-radius:20px;padding:10px;display:flex;gap:12px;align-items:center;background:var(--surface);box-shadow:var(--shadow-lg);text-align:left}
+.popup img{width:64px;height:64px;border-radius:14px;object-fit:cover}
+.popup div{min-width:0}.popup b{display:block;font-size:17px}.popup span{font-size:12px;color:var(--muted)}
+
+/* engine card + lab (kept from v3) */
+.eng{background:var(--surface);border-radius:20px;padding:14px;margin-top:10px;box-shadow:var(--shadow)}
+.eng-head{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.eng-imgs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.eng-imgs figure{margin:0;min-width:0}
+.ov-img{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1;max-width:100%;background:var(--line)}
+.ov-img img{width:100%;height:100%;object-fit:cover;display:block}
+.ov-img svg{position:absolute;inset:0;width:100%;height:100%}
+.ov-img.tint{outline:2px solid #5FD08A;outline-offset:-2px}
+.eng figcaption{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}
+.eng-metrics{margin-top:10px;font-size:13px}
+.eng-metrics div{padding:7px 2px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+.eng-metrics span{color:var(--muted);min-width:0}.eng-metrics b{font-variant-numeric:tabular-nums;text-align:right}
+.verdict{font-size:12px;font-weight:800;border-radius:8px;padding:4px 8px;white-space:nowrap}
+.v-same{background:var(--ok-bg);color:var(--ok-ink)}.v-cand{background:var(--warn-bg);color:var(--warn-ink)}.v-low{background:var(--line);color:var(--muted)}
+.big-score{font:800 24px var(--font-brand);font-variant-numeric:tabular-nums}
+.unc{border-radius:14px;padding:10px 12px;margin-top:10px;font-size:13px;line-height:1.5;background:var(--accent-soft)}
+.unc>b{display:block;margin-bottom:4px}.unc li{margin-left:-14px}.unc li small{display:block;color:var(--muted)}
+.slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.slot{background:var(--surface);border-radius:18px;padding:10px;display:flex;flex-direction:column;gap:6px;text-align:left;min-width:0;box-shadow:var(--shadow)}
+.slot .ph{aspect-ratio:1;max-width:100%;border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;overflow:hidden;color:var(--deep);font:800 26px var(--font-brand)}
+.slot .ph img{width:100%;height:100%;object-fit:cover}
+.slot b{font-size:14px}.slot small{font-size:11px;color:var(--muted);line-height:1.4}
+.qq{font-size:11px;font-weight:700;border-radius:8px;padding:3px 7px;align-self:flex-start;line-height:1.4}
+.qq.ok{background:var(--ok-bg);color:var(--ok-ink)}.qq.warn{background:var(--warn-bg);color:var(--warn-ink)}
+.lab-cat{background:var(--surface);border-radius:18px;padding:12px;margin-top:10px;box-shadow:var(--shadow)}
+.lab-cat header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.thumb{position:relative;width:56px;height:56px;border-radius:10px;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb span{position:absolute;left:0;right:0;bottom:0;font-size:9px;font-weight:800;text-align:center;background:rgba(0,0,0,.55);color:#fff;padding:1px 0}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fact{background:var(--surface);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.fact b{display:block;font:800 28px var(--font-brand);color:var(--deep);letter-spacing:-.02em}
+.fact span{display:block;font-size:13px;font-weight:700;margin-top:2px}.fact small{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+.prog{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:8px}.prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+.steps{counter-reset:s;display:flex;flex-direction:column;gap:8px}
+.tip{background:var(--surface);border-radius:16px;padding:13px 14px;line-height:1.55;font-size:14px;box-shadow:var(--shadow)}
+.tip b{display:block;margin-bottom:2px}
+.tips{display:flex;flex-direction:column;gap:8px}
+.steps .tip{position:relative;padding-left:46px}
+.steps .tip::before{counter-increment:s;content:counter(s);position:absolute;left:12px;top:12px;width:24px;height:24px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font:800 12px var(--font-brand)}
+.chart{background:var(--surface);border-radius:16px;padding:10px;margin-top:10px;box-shadow:var(--shadow)}
+.chart svg{width:100%;height:auto;display:block}.chart text{font:600 10px var(--font-ui);fill:var(--muted)}
+.legend{display:flex;gap:12px;font-size:12px;color:var(--muted);margin-top:4px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.slide{background:var(--ink);color:#fff;border-radius:16px;padding:14px;line-height:1.6;font-weight:600;white-space:pre-line}
+.cmp{width:100%;border-collapse:collapse;font-size:12px;line-height:1.45}
+.cmp th,.cmp td{padding:8px 6px;text-align:left;vertical-align:top;border-top:1px solid var(--line)}
+.cmp th{color:var(--muted);font-weight:700}
+.tbl{background:var(--surface);border-radius:16px;padding:4px 8px;overflow-x:auto;box-shadow:var(--shadow)}
+.confirm{margin-top:12px;background:var(--surface);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
+.confirm .actions{display:flex;gap:8px}.confirm .actions .btn{flex:1;padding:11px}
+.mini-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.alert{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.alert+.alert{margin-top:8px}
+.alert small{font:700 10px var(--font-brand);letter-spacing:.14em;color:var(--accent-text)}
+.alert p{margin:3px 0 0;font-weight:700;line-height:1.45}
+.req-actions{display:flex;gap:8px;margin-top:8px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.sec-label{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--muted);margin:18px 2px 8px}
+.btn.coral{background:var(--accent);color:var(--accent-ink)}
+.answer-input{display:flex;gap:8px;width:100%}.answer-input .txt{flex:1;min-width:0}
+.map-note{font-size:13px;color:var(--muted);padding-block:6px}
+
+</style>
+<div class="app" id="app">
+  <!-- HOME -->
+  <section class="view gut" id="v-home">
+    <div class="topbar"><span class="wordmark">WANDER</span><button class="icon-btn" id="bellBtn" aria-label="알림"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="dot-badge" id="bellBadge" hidden>0</span></button></div>
+    <h1 class="title" id="homeTitle">궁동에서 <em>0마리</em>를<br>알아봤어요</h1>
+    <div class="sub" id="homeSub">빈칸 16개가 남았어요</div>
+    <div class="panel">
+      <div class="panel-head"><b id="homeDexTitle">궁동 도감</b><button class="more" data-go="dex">전체 보기 ›</button></div>
+      <div class="progress"><i id="homeProg" style="width:0"></i></div>
+      <div class="dex-strip" id="homeStrip"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><b>최근 만난 친구</b><button class="more" data-go="dex" id="recentMore">0장 ›</button></div>
+      <div class="recent" id="homeRecent"></div>
+    </div>
+    <div class="banner">
+      <b>우리 고양이를 잃어버렸나요?</b>
+      <p>몇 가지만 물어볼게요 · 무료</p>
+      <button class="go" data-go="find">찾기 시작 ›</button>
+      <img src="assets/cats/cheese.jpg" alt="">
+    </div>
+    <div class="list">
+      <button class="lrow" id="openEngine"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span><div><b>식별 엔진 · 실험실</b><span>어떻게 같은 고양이를 알아보는지, 정확도 측정</span></div><span>›</span></button>
+      <button class="lrow" id="openContrib"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg></span><div><b>내 기여</b><span>단서가 된 카드, 받은 감사 메시지</span></div><span>›</span></button>
+      <button class="lrow" id="openInstall"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></span><div><b>홈 화면에 앱으로 두기</b><span>누르면 바로 카메라가 열려요</span></div><span>›</span></button>
+    </div>
+  </section>
+
+  <!-- DEX -->
+  <section class="view gut" id="v-dex" hidden>
+    <div class="eyebrow" style="padding-top:16px" id="dexZone">궁동 일대</div>
+    <h1 class="title" id="dexTitle">궁동 도감</h1>
+    <div class="sub" id="dexSub">16칸 중 <b class="hl">0칸</b> 채웠어요</div>
+    <div class="progress"><i id="dexProg" style="width:0"></i></div>
+    <div class="chips" id="dexFilter" style="margin-top:16px"></div>
+    <div id="dexGrid"></div>
+    <p class="notice" id="modeNote" style="text-align:center"></p>
+  </section>
+
+  <!-- NEIGHBORHOOD MAP -->
+  <section class="view" id="v-map" hidden style="display:flex;flex-direction:column;padding-bottom:0">
+    <div class="gut" style="padding-top:16px"><div class="eyebrow">동네</div><h1 class="title" id="mapTitle" style="text-align:center">궁동 일대</h1><p class="notice" style="text-align:center;padding-top:2px">기록은 150m 구역으로만 보여요 · 정확한 위치는 찍은 사람만 알아요</p></div>
+    <div class="map-wrap" id="mainMap"></div>
+  </section>
+
+  <!-- FIND (lost pet) -->
+  <section class="view gut" id="v-find" hidden></section>
+
+  <nav class="tabs" role="tablist" aria-label="메뉴">
+    <button class="tab" role="tab" data-v="home" aria-selected="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.2 3 10.4V20a1 1 0 0 0 1 1h5.5v-6h5v6H20a1 1 0 0 0 1-1v-9.6z"/></svg>홈</button>
+    <button class="tab" role="tab" data-v="dex" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><path d="M14 15h6M14 19h6"/></svg>도감</button>
+    <button class="fab" id="fabCam" aria-label="촬영"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+    <button class="tab" role="tab" data-v="map" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="2.5"/></svg>동네</button>
+    <button class="tab" role="tab" data-v="find" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>찾기</button>
+  </nav>
+</div>
+
+<!-- CAMERA (AR) — the app opens here -->
+<div class="cam" id="cam">
+  <video id="camVideo" playsinline muted autoplay hidden></video>
+  <div class="cam-still" id="camStill"></div>
+  <div class="shade"></div>
+  <div class="ar" id="ar">
+    <div class="ar-box guide" id="arBox" style="left:15%;top:24%;width:70%;height:44%"></div>
+    <div class="ar-label" id="arLabel" hidden></div>
+    <div class="ar-hint" id="arHint">길에서 만난 동물을 비춰 보세요<small>고양이가 보이면 자동으로 표시돼요</small></div>
+  </div>
+  <div class="flash" id="camFlash"></div>
+  <div class="cam-top gut">
+    <button class="cam-btn glass" id="camClose" aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <span class="zone-pill glass" id="camZone"><i></i>궁동 일대</span>
+    <button class="cam-btn glass" id="camTorch" aria-label="플래시" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button>
+  </div>
+  <div class="cam-msg" id="camMsg" hidden></div>
+  <div class="cam-bottom">
+    <div class="cam-bar glass">
+      <button class="cam-side" id="camAlbum"><span class="sq" id="albumThumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></span>앨범</button>
+      <button class="shutter" id="shutter" aria-label="사진 찍기"><span></span></button>
+      <button class="cam-side" id="camDex"><span class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><path d="M14 15h6M14 19h6"/></svg></span><span class="cnt" id="camCount">0</span>도감</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="camInput" accept="image/*" capture="environment" hidden>
+<input type="file" id="albumInput" accept="image/*" hidden>
+<div id="sheetRoot"></div>
+<div id="pushRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+"use strict";
+/* ---------- data ---------- */
+const NB='궁동';                                  // 동네 이름 (발표 영상 기준)
+const ZONE=NB+' 일대';
+const DEX_SLOTS=16;                               // 도감 칸 수 (영상: 16칸 중 11칸)
+const COATS={
+  cheese:{label:'치즈',bg:'#FFE9D6',ink:'#6E2F0C',fur:'#F29A4A',fur2:'#D7712A',names:['치즈대장','노랑이','호박이','귤이'],traits:['치즈 무늬']},
+  mackerel:{label:'고등어',bg:'#E4E8F2',ink:'#263147',fur:'#9AA0AD',fur2:'#565B69',names:['담장 위 고등어','줄무늬','회색이'],traits:['고등어 무늬']},
+  calico:{label:'삼색',bg:'#FBE4EC',ink:'#5E2140',fur:'#FBF7F0',fur2:'#E68A3E',fur3:'#2E2A2A',names:['삼색 공주','꽃님이','알록이'],traits:['삼색 무늬']},
+  tuxedo:{label:'턱시도',bg:'#E3E5FA',ink:'#1F2350',fur:'#2C2B35',fur2:'#FBFAF6',names:['턱시도 신사','양말이'],traits:['턱시도']},
+  white:{label:'흰색',bg:'#EAF2E6',ink:'#26391F',fur:'#FAF8F3',fur2:'#E6DED0',names:['눈송이','구름이'],traits:['흰 털']},
+  black:{label:'검정',bg:'#E8E4F4',ink:'#251E40',fur:'#2A2733',fur2:'#3D3948',names:['까망이','밤톨이'],traits:['올블랙']},
+  brown:{label:'갈색',bg:'#F5EAD6',ink:'#4A3214',fur:'#B07A45',fur2:'#8A5A2E',names:['초코','누룽지'],traits:['갈색 털']}
+};
+const TRAITS=['고등어 무늬','치즈 무늬','삼색 무늬','턱시도','올블랙','흰 털','회색','흰 양말','흰 가슴','초록 눈','노란 눈','금빛 눈','파란 눈','꼬리 짧음','귀 커팅','통통함'];
+const SPECIES={cat:'고양이',dog:'강아지',bird:'새',etc:'기타'};
+const NEAR={cheese:['brown'],brown:['cheese'],black:['tuxedo'],tuxedo:['black'],mackerel:['calico'],calico:['mackerel','white'],white:['calico']};
+const LANDMARKS=[
+  {n:'편의점 앞',x:60,y:-40},{n:'놀이터',x:-170,y:-160},{n:'화분 골목',x:-220,y:170},{n:'담장길',x:230,y:120},
+  {n:'주차장',x:190,y:-230},{n:'화단 옆',x:-30,y:270},{n:'학교 담장',x:340,y:-70},{n:'개울가',x:-340,y:-20}
+];
+const RARITY={normal:{label:'일반',g:'●'},rare:{label:'레어',g:'◆'},special:{label:'스페셜',g:'★'},clue:{label:'단서',g:'✦'}};
+const HOUR=3600e3,DAY=24*HOUR;
+const T0=Date.now();
+const cat=k=>'assets/cats/'+k+'.jpg';
+const SAMPLES=[
+  {id:'s1',no:12,name:'담장 위 고등어',species:'cat',coat:'mackerel',traits:['고등어 무늬','흰 양말','초록 눈'],photo:cat('godeungeo'),x:235,y:115,seen:1,r:'normal',createdAt:T0-3*HOUR,lastSeen:T0-3*HOUR,sample:true},
+  {id:'s2',no:7,name:'화분 옆 치즈',species:'cat',coat:'cheese',traits:['치즈 무늬','흰 양말'],photo:cat('cheese'),x:-210,y:160,seen:5,r:'rare',createdAt:T0-19*DAY,lastSeen:T0-8*HOUR,sample:true},
+  {id:'s3',no:9,name:'회색 대장',species:'cat',coat:'mackerel',traits:['회색','흰 가슴','통통함'],photo:cat('hoesaek'),x:70,y:-30,seen:4,r:'special',createdAt:T0-13*DAY,lastSeen:T0-26*HOUR,sample:true},
+  {id:'s4',no:11,name:'까망이',species:'cat',coat:'black',traits:['올블랙','금빛 눈'],photo:cat('kkamangi'),x:195,y:-225,seen:2,r:'rare',createdAt:T0-7*DAY,lastSeen:T0-2*DAY,sample:true},
+  {id:'s5',no:5,name:'삼색 공주',species:'cat',coat:'calico',traits:['삼색 무늬'],photo:cat('samsaek'),x:-165,y:-150,seen:3,r:'rare',createdAt:T0-15*DAY,lastSeen:T0-3*DAY,sample:true},
+  {id:'s6',no:4,name:'턱시도 신사',species:'cat',coat:'tuxedo',traits:['턱시도','흰 양말'],photo:cat('tuxedo'),x:330,y:-60,seen:2,r:'normal',createdAt:T0-16*DAY,lastSeen:T0-4*DAY,sample:true},
+  {id:'s7',no:3,name:'눈송이',species:'cat',coat:'white',traits:['흰 털','파란 눈'],photo:cat('nunsong'),x:-30,y:265,seen:3,r:'rare',createdAt:T0-18*DAY,lastSeen:T0-5*DAY,sample:true},
+  {id:'s8',no:8,name:'은빛 낮잠',species:'cat',coat:'mackerel',traits:['고등어 무늬','회색'],photo:cat('eunbit'),x:-335,y:-25,seen:1,r:'normal',createdAt:T0-9*DAY,lastSeen:T0-9*DAY,sample:true},
+  {id:'s9',no:10,name:'카오스',species:'cat',coat:'calico',traits:['삼색 무늬','노란 눈'],photo:cat('chaos'),x:180,y:-210,seen:2,r:'normal',createdAt:T0-10*DAY,lastSeen:T0-6*DAY,sample:true}
+];
+/* 자주 만날수록 레벨 업: 1번 일반 · 2번 레어 · 4번 스페셜 · 보호자 귀가에 쓰이면 단서 */
+const R_ORD=['normal','rare','special'];
+function rarity(c){if(c.helped>0)return'clue';const s=c.seen||1,byLv=s>=4?2:s>=2?1:0;return R_ORD[Math.max(byLv,R_ORD.indexOf(c.r||'normal'))]}
+const isNew=c=>Date.now()-(c.createdAt||0)<DAY;
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const h=(s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad2=n=>String(n).padStart(2,'0');
+const ago=t=>{const d=Date.now()-t;if(d<60e3)return'방금';if(d<HOUR)return Math.floor(d/60e3)+'분 전';if(d<DAY)return Math.floor(d/HOUR)+'시간 전';return Math.floor(d/DAY)+'일 전'};
+const fmtDate=t=>{const d=new Date(t);return `${d.getMonth()+1}월 ${d.getDate()}일`};
+const fmtDT=t=>{const d=new Date(t),hh=d.getHours();return `${d.getMonth()+1}월 ${d.getDate()}일 ${hh<12?'오전':'오후'} ${hh%12||12}:${String(d.getMinutes()).padStart(2,'0')}`};
+const whenLabel=t=>{const d=new Date(t),n=new Date(),hh=d.getHours(),tm=`${hh<12?'오전':'오후'} ${hh%12||12}:${String(d.getMinutes()).padStart(2,'0')}`;const day=Math.round((new Date(n.toDateString())-new Date(d.toDateString()))/DAY);return day===0?'오늘 '+tm:day===1?'어제 '+tm:`${d.getMonth()+1}월 ${d.getDate()}일`};
+const CELL=150;const snap=v=>Math.floor(v/CELL)*CELL+CELL/2;
+const nearest=(x,y)=>LANDMARKS.reduce((a,l)=>{const d=Math.hypot(l.x-x,l.y-y);return d<a.d?{l,d}:a},{l:LANDMARKS[0],d:1e9}).l;
+const zoneName=(x,y)=>nearest(x,y).n+' 구역';
+const lsGet=(k,f)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function toast(msg){const r=$('#toastRoot');r.innerHTML=`<div class="toast" role="status">${h(msg)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>r.innerHTML='',2600)}
+const ICON={
+  close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'
+};
+
+/* ---------- illustrations ---------- */
+function art(coat,species){
+  const c=COATS[coat]||COATS.cheese, f=c.fur, f2=c.fur2, f3=c.fur3||f2;
+  const eye=coat==='black'?'#F2C94C':'#2C2B35', eyeOn=coat==='black'||coat==='tuxedo';
+  if(species==='dog'){
+    return `<svg viewBox="0 0 200 200" aria-hidden="true"><ellipse cx="52" cy="98" rx="22" ry="44" fill="${f2}" transform="rotate(18 52 98)"/><ellipse cx="148" cy="98" rx="22" ry="44" fill="${f2}" transform="rotate(-18 148 98)"/><ellipse cx="100" cy="108" rx="58" ry="60" fill="${f}"/><ellipse cx="100" cy="138" rx="32" ry="24" fill="#FBF3E6"/><ellipse cx="100" cy="124" rx="11" ry="8" fill="#2C2B35"/><path d="M100 132v10M88 146q12 8 24 0" stroke="#2C2B35" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="78" cy="96" r="7" fill="#2C2B35"/><circle cx="122" cy="96" r="7" fill="#2C2B35"/><circle cx="80" cy="94" r="2" fill="#fff"/><circle cx="124" cy="94" r="2" fill="#fff"/></svg>`;
+  }
+  if(species==='bird'){
+    return `<svg viewBox="0 0 200 200" aria-hidden="true"><ellipse cx="100" cy="112" rx="60" ry="56" fill="${f}"/><ellipse cx="118" cy="132" rx="34" ry="26" fill="${f2}"/><path d="M48 104l-24 8 24 8z" fill="#F2B544"/><circle cx="74" cy="94" r="7" fill="#2C2B35"/></svg>`;
+  }
+  let marks='';
+  if(coat==='cheese'||coat==='mackerel'||coat==='brown') marks=`<path d="M100 66v18M84 70l4 14M116 70l-4 14" stroke="${f2}" stroke-width="7" stroke-linecap="round"/><path d="M40 118h18M42 132h16M142 118h18M142 132h16" stroke="${f2}" stroke-width="6" stroke-linecap="round"/>`;
+  if(coat==='calico') marks=`<path d="M48 90c10-30 40-36 48-30-4 22-24 36-48 30z" fill="${f2}"/><path d="M152 92c-8-26-34-34-44-28 4 20 22 34 44 28z" fill="${f3}"/>`;
+  if(coat==='tuxedo') marks=`<path d="M100 92c-26 0-36 26-36 44 10 20 62 20 72 0 0-18-10-44-36-44z" fill="${f2}"/>`;
+  if(coat==='white') marks=`<ellipse cx="128" cy="86" rx="16" ry="12" fill="${f2}"/>`;
+  const earIn=coat==='black'||coat==='tuxedo'?'#5A4A5E':'#F4B6B0';
+  const wh=coat==='white'||coat==='calico'?'#C9C1B4':'#FFFFFF';
+  return `<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M38 96L48 28l46 40z" fill="${f}"/><path d="M162 96L152 28l-46 40z" fill="${f}"/><path d="M50 78l6-36 26 24z" fill="${earIn}"/><path d="M150 78l-6-36-26 24z" fill="${earIn}"/><ellipse cx="100" cy="116" rx="70" ry="60" fill="${f}"/>${marks}<ellipse cx="74" cy="112" rx="9" ry="${eyeOn?11:10}" fill="${eye}"/><ellipse cx="126" cy="112" rx="9" ry="${eyeOn?11:10}" fill="${eye}"/>${eyeOn?'<ellipse cx="74" cy="112" rx="3" ry="9" fill="#1B1A22"/><ellipse cx="126" cy="112" rx="3" ry="9" fill="#1B1A22"/>':''}<circle cx="77" cy="108" r="3" fill="#fff"/><circle cx="129" cy="108" r="3" fill="#fff"/><path d="M93 132h14l-7 8z" fill="#F08C8C"/><path d="M100 140q-8 8-16 4M100 140q8 8 16 4" stroke="${coat==='black'?'#7B7590':'#2C2B35'}" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M60 136l-30-4M60 144l-28 6M140 136l30-4M140 144l28 6" stroke="${wh}" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+}
+const picHTML=c=>c.photo?`<img src="${c.photo}" alt="${h(c.name)} 사진">`:art(c.coat,c.species);
+const cvars=c=>{const k=COATS[c.coat]||COATS.cheese;return `--bg-c:${k.bg};--ink-c:${k.ink}`};
+
+/* ---------- storage: shared db, local fallback ---------- */
+const Store={mode:'loading',cards:[],alerts:[],requests:[],me:'local',subs:new Set(),db:null,
+  emit(){this.subs.forEach(f=>f())},
+  sub(f){this.subs.add(f)},
+  async init(){
+    const timer=setTimeout(()=>{if(this.mode==='loading')this.useLocal()},10000);
+    try{
+      const db=window.claude&&window.claude.use?await window.claude.use('db'):null;
+      if(!db){clearTimeout(timer);return this.useLocal()}
+      this.db=db;
+      try{const u=await window.claude.use('user');const id=u&&await u.id();if(id)this.me=String(id)}catch(e){}
+      db.collection('cards').orderBy('no').onSnapshot(s=>{clearTimeout(timer);this.mode='db';this.cards=s.docs.map(d=>({id:d.id,...d.data()}));this.emit()},e=>{clearTimeout(timer);if(this.mode!=='db')this.useLocal()});
+      db.collection('alerts').orderBy('at','desc').limit(50).onSnapshot(s=>{this.alerts=s.docs.map(d=>({id:d.id,...d.data()}));this.emit()},()=>{});
+      db.collection('requests').orderBy('at','desc').limit(50).onSnapshot(s=>{this.requests=s.docs.map(d=>({id:d.id,...d.data()}));this.emit()},()=>{});
+    }catch(e){clearTimeout(timer);this.useLocal()}
+  },
+  useLocal(){this.mode='local';this.cards=lsGet('wander2.cards',null)||SAMPLES.slice();this.alerts=lsGet('wander2.alerts',[]);this.requests=lsGet('wander2.requests',[]);this.emit()},
+  saveLocal(){lsSet('wander2.cards',this.cards);lsSet('wander2.alerts',this.alerts);lsSet('wander2.requests',this.requests);this.emit()},
+  nextNo(){return this.cards.reduce((m,c)=>Math.max(m,c.no||0),0)+1},
+  async add(card){
+    if(this.mode==='db'){const {id,...d}=card;await this.db.collection('cards').doc(id).set(d)}
+    else{this.cards.push(card);this.saveLocal()}
+  },
+  async update(id,patch){
+    if(this.mode==='db'){await this.db.collection('cards').doc(id).update(patch)}
+    else{const c=this.cards.find(x=>x.id===id);if(c)Object.assign(c,patch);this.saveLocal()}
+  },
+  async remove(id){
+    if(this.mode==='db'){await this.db.collection('cards').doc(id).delete()}
+    else{this.cards=this.cards.filter(x=>x.id!==id);this.saveLocal()}
+  },
+  async addAlert(a){
+    if(this.mode==='db'){const {id,...d}=a;await this.db.collection('alerts').doc(id).set(d)}
+    else{this.alerts.unshift(a);this.saveLocal()}
+  },
+  async addRequest(r){
+    if(this.mode==='db'){const {id,...d}=r;await this.db.collection('requests').doc(id).set(d)}
+    else{this.requests.unshift(r);this.saveLocal()}
+  },
+  async updateRequest(id,patch){
+    if(this.mode==='db'){await this.db.collection('requests').doc(id).update(patch)}
+    else{const r=this.requests.find(x=>x.id===id);if(r)Object.assign(r,patch);this.saveLocal()}
+  },
+  /* the exact spot stays private to the person who saw the animal; the shared card keeps only its 150m zone */
+  async saveExact(cardId,p){
+    if(this.mode==='db'){try{await this.db.collection('data/users/'+this.me).doc('exact_'+cardId).set({x:Math.round(p.x),y:Math.round(p.y)})}catch(e){}}
+    else{const m=lsGet('wander2.exact',{});m[cardId]={x:Math.round(p.x),y:Math.round(p.y)};lsSet('wander2.exact',m)}
+  },
+  async getExact(cardId){
+    if(this.mode==='db'){try{const d=await this.db.collection('data/users/'+this.me).doc('exact_'+cardId).get();return d.exists?d.data():null}catch(e){return null}}
+    return lsGet('wander2.exact',{})[cardId]||null;
+  }
+};
+
+/* ---------- map ---------- */
+const WORLD=2600;
+const streamX=y=>-330+120*Math.sin(y/420);
+const PARKS=[{x:-220,y:175,r:120},{x:900,y:-700,r:200},{x:-900,y:1100,r:230}];
+let BASE=null;
+function baseLayer(){
+  if(BASE)return BASE;
+  let s='',seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+  const G=160;
+  for(let i=-16;i<16;i++)for(let j=-16;j<16;j++){
+    const cx=i*G+G/2,cy=j*G+G/2;
+    if(Math.abs(cx-streamX(cy))<120)continue;
+    if(PARKS.some(p=>Math.hypot(p.x-cx,p.y-cy)<p.r+40))continue;
+    const split=rnd()<.45;
+    if(split){s+=`<rect class="mb" x="${i*G+10}" y="${j*G+10}" width="${G/2-15}" height="${G-20}" rx="14"/><rect class="mb" x="${i*G+G/2+5}" y="${j*G+10}" width="${G/2-15}" height="${G-20}" rx="14"/>`}
+    else s+=`<rect class="mb" x="${i*G+10}" y="${j*G+10}" width="${G-20}" height="${G-20}" rx="16"/>`;
+  }
+  PARKS.forEach(p=>s+=`<circle class="mp" cx="${p.x}" cy="${p.y}" r="${p.r}"/>`);
+  let d='';for(let y=-WORLD;y<=WORLD;y+=60)d+=(d?'L':'M')+streamX(y).toFixed(1)+' '+y;
+  s+=`<path class="mw" d="${d}" stroke-width="46"/>`;
+  return BASE=s;
+}
+class WMap{
+  constructor(el,opt={}){
+    this.el=el;this.opt=opt;this.cx=opt.cx||0;this.cy=opt.cy||0;this.half=opt.half||560;
+    el.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><g>${baseLayer()}</g><g class="ov"></g></svg>`+(opt.controls!==false?`<div class="map-ui"><span class="pill" style="font-size:12px">150m 구역 단위로만 보여요</span><div class="zoom"><button aria-label="확대">+</button><button aria-label="축소">−</button></div></div>`:'')+`<div class="scale"><span></span><i></i></div><div class="pop-slot"></div>`;
+    this.svg=el.querySelector('svg');this.ov=el.querySelector('.ov');this.data={cards:[]};
+    const z=el.querySelectorAll('.zoom button');
+    if(z.length){z[0].onclick=()=>this.zoom(.6);z[1].onclick=()=>this.zoom(1/.6)}
+    this.bind();this.ro=new ResizeObserver(()=>this.render());this.ro.observe(el);
+  }
+  ppm(){const r=this.svg.getBoundingClientRect();return Math.max(r.width,r.height)/(2*this.half)||0.5}
+  toWorld(px,py){const r=this.svg.getBoundingClientRect(),k=this.ppm();return{x:this.cx+(px-r.left-r.width/2)/k,y:this.cy+(py-r.top-r.height/2)/k}}
+  zoom(f){this.half=Math.min(WORLD*.9,Math.max(120,this.half*f));this.render()}
+  bind(){
+    const P=new Map();let start=null,moved=false,pinch=null;
+    this.svg.addEventListener('pointerdown',e=>{this.svg.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(P.size===1){start={x:e.clientX,y:e.clientY,cx:this.cx,cy:this.cy};moved=false}
+      if(P.size===2){const [a,b]=[...P.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),half:this.half};moved=true}});
+    this.svg.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(P.size===2&&pinch){const [a,b]=[...P.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);this.half=Math.min(WORLD*.9,Math.max(120,pinch.half*pinch.d/d));this.render();return}
+      if(start&&P.size===1){const dx=e.clientX-start.x,dy=e.clientY-start.y;if(Math.hypot(dx,dy)>6)moved=true;if(moved){const k=this.ppm();this.cx=start.cx-dx/k;this.cy=start.cy-dy/k;this.setView()}}});
+    const up=e=>{if(!P.has(e.pointerId))return;P.delete(e.pointerId);
+      if(P.size===0){if(!moved){const t=e.target.closest('[data-card]');if(t&&this.opt.onCard)this.opt.onCard(t.dataset.card);else if(this.opt.onTap){const w=this.toWorld(e.clientX,e.clientY);this.opt.onTap(w.x,w.y)}}start=null;pinch=null;this.render()}
+      else if(P.size===1){const [a]=[...P.values()];start={x:a.x,y:a.y,cx:this.cx,cy:this.cy};pinch=null}};
+    this.svg.addEventListener('pointerup',up);this.svg.addEventListener('pointercancel',up);
+    this.svg.addEventListener('wheel',e=>{e.preventDefault();this.zoom(e.deltaY>0?1.15:1/1.15)},{passive:false});
+  }
+  set(d){Object.assign(this.data,d);this.render()}
+  setView(){this.svg.setAttribute('viewBox',`${this.cx-this.half} ${this.cy-this.half} ${this.half*2} ${this.half*2}`)}
+  render(){
+    this.setView();const k=this.ppm(),inv=1/k,d=this.data;let s='';
+    if(this.half<1000)LANDMARKS.forEach(l=>s+=`<g transform="translate(${l.x} ${l.y}) scale(${inv})"><text class="mlabel" text-anchor="middle" y="-34" style="paint-order:stroke;stroke:var(--map-ground);stroke-width:4px">${h(l.n)}</text></g>`);
+    if(d.search){const S=d.search;if(S.inner&&S.inner<S.r)s+=`<circle cx="${S.x}" cy="${S.y}" r="${S.inner}" fill="var(--coral)" fill-opacity=".14" stroke="var(--coral)" stroke-width="${2*inv}"/>`;s+=`<circle cx="${S.x}" cy="${S.y}" r="${S.r}" fill="var(--indigo)" fill-opacity=".12" stroke="var(--indigo)" stroke-width="${2*inv}" stroke-dasharray="${8*inv} ${6*inv}"/><g transform="translate(${S.x} ${S.y}) scale(${inv})"><circle r="14" fill="var(--coral)" stroke="var(--surface)" stroke-width="4"/><path d="M-6 2l6-6 6 6v6h-12z" fill="var(--on-coral)"/><text class="mlabel" text-anchor="middle" y="32">${h(S.label||'마지막 본 곳')}</text></g>`}
+    (d.cards||[]).forEach(c=>{const x=snap(c.x),y=snap(c.y),col=(COATS[c.coat]||COATS.cheese);const hi=d.highlight&&d.highlight.includes(c.id);
+      s+=`<circle cx="${x}" cy="${y}" r="${CELL/2}" fill="${col.fur2}" fill-opacity=".22" stroke="${col.fur2}" stroke-opacity=".6" stroke-width="${1.5*inv}"/>`;
+      const id='cp'+c.id.replace(/\W/g,'');
+      s+=`<g data-card="${h(c.id)}" transform="translate(${x} ${y}) scale(${inv})" style="cursor:pointer"><circle r="${hi?27:23}" fill="${hi?'var(--coral)':'var(--surface)'}"/><clipPath id="${id}"><circle r="19"/></clipPath><circle r="19" fill="${col.bg}"/>${c.photo?`<image href="${c.photo}" x="-19" y="-19" width="38" height="38" clip-path="url(#${id})" preserveAspectRatio="xMidYMid slice"/>`:`<g transform="translate(-17 -17) scale(.17)">${art(c.coat,c.species).replace(/^<svg[^>]*>|<\/svg>$/g,'')}</g>`}</g>`});
+    if(d.pick){s+=`<g transform="translate(${d.pick.x} ${d.pick.y}) scale(${inv})"><circle r="16" fill="var(--coral)" stroke="var(--surface)" stroke-width="4"/><circle r="5" fill="var(--on-coral)"/></g>`}
+    this.ov.innerHTML=s;
+    const steps=[25,50,100,200,500,1000];const m=steps.find(v=>v*k>=60)||1000;
+    const sc=this.el.querySelector('.scale');sc.querySelector('span').textContent=m>=1000?m/1000+'km':m+'m';sc.querySelector('i').style.width=(m*k)+'px';
+  }
+  center(x,y,half){this.cx=x;this.cy=y;if(half)this.half=half;this.render()}
+  destroy(){this.ro.disconnect()}
+}
+
+/* ---------- sheets ---------- */
+let sheetCleanup=null;
+function openSheet(html){closeSheet();$('#sheetRoot').innerHTML=`<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;return $('#sheetRoot .sheet')}
+function closeSheet(){if(sheetCleanup){sheetCleanup();sheetCleanup=null}$('#sheetRoot').innerHTML=''}
+const topBar=(title,icon='close')=>`<div class="sheet-top gut"><button class="icon-btn" data-close aria-label="닫기">${ICON[icon]}</button><b>${title}</b><span style="width:40px"></span></div>`;
+function wireClose(el){el.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeSheet)}
+
+/* ---------- photo ---------- */
+async function readPhoto(file,size=520){
+  const url=URL.createObjectURL(file);
+  try{
+    const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+    const s=Math.min(img.naturalWidth,img.naturalHeight),c=document.createElement('canvas');c.width=c.height=size;
+    const g=c.getContext('2d');g.drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,0,0,size,size);
+    const px=g.getImageData(size*.3,size*.3,size*.4,size*.4).data;let r=0,gg=0,b=0,n=0;for(let i=0;i<px.length;i+=16){r+=px[i];gg+=px[i+1];b+=px[i+2];n++}
+    return{photo:c.toDataURL('image/jpeg',.7),avg:[r/n,gg/n,b/n]};
+  }finally{URL.revokeObjectURL(url)}
+}
+function guessCoat([r,g,b]){
+  r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,d=mx-mn,s=d?d/(1-Math.abs(2*l-1)):0;
+  let hue=0;if(d){if(mx===r)hue=60*(((g-b)/d)%6);else if(mx===g)hue=60*((b-r)/d+2);else hue=60*((r-g)/d+4)}if(hue<0)hue+=360;
+  if(l<.2)return'black';if(l>.75&&s<.25)return'white';if(hue>10&&hue<50&&s>.3)return l<.38?'brown':'cheese';if(s<.15)return l<.35?'tuxedo':'mackerel';return'mackerel';
+}
+
+/* ---------- AI (Claude vision via the sample capability) ---------- */
+const AI={fn:null,max:0,off:'',
+  async init(){try{const s=window.claude&&window.claude.use?await window.claude.use('sample'):null;if(!s){this.off='unavailable';return}
+    const lim=await s.limits().catch(()=>null);this.fn=s;this.max=lim&&lim.images?lim.images.maxCount:0;if(!this.max)this.off='noimages'}catch(e){this.off='unavailable'}},
+  ready(){return !!(this.fn&&this.max&&!this.off)},
+  fail(e){const c=e&&e.code;if(['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed','images_unavailable'].includes(c))this.off=c;return c||'error'},
+  async json(prompt,blobs,tier){return this.fn.json(prompt,{images:blobs.slice(0,this.max),modelTier:tier||'quick',cache:false})}
+};
+const toBlob=async dataUrl=>{const [head,b64]=dataUrl.split(',');const bin=atob(b64);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:(head.match(/data:([^;]+)/)||[])[1]||'image/jpeg'})};
+const COAT_KEYS=Object.keys(COATS).join('|');
+async function aiRecognize(photo,cands){
+  const blobs=[await toBlob(photo)];const used=[];
+  for(const c of cands){if(blobs.length>=Math.min(AI.max,5))break;if(c.photo){blobs.push(await toBlob(c.photo));used.push(c)}}
+  const prompt=`이 앱은 길에서 만난 동물을 찍어 카드로 모으는 도감이에요. 이미지 1은 방금 찍은 사진이에요.${used.length?` 이미지 2~${used.length+1}은 도감에 이미 있는 동물들이에요(순서대로 후보 1~${used.length}).`:''}
+이미지 1을 보고 JSON 객체 하나로만 답하세요:
+{"isAnimal": 동물이 보이면 true,
+ "species": "cat"|"dog"|"bird"|"etc",
+ "coat": "${COAT_KEYS}" 중 하나 (cheese=주황/치즈, mackerel=회색 줄무늬 고등어, calico=삼색, tuxedo=검정+흰색 턱시도, white=흰색, black=검정, brown=갈색),
+ "breed": 한국어로 짧게 추정한 품종 (예: "코리안숏헤어", "말티즈", "믹스로 보여요"),
+ "name": 생김새에 어울리는 귀여운 한국어 별명 2~5글자,
+ "note": 생김새나 자세를 담은 한국어 한 줄 설명, 25자 이내,
+ "match": ${used.length?`이미지 1이 후보 중 같은 개체로 보이면 그 후보 번호(1~${used.length}), 아니면 null`:'null'},
+ "matchConfidence": 0~1 사이 숫자}`;
+  const r=await AI.json(prompt,blobs,'quick');
+  if(!r||typeof r!=='object')throw{code:'invalid_json'};
+  const m=Number(r.match);
+  return{isAnimal:r.isAnimal!==false,species:SPECIES[r.species]?r.species:'cat',coat:COATS[r.coat]?r.coat:null,breed:String(r.breed||'').slice(0,20),
+    name:String(r.name||'').slice(0,12),note:String(r.note||'').slice(0,40),known:(m>=1&&m<=used.length&&Number(r.matchConfidence)>=.6)?used[m-1].id:null};
+}
+
+function analyze(L,all){
+  const r=L.species==='cat'?(L.outdoor?1609:137):1609;
+  const home=L.last||{x:0,y:0};const since=Date.now()-(L.when||0)*DAY-12*HOUR;
+  let cands=Store.cards.filter(c=>c.species===L.species).map(c=>{
+    const look=c.coat===L.coat?1:(NEAR[L.coat]||[]).includes(c.coat)?.45:0;
+    const dist=Math.hypot(c.x-home.x,c.y-home.y);const dS=Math.max(0,1-dist/(r*1.6));
+    const t=c.lastSeen||c.createdAt;const tS=t>=since?1:Math.max(0,1-(since-t)/(10*DAY));
+    return{c,dist,dS,tS,look,score:Math.round((look*.6+dS*.25+tS*.15)*100)}
+  }).sort((a,b)=>b.score-a.score);
+  if(!all)cands=cands.filter(x=>x.score>=30).slice(0,5);
+  return{r,home,cands,ai:false};
+}
+function tipsFor(L,r){
+  const t=[['집 주변 50~100m부터','영역동물은 아는 영역 가까이에 머물러요. 집 주변 50~100m를 먼저 꼼꼼히 본 뒤, 지도의 점선 반경으로 넓혀 가세요.']];
+  if(L.species==='cat'&&!L.outdoor)t.push(['숨을 곳부터, 집 가까이부터','실내에서만 지낸 고양이는 멀리 가기보다 숨어요. 반경 '+r+'m 안의 차 밑, 실외기 뒤, 계단 아래, 덤불을 손전등으로 비춰 눈빛을 찾아보세요.']);
+  if(L.species==='cat'&&L.outdoor)t.push(['다니던 길을 따라 넓게','외출하던 고양이는 평소 동선과 밥자리를 따라 움직여요. 지도의 닮은 기록이 있는 구역부터 순서대로 확인해요.']);
+  if(L.species==='dog')t.push(['참고 자료는 고양이 기준이에요','강아지는 이동 거리가 더 길 수 있어 1.6km부터 넓게 잡았어요. 산책로와 큰길 쪽을 먼저 확인하고 근처 보호소에도 연락해 두세요.']);
+  if(L.temper==='shy')t.push(['조용한 시간에, 쫓지 않고','겁 많은 아이는 사람이 적은 밤 10시 이후에 움직여요. 이름은 작게 부르고, 보이면 다가가지 말고 그 자리에 앉아 기다려 주세요. 설문 36명 중 4명이 다가가다 놓쳤어요.']);
+  if(L.temper==='social')t.push(['이웃에게 사진을 보여주세요','사람을 좋아하는 아이는 남의 집이나 가게에 들어가기도 해요. 경비실, 편의점, 동물병원에 사진을 보여 주세요.']);
+  t.push(['익숙한 냄새를 집 앞에',`평소 쓰던 모래, 담요와 ${L.snack&&L.snack!=='기타'?L.snack:'좋아하는 간식'}를 집 앞에 두면 돌아올 길을 찾는 데 도움이 돼요.`]);
+  if(L.how==='door'||L.how==='window')t.push(['나간 곳 바로 앞부터',(L.how==='door'?'열린 문':'창문 아래')+' 주변 10m 안을 먼저 꼼꼼히 확인하세요. 가장 가까운 곳에 숨어 있는 경우가 많아요.']);
+  return t;
+}
+
+/* =====================================================================
+   WANDER 식별 엔진 (patch engine, runs entirely in the browser)
+   1 정규화  : 가운데 정사각형 256px
+   2 조명    : 평균 밝기 → 밝기 배율(×f), 주변(테두리) 색이 다양하면 색 보정, 아니면 '주변색 단서 부족'
+   3 영역    : 테두리 색과 다른 패치 = 동물 영역. 실패하면 전체 64패치 사용
+   4 특징    : 8×8 = 64패치, 패치마다 색 분포 12 + 무늬 방향 8 + 무늬 밀도 1 = 21차원
+   5 매칭    : 패치마다 상대 사진 ±2칸 안에서 가장 닮은 패치와 짝 (자세 차이 허용),
+               무작위 짝 기준선보다 얼마나 닮았는지로 점수화, 양방향 평균
+   6 원본/보정 둘 다 계산해 높은 쪽
+   7 등록 여러 장: 최종 = 0.6 × 최고 + 0.4 × 상위 2장 평균
+   ===================================================================== */
+const ENG={N:256,G:8,cache:new Map(),
+  TH:Object.assign({same:.75,cand:.55,src:'기본값 · 실험실 측정 전'},lsGet('wander.th',{})),
+  /* score = ½ 패치 유사도(0.80→0, 0.98→1) + ½ 위치 일관성(0.35→0, 0.95→1) */
+  CAL:{simLo:.80,simHi:.98,consLo:.35,consHi:.95},
+  Q:{dark:.28,bright:.78,blur:.018,plain:.06,small:14,regMin:2,close:.04}};
+const BOXC=['#B58CFF','#6FA8FF','#F5B65A','#5FD08A'];
+const dot=(a,b)=>{let s=0;for(let i=0;i<a.length;i++)s+=a[i]*b[i];return s};
+const tick=()=>new Promise(r=>setTimeout(r,0));
+function loadImg(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src})}
+
+async function engPrep(src){
+  if(ENG.cache.has(src))return ENG.cache.get(src);
+  const img=await loadImg(src),N=ENG.N,c=document.createElement('canvas');c.width=c.height=N;
+  const g=c.getContext('2d',{willReadFrequently:true});const s=Math.min(img.naturalWidth,img.naturalHeight);
+  g.drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,0,0,N,N);
+  const px=g.getImageData(0,0,N,N).data;
+  const light=engLight(px),orig=engFeat(px),corr=engFeat(engCorrect(px,light)),fg=engForeground(orig);
+  const r={orig,corr,light,fg,quality:engQuality(orig,light,fg)};
+  if(ENG.cache.size>400)ENG.cache.clear();ENG.cache.set(src,r);return r;
+}
+function engLight(px){
+  const N=ENG.N;let R=0,G=0,B=0,n=0,bR=0,bG=0,bB=0,bs=0,bn=0;
+  for(let y=0;y<N;y+=2)for(let x=0;x<N;x+=2){const i=(y*N+x)*4,r=px[i]/255,g=px[i+1]/255,b=px[i+2]/255;R+=r;G+=g;B+=b;n++;
+    if(x<32||y<32||x>=N-32||y>=N-32){bR+=r;bG+=g;bB+=b;bs+=Math.max(r,g,b)-Math.min(r,g,b);bn++}}
+  R/=n;G/=n;B/=n;bR/=bn;bG/=bn;bB/=bn;bs/=bn;
+  const lum=.299*R+.587*G+.114*B;
+  const cue=bs>.12;                       // varied, colourful surroundings carry the light colour
+  const gray=(bR+bG+bB)/3;
+  const gains=cue?[bR,bG,bB].map(v=>Math.min(1.25,Math.max(.8,gray/(v||1e-3)))):[1,1,1];
+  const factor=Math.min(1.8,Math.max(.6,.5/(lum||1e-3)));
+  return{lum,factor:Math.round(factor*100)/100,gains,cue,state:lum<ENG.Q.dark?'dark':lum>ENG.Q.bright?'bright':'ok'};
+}
+function engCorrect(px,l){const o=new Uint8ClampedArray(px.length);
+  for(let i=0;i<px.length;i+=4){o[i]=px[i]*l.gains[0]*l.factor;o[i+1]=px[i+1]*l.gains[1]*l.factor;o[i+2]=px[i+2]*l.gains[2]*l.factor;o[i+3]=255}return o}
+function engFeat(px){
+  const N=ENG.N,G=ENG.G,P=N/G,lum=new Float32Array(N*N);
+  for(let i=0,j=0;i<px.length;i+=4,j++)lum[j]=(.299*px[i]+.587*px[i+1]+.114*px[i+2])/255;
+  const out=[];
+  for(let pj=0;pj<G;pj++)for(let pi=0;pi<G;pi++){
+    const col=new Float32Array(12),tex=new Float32Array(8);let mR=0,mG=0,mB=0,mL=0,mL2=0,edge=0,n=0;
+    for(let y=pj*P+1;y<(pj+1)*P-1;y+=2)for(let x=pi*P+1;x<(pi+1)*P-1;x+=2){
+      const k=y*N+x,i=k*4,r=px[i]/255,g=px[i+1]/255,b=px[i+2]/255,l=lum[k];
+      mR+=r;mG+=g;mB+=b;mL+=l;mL2+=l*l;n++;
+      const o1=r-g,o2=(r+g)/2-b,ch=Math.hypot(o1,o2);
+      if(ch>.04)col[Math.floor((Math.atan2(o2,o1)+Math.PI)/(2*Math.PI)*8)%8]+=ch;
+      col[8+Math.min(3,Math.floor(l*4))]+=.15;
+      const gx=lum[k+1]-lum[k-1],gy=lum[k+N]-lum[k-N],m=Math.hypot(gx,gy);
+      if(m>.02){let a=Math.atan2(gy,gx);if(a<0)a+=Math.PI;tex[Math.floor(a/Math.PI*8)%8]+=m}
+      edge+=m;
+    }
+    const nc=Math.hypot(...col)||1,nt=Math.hypot(...tex)||1,v=new Float32Array(21);
+    for(let q=0;q<12;q++)v[q]=col[q]/nc*.75;for(let q=0;q<8;q++)v[12+q]=tex[q]/nt*.55;v[20]=Math.min(1,edge/n*6)*.35;
+    const nv=Math.hypot(...v)||1;for(let q=0;q<21;q++)v[q]/=nv;
+    out.push({v,i:pi,j:pj,mean:[mR/n,mG/n,mB/n],lum:mL/n,lstd:Math.sqrt(Math.max(0,mL2/n-(mL/n)**2)),edge:edge/n});
+  }
+  return out;
+}
+function engForeground(f){
+  const border=f.filter(p=>p.i===0||p.j===0||p.i===7||p.j===7);
+  const bg=[0,1,2].map(c=>border.reduce((a,p)=>a+p.mean[c],0)/border.length);
+  const d=p=>Math.hypot(p.mean[0]-bg[0],p.mean[1]-bg[1],p.mean[2]-bg[2]);
+  const bd=border.map(d),mu=bd.reduce((a,v)=>a+v,0)/bd.length,sd=Math.sqrt(bd.reduce((a,v)=>a+(v-mu)**2,0)/bd.length);
+  const thr=Math.max(.08,mu+1.2*sd);
+  const idx=f.map((p,k)=>d(p)>thr?k:-1).filter(k=>k>=0);
+  if(idx.length<10||idx.length>56)return{mode:'all',idx:f.map((_,k)=>k)};
+  return{mode:'fg',idx};
+}
+function engQuality(f,light,fg){
+  const ps=fg.idx.map(k=>f[k]);
+  const sharp=ps.reduce((a,p)=>a+p.edge,0)/ps.length;
+  const m=ps.reduce((a,p)=>a+p.lum,0)/ps.length;
+  const contrast=Math.sqrt(ps.reduce((a,p)=>a+(p.lum-m)**2+p.lstd**2,0)/ps.length);
+  return{dark:light.state==='dark',bright:light.state==='bright',blurry:sharp<ENG.Q.blur,plain:contrast<ENG.Q.plain,
+    small:fg.mode==='fg'&&fg.idx.length<ENG.Q.small,sharp,contrast,lum:light.lum,patches:fg.idx.length};
+}
+function engDir(fa,ia,fb,ib){
+  const setB=new Set(ib),sims=[],pairs=[];
+  for(const a of ia){const pa=fa[a];let best=-1,bk=-1;
+    for(let dj=-2;dj<=2;dj++)for(let di=-2;di<=2;di++){const i=pa.i+di,j=pa.j+dj;if(i<0||j<0||i>7||j>7)continue;
+      const b=j*8+i;if(!setB.has(b))continue;const s=dot(pa.v,fb[b].v);if(s>best){best=s;bk=b}}
+    if(bk>=0){sims.push(best);pairs.push([a,bk,best])}}
+  if(!sims.length)return{score:0,sim:0,cons:0,pairs:[]};
+  sims.sort((x,y)=>y-x);const top=sims.slice(0,Math.max(1,Math.ceil(sims.length*.7)));
+  const m=top.reduce((x,y)=>x+y,0)/top.length;
+  // spatial consistency: for the same animal most patches move by the same offset (pose shift)
+  const ds=pairs.map(([a,b])=>[(b%8)-(a%8),Math.floor(b/8)-Math.floor(a/8)]);
+  const med=k=>{const v=ds.map(d=>d[k]).sort((x,y)=>x-y);return v[Math.floor(v.length/2)]},mx=med(0),my=med(1);
+  const cons=ds.filter(d=>Math.abs(d[0]-mx)<=1&&Math.abs(d[1]-my)<=1).length/ds.length;
+  const clamp=v=>Math.max(0,Math.min(1,v));
+  const score=.5*clamp((m-ENG.CAL.simLo)/(ENG.CAL.simHi-ENG.CAL.simLo))+.5*clamp((cons-ENG.CAL.consLo)/(ENG.CAL.consHi-ENG.CAL.consLo));
+  return{score,sim:m,cons,pairs};
+}
+function engPairScore(A,B){
+  const o1=engDir(A.orig,A.fg.idx,B.orig,B.fg.idx),o2=engDir(B.orig,B.fg.idx,A.orig,A.fg.idx);
+  const c1=engDir(A.corr,A.fg.idx,B.corr,B.fg.idx),c2=engDir(B.corr,B.fg.idx,A.corr,A.fg.idx);
+  const orig=(o1.score+o2.score)/2,corr=(c1.score+c2.score)/2,w=corr>orig?[c1,c2]:[o1,o2];
+  return{score:Math.max(orig,corr),orig,corr,sim:(w[0].sim+w[1].sim)/2,cons:(w[0].cons+w[1].cons)/2,pairs:w[0].pairs};
+}
+const engAgg=list=>{const t=list.slice().sort((x,y)=>y-x);return t.length>=2?.6*t[0]+.4*(t[0]+t[1])/2:(t[0]||0)};
+/* query = witness photo (길에서 찍힌 목격 사진), regs = owner's registered photos */
+async function engMatch(qSrc,regs,labels){
+  const Q=await engPrep(qSrc),R=[];for(const s of regs)R.push(await engPrep(s));
+  const per=R.map((B,k)=>({k,...engPairScore(Q,B)}));
+  const best=per.slice().sort((a,b)=>b.score-a.score)[0];
+  const final=engAgg(per.map(p=>p.score));
+  return{final,best,q:Q,regQ:R,
+    list:per.map(p=>({label:(labels&&labels[p.k])||('사진 '+(p.k+1)),score:p.score})).sort((a,b)=>b.score-a.score),
+    unc:engUnc(Q,R,{})};
+}
+function engUnc(Q,R,extra){
+  const items=[],qq=Q.quality,TQ=ENG.Q;
+  const add=(why,fix)=>items.push([why,fix]);
+  if(qq.dark)add(`목격 사진이 어두워요 (밝기 ${qq.lum.toFixed(2)} < ${TQ.dark})`,'보정 점수를 같이 봤어요. 밝을 때 찍힌 목격 사진이 더 오면 다시 비교하세요');
+  if(qq.bright)add(`역광 · 과노출 (밝기 ${qq.lum.toFixed(2)} > ${TQ.bright})`,'그늘에서 찍힌 사진으로 다시 비교하세요');
+  if(qq.blurry)add(`사진이 흐려요 (선명도 ${qq.sharp.toFixed(3)} < ${TQ.blur})`,'흔들리지 않은 사진이 필요해요');
+  if(qq.small)add(`동물이 작게 찍혔어요 (동물 영역 ${qq.patches}패치 < ${TQ.small})`,'화면 절반 이상 차게 찍힌 사진이 필요해요');
+  if(qq.plain)add(`무늬 단서가 적어요 (무늬 대비 ${qq.contrast.toFixed(3)} < ${TQ.plain}, 단색 계열)`,'특징 부위(꼬리 끝, 귀, 얼룩) 사진을 추가하고 위치 · 시간 정보를 더 믿으세요');
+  if(R.length<TQ.regMin)add(`등록 사진 ${R.length}장 (기준: ${TQ.regMin}장 이상 · 뒷모습 포함)`,'뒷모습 사진을 추가하면 길에서 찍힌 사진과 맞추기 쉬워요');
+  const darkReg=R.filter(x=>x.quality.dark).length;if(darkReg)add(`어두운 등록 사진 ${darkReg}장`,'창가 자연광에서 다시 찍어 바꿔 주세요');
+  if(extra.close)add(`다음 후보와 점수 차가 작아요 (${TQ.close} 미만)`,'위에서 본 등 무늬 사진을 추가하면 두 아이를 구분하기 쉬워요');
+  const level=items.length===0?'낮음':items.length<=2?'보통':'높음';
+  return{level,items};
+}
+/* 점수는 줄 세우기에만 써요. 같은 고양이인지는 보호자가 확인해요 */
+function verdict(s){return s>=ENG.TH.same?['아주 닮음','v-same']:s>=ENG.TH.cand?['후보','v-cand']:['닮음 낮음','v-low']}
+function pickBoxes(pairs){
+  const out=[];for(const p of pairs.slice().sort((a,b)=>b[2]-a[2])){
+    const ai=p[0]%8,aj=Math.floor(p[0]/8);
+    if(out.every(o=>Math.abs(o.ai-ai)+Math.abs(o.aj-aj)>=2))out.push({ai,aj,bi:p[1]%8,bj:Math.floor(p[1]/8),c:BOXC[out.length]});
+    if(out.length===4)break}
+  return out;
+}
+const boxesSVG=list=>`<svg viewBox="0 0 8 8" preserveAspectRatio="none" aria-hidden="true">${list.map(([i,j,c])=>`<rect x="${i+.06}" y="${j+.06}" width=".88" height=".88" rx=".08" fill="none" stroke="${c}" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`).join('')}</svg>`;
+const tintSVG=idx=>`<svg viewBox="0 0 8 8" preserveAspectRatio="none" aria-hidden="true">${idx.map(k=>`<rect x="${k%8}" y="${Math.floor(k/8)}" width="1.02" height="1.02" fill="#5FD08A" fill-opacity=".38"/>`).join('')}</svg>`;
+function uncHTML(u){return `<div class="unc"><b>인식 불확도 · ${u.level}</b>${u.items.length?`<ul style="margin:0;padding-left:18px">${u.items.map(([a,b])=>`<li>${h(a)}<small>${h(b)}</small></li>`).join('')}</ul>`:'조명 · 선명도 · 등록 사진 수 모두 기준 안이에요.'}</div>`}
+function engCardHTML(r,qSrc,regSrcs,title){
+  const [vt,vc]=verdict(r.final),B=pickBoxes(r.best.pairs);
+  return `<div class="eng">
+    <div class="eng-head"><b style="font-size:15px;min-width:0">${h(title||'엔진 비교 결과')}</b><span style="display:flex;align-items:center;gap:8px"><span class="verdict ${vc}">${vt}</span><span class="big-score">${r.final.toFixed(3)}</span></span></div>
+    <div class="eng-imgs">
+      <figure><div class="ov-img"><img src="${qSrc}" alt="목격 사진">${boxesSVG(B.map(b=>[b.ai,b.aj,b.c]))}</div><figcaption>목격 사진 · 일치에 쓰인 부분</figcaption></figure>
+      <figure><div class="ov-img tint"><img src="${qSrc}" alt="">${tintSVG(r.q.fg.idx)}</div><figcaption>초록색 · 비교에 사용한 영역</figcaption></figure>
+      <figure><div class="ov-img"><img src="${regSrcs[r.best.k]}" alt="가장 가까운 등록 사진">${boxesSVG(B.map(b=>[b.bi,b.bj,b.c]))}</div><figcaption>가장 가까운 등록 사진</figcaption></figure>
+    </div>
+    <div class="eng-metrics">
+      <div><span>영역</span><b>${r.q.fg.mode==='all'?'전체 사진 사용':'동물 영역만 사용'} · 패치 ${r.q.fg.idx.length}개</b></div>
+      <div><span>조명</span><b>${r.q.light.cue?'주변색으로 색 보정':'주변색 단서 부족'} · 밝기 ×${r.q.light.factor.toFixed(2)}</b></div>
+      <div><span>부분 비교</span><b>원본 ${r.best.orig.toFixed(3)} / 보정 ${r.best.corr.toFixed(3)}</b></div>
+      <div><span>근거</span><b>패치 유사도 ${r.best.sim.toFixed(3)} · 위치 일관성 ${Math.round(r.best.cons*100)}%</b></div>
+      ${r.list.map(x=>`<div><span>${h(x.label)}</span><b>${x.score.toFixed(3)}</b></div>`).join('')}
+      <div><span>판정 기준 (${h(ENG.TH.src)})</span><b>동일 ≥ ${ENG.TH.same.toFixed(2)} · 후보 ≥ ${ENG.TH.cand.toFixed(2)}</b></div>
+    </div>
+    ${uncHTML(r.unc)}
+  </div>`;
+}
+
+/* ---------- 표준 등록 사진 가이드 ---------- */
+const SLOTS=[
+  {k:'front',t:'정면',d:'얼굴 무늬가 보이게'},
+  {k:'side',t:'옆모습',d:'몸통 무늬 전체'},
+  {k:'back',t:'뒷모습',d:'길에서 가장 많이 찍혀요',req:true},
+  {k:'extra',t:'특징',d:'꼬리 · 귀 · 얼룩'}];
+function qualityBadges(Q){
+  const q=Q.quality,o=[];
+  if(q.dark)o.push(['warn','어두워요 · 창가 자연광에서']);else if(q.bright)o.push(['warn','너무 밝아요 · 그늘에서']);
+  if(q.blurry)o.push(['warn','흐려요 · 다시 찍기']);
+  if(q.small)o.push(['warn','작아요 · 더 가까이']);
+  if(q.plain)o.push(['warn','무늬 단서 적음 · 특징 부위 추가']);
+  if(!o.length)o.push(['ok','표준 충족']);
+  return o.map(([c,t])=>`<span class="qq ${c}">${t}</span>`).join('');
+}
+/* ---------- lost search on the engine ---------- */
+async function analyzeEngine(L,onProg){
+  const base=analyze(L,true);
+  if(!L.photos.length)return analyze(L);
+  const regs=L.photos.map(p=>p.photo),labels=L.photos.map((p,i)=>p.label||('등록 사진 '+(i+1)));
+  const pool=base.cands.filter(x=>x.c.photo);
+  for(let i=0;i<pool.length;i++){pool[i].eng=await engMatch(pool[i].c.photo,regs,labels);onProg&&onProg(i+1,pool.length);await tick()}
+  const ranked=pool.slice().sort((a,b)=>b.eng.final-a.eng.final);
+  if(ranked.length>1&&ranked[0].eng.final-ranked[1].eng.final<ENG.Q.close){ranked[0].eng.unc=engUnc(ranked[0].eng.q,ranked[0].eng.regQ,{close:true})}
+  base.cands.forEach(x=>{x.score=x.eng?Math.round(x.eng.final*60+x.dS*25+x.tS*15):Math.round(x.look*35+x.dS*25+x.tS*15)});
+  const cands=base.cands.filter(x=>x.score>=30).sort((a,b)=>b.score-a.score).slice(0,5);
+  return{...base,cands,engine:true,regs,labels};
+}
+
+/* ---------- IndexedDB (lab photos stay on this device) ---------- */
+const IDB={db:null,
+  async open(){if(this.db)return this.db;return this.db=await new Promise((res,rej)=>{const r=indexedDB.open('wander',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})},
+  async get(k){try{const d=await this.open();return await new Promise((res,rej)=>{const t=d.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error)})}catch(e){return lsGet('wander.idb.'+k,null)}},
+  async set(k,v){try{const d=await this.open();await new Promise((res,rej)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error)})}catch(e){lsSet('wander.idb.'+k,v)}}};
+
+/* ---------- 실험실: 정확도 · 판정 기준 측정 ---------- */
+const CONDS=[['normal','정상'],['dark','어두움'],['back','뒷모습'],['side','옆모습']];
+let LAB={cats:[]},labCond='normal';
+async function labLoad(){const v=await IDB.get('lab');LAB=v&&Array.isArray(v.cats)?v:{cats:[]}}
+const labSave=()=>IDB.set('lab',LAB);
+function bestThreshold(gen,imp){
+  let bal=null,strict=null;
+  for(let t=.30;t<=.995;t+=.005){
+    const tpr=gen.filter(s=>s>=t).length/(gen.length||1),fpr=imp.filter(s=>s>=t).length/(imp.length||1);
+    const b=(tpr+1-fpr)/2;if(!bal||b>bal.b)bal={t,b,tpr,fpr,acc:(gen.filter(s=>s>=t).length+imp.filter(s=>s<t).length)/((gen.length+imp.length)||1)};
+    if(!strict&&fpr<=.01)strict={t,tpr,fpr};
+  }
+  return{bal,strict:strict||{t:.995,tpr:0,fpr:0}};
+}
+async function labEval(onProg){
+  const items=[];LAB.cats.forEach(c=>c.photos.forEach(p=>items.push({cat:c.id,p})));
+  for(let k=0;k<items.length;k++){items[k].f=await engPrep(items[k].p.photo);onProg('특징 추출',k+1,items.length);if(k%4===0)await tick()}
+  const n=items.length,S=Array.from({length:n},()=>new Float32Array(n));let done=0;const total=n*(n-1)/2;
+  for(let a=0;a<n;a++)for(let b=a+1;b<n;b++){S[a][b]=S[b][a]=engPairScore(items[a].f,items[b].f).score;if(++done%40===0){onProg('사진끼리 비교',done,total);await tick()}}
+  const cats=LAB.cats.filter(c=>c.photos.length>=2).map(c=>c.id);
+  const run=kmax=>{let q=0,t1=0,t5=0;const gen=[],imp=[],byCond={};
+    for(let a=0;a<n;a++){const mine=items[a].cat;if(!cats.includes(mine))continue;
+      const sc=[];for(const cid of cats){let idx=[];for(let b=0;b<n;b++)if(b!==a&&items[b].cat===cid)idx.push(b);
+        if(kmax&&idx.length){const r=a%idx.length;idx=idx.slice(r).concat(idx.slice(0,r)).slice(0,kmax)}
+        if(idx.length)sc.push({cid,s:engAgg(idx.map(b=>S[a][b]))})}
+      sc.sort((x,y)=>y.s-x.s);const rank=sc.findIndex(x=>x.cid===mine);q++;if(rank===0)t1++;if(rank>=0&&rank<5)t5++;
+      const cd=items[a].p.cond||'normal';byCond[cd]=byCond[cd]||{n:0,ok:0};byCond[cd].n++;if(rank===0)byCond[cd].ok++;
+      sc.forEach(x=>(x.cid===mine?gen:imp).push(x.s))}
+    return{q,top1:q?t1/q:0,top5:q?t5/q:0,gen,imp,byCond}};
+  const all=run(0),byK=[1,2,3,4].map(k=>({k,top1:run(k).top1})),th=bestThreshold(all.gen,all.imp);
+  const meanOf=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+  return{at:Date.now(),cats:cats.length,photos:n,queries:all.q,top1:all.top1,top5:all.top5,byCond:all.byCond,byK,th,
+    genMean:meanOf(all.gen),impMean:meanOf(all.imp),gen:all.gen,imp:all.imp};
+}
+const pct=v=>Math.round(v*1000)/10+'%';
+function labChart(R){
+  const W=320,H=130,bins=20,cnt=a=>{const c=new Array(bins).fill(0);a.forEach(s=>c[Math.min(bins-1,Math.floor(s*bins))]++);const m=a.length||1;return c.map(v=>v/m)};
+  const g=cnt(R.gen),i=cnt(R.imp),mx=Math.max(...g,...i,.01),bw=(W-30)/bins;
+  const bar=(arr,col,off)=>arr.map((v,k)=>`<rect x="${24+k*bw+off}" y="${H-18-(v/mx)*(H-30)}" width="${bw/2-1}" height="${(v/mx)*(H-30)}" fill="${col}" rx="1"/>`).join('');
+  const tx=t=>24+t*(W-30);
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="같은 고양이와 다른 고양이 점수 분포">
+    <line x1="24" y1="${H-18}" x2="${W-6}" y2="${H-18}" stroke="var(--line)"/>
+    ${bar(i,'var(--muted)',bw/2)}${bar(g,'var(--indigo)',0)}
+    <line x1="${tx(R.th.bal.t)}" y1="8" x2="${tx(R.th.bal.t)}" y2="${H-18}" stroke="var(--coral)" stroke-dasharray="3 3"/>
+    <line x1="${tx(R.th.strict.t)}" y1="8" x2="${tx(R.th.strict.t)}" y2="${H-18}" stroke="var(--ok-ink)" stroke-dasharray="3 3"/>
+    ${[0,.25,.5,.75,1].map(v=>`<text x="${tx(v)}" y="${H-4}" text-anchor="middle">${v}</text>`).join('')}
+  </svg><div class="legend"><span><i style="background:var(--indigo)"></i>같은 고양이 점수</span><span><i style="background:var(--muted)"></i>다른 고양이 점수</span><span><i style="background:var(--coral)"></i>후보 기준 ${R.th.bal.t.toFixed(2)}</span><span><i style="background:var(--ok-ink)"></i>동일 기준 ${R.th.strict.t.toFixed(2)}</span></div></div>`;
+}
+function slideText(R){
+  const c=k=>R.byCond[k]?`${pct(R.byCond[k].ok/R.byCond[k].n)} (${R.byCond[k].n}회)`:'측정 안 함';
+  return `고양이 ${R.cats}마리 · 사진 ${R.photos}장 · 비교 ${R.queries}회
+1등 정답 ${pct(R.top1)} · 상위 5장 안 ${pct(R.top5)}
+동일 판정 기준 ${R.th.strict.t.toFixed(2)} 이상 (다른 고양이를 같다고 할 확률 ${pct(R.th.strict.fpr)}, 같은 고양이 인정률 ${pct(R.th.strict.tpr)})
+비교 후보 기준 ${R.th.bal.t.toFixed(2)} 이상 (판정 정확도 ${pct(R.th.bal.acc)})
+같은 고양이 평균 ${R.genMean.toFixed(3)} / 다른 고양이 평균 ${R.impMean.toFixed(3)}
+어두운 사진 ${c('dark')} · 뒷모습 ${c('back')} · 옆모습 ${c('side')}
+등록 1장 → 4장: ${R.byK.map(x=>pct(x.top1)).join(' → ')}`;
+}
+function labReportHTML(R){
+  const weak=R.cats<10||R.photos<50;
+  return `<div class="kpis" style="margin-top:12px">
+    <div class="fact"><b>${pct(R.top1)}</b><span>1등 정답</span><small>질의 ${R.queries}회 · 다른 사진들 중 같은 고양이를 1등으로 고른 비율</small></div>
+    <div class="fact"><b>${pct(R.top5)}</b><span>상위 5장 안</span><small>후보 다섯 장 안에 진짜가 있는 비율</small></div>
+    <div class="fact"><b>${R.th.strict.t.toFixed(2)}</b><span>동일 개체 기준</span><small>다른 고양이를 같다고 할 확률 ${pct(R.th.strict.fpr)} 이하</small></div>
+    <div class="fact"><b>${pct(R.th.bal.acc)}</b><span>같다 · 다르다 판정 정확도</span><small>후보 기준 ${R.th.bal.t.toFixed(2)}에서</small></div>
+  </div>
+  ${labChart(R)}
+  <div class="sec-label">조건별 1등 정답</div>
+  <div style="background:var(--surface);border-radius:18px;padding:4px 8px;overflow-x:auto"><table class="cmp"><tr><th>조건</th><th>질의</th><th>1등 정답</th></tr>
+    ${CONDS.map(([k,l])=>R.byCond[k]?`<tr><td>${l}</td><td>${R.byCond[k].n}회</td><td>${pct(R.byCond[k].ok/R.byCond[k].n)}</td></tr>`:`<tr><td>${l}</td><td>0회</td><td>측정 안 함</td></tr>`).join('')}</table></div>
+  <div class="sec-label">등록 사진 수에 따른 1등 정답</div>
+  <div style="background:var(--surface);border-radius:18px;padding:4px 8px;overflow-x:auto"><table class="cmp"><tr><th>등록</th>${R.byK.map(x=>`<th>${x.k}장</th>`).join('')}</tr><tr><td>1등 정답</td>${R.byK.map(x=>`<td>${pct(x.top1)}</td>`).join('')}</tr></table></div>
+  <p class="notice">등록 k장은 고양이마다 다른 사진 중 k장만 남기고 다시 잰 값이에요. 사진이 k+1장보다 적은 고양이는 가진 만큼만 써요.</p>
+  ${weak?`<div class="unc"><b>표본이 아직 작아요</b>고양이 ${R.cats}마리 · 사진 ${R.photos}장으로는 정확도가 크게 흔들려요. 발표 근거로 쓰려면 최소 10마리 · 마리당 5장(정면 · 좌 · 우 · 등 + 어두운 사진 1장) 이상을 권장해요.</div>`:''}
+  <div class="sec-label">발표용 요약</div>
+  <div class="slide" id="slideTxt">${h(slideText(R))}</div>
+  <div class="mini-actions"><button class="btn soft" id="copySlide">요약 복사</button><button class="btn ink" id="applyTh">이 기준을 앱 판정에 적용</button></div>`;
+}
+async function openLab(){
+  await labLoad();
+  const el=openSheet(`${topBar('실험실')}<div class="sheet-body gut" id="labBody"></div>`);wireClose(el);
+  const body=$('#labBody');
+  const paint=()=>{
+    const nPh=LAB.cats.reduce((a,c)=>a+c.photos.length,0),last=lsGet('wander.labReport',null);
+    body.innerHTML=`<p style="line-height:1.6;margin:4px 4px 10px">같은 고양이 사진을 마리마다 여러 장 넣고 실행하면, 엔진이 <b>몇 %로 같은 고양이를 맞히는지</b>와 <b>몇 점 이상이면 같은 고양이로 볼지</b>를 계산해요. 사진은 이 기기에만 저장돼요.</p>
+      <div class="field" style="margin-top:0"><span class="lab">다음에 넣을 사진의 상태</span><div class="chips" id="condChips">${CONDS.map(([k,l])=>`<button class="chip" aria-pressed="${labCond===k}" data-k="${k}">${l}</button>`).join('')}</div></div>
+      <form class="answer-input" id="addCat" style="margin-top:12px"><input class="txt" id="catName" maxlength="12" placeholder="고양이 이름 (예: 콩이)" autocomplete="off"><button class="btn ink">추가</button></form>
+      ${LAB.cats.map(c=>`<div class="lab-cat"><header><b>${h(c.name)} · ${c.photos.length}장</b><span style="display:flex;gap:6px"><button class="btn soft" style="padding:8px 12px;font-size:12px" data-add="${c.id}">사진 추가</button><button class="btn light" style="padding:8px 12px;font-size:12px" data-del="${c.id}">삭제</button></span></header>
+        <div class="thumbs">${c.photos.map(p=>`<button class="thumb" data-cat="${c.id}" data-ph="${p.id}" title="눌러서 지우기"><img src="${p.photo}" alt=""><span>${(CONDS.find(x=>x[0]===p.cond)||CONDS[0])[1]}</span></button>`).join('')}</div><div data-confirm="${c.id}"></div></div>`).join('')}
+      <div class="unc" style="margin-top:14px"><b>지금 ${LAB.cats.length}마리 · ${nPh}장</b>최소 3마리 · 마리당 2장이 있어야 실행돼요. 발표 근거로는 10마리 · 마리당 5장 이상을 권장해요.</div>
+      <button class="btn coral wide" style="margin-top:12px" id="runLab" ${LAB.cats.filter(c=>c.photos.length>=2).length>=3?'':'disabled'}>실험 실행</button>
+      <div id="labProg"></div><div id="labOut">${last?`<div class="sec-label">지난 실험 · ${ago(last.at)}</div>`+labReportHTML(last):''}</div>`;
+    body.querySelectorAll('#condChips .chip').forEach(b=>b.onclick=()=>{labCond=b.dataset.k;paint()});
+    $('#addCat').onsubmit=async e=>{e.preventDefault();const n=$('#catName').value.trim();if(!n)return;LAB.cats.push({id:uid(),name:n,photos:[]});await labSave();paint()};
+    body.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const c=LAB.cats.find(x=>x.id===b.dataset.add);const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;
+      inp.onchange=async()=>{for(const f of [...inp.files]){try{const r=await readPhoto(f,360);c.photos.push({id:uid(),photo:r.photo,cond:labCond})}catch(e){}}await labSave();paint()};inp.click()});
+    body.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const slot=body.querySelector(`[data-confirm="${b.dataset.del}"]`);slot.innerHTML=`<div class="confirm"><b>이 고양이와 사진을 모두 지울까요?</b><div class="actions"><button class="btn light" data-no>그대로 두기</button><button class="btn coral" data-yes>지우기</button></div></div>`;
+      slot.querySelector('[data-no]').onclick=()=>slot.innerHTML='';slot.querySelector('[data-yes]').onclick=async()=>{LAB.cats=LAB.cats.filter(x=>x.id!==b.dataset.del);await labSave();paint()}});
+    body.querySelectorAll('.thumb').forEach(b=>b.onclick=()=>{const slot=body.querySelector(`[data-confirm="${b.dataset.cat}"]`);slot.innerHTML=`<div class="confirm"><b>이 사진을 뺄까요?</b><div class="actions"><button class="btn light" data-no>그대로 두기</button><button class="btn coral" data-yes>빼기</button></div></div>`;
+      slot.querySelector('[data-no]').onclick=()=>slot.innerHTML='';slot.querySelector('[data-yes]').onclick=async()=>{const c=LAB.cats.find(x=>x.id===b.dataset.cat);c.photos=c.photos.filter(p=>p.id!==b.dataset.ph);await labSave();paint()}});
+    const run=$('#runLab');if(run)run.onclick=async()=>{run.disabled=true;const pg=$('#labProg');
+      try{const R=await labEval((stage,i,n)=>{pg.innerHTML=`<p class="notice">${stage} ${i}/${n}</p><div class="prog"><i style="width:${Math.round(i/n*100)}%"></i></div>`});
+        const keep={...R,gen:R.gen.slice(0,3000),imp:R.imp.slice(0,6000)};lsSet('wander.labReport',keep);pg.innerHTML='';
+        $('#labOut').innerHTML='<div class="sec-label">이번 실험 결과</div>'+labReportHTML(R);wireReport(R)}
+      catch(e){pg.innerHTML='<p class="notice">실험을 끝내지 못했어요. 사진 수를 줄여 다시 실행해 주세요.</p>';run.disabled=false}};
+    if(last)wireReport(last);
+  };
+  const wireReport=R=>{const c=$('#copySlide');if(c)c.onclick=async()=>{try{await navigator.clipboard.writeText(slideText(R));toast('요약을 복사했어요')}catch(e){const r=document.createRange();r.selectNodeContents($('#slideTxt'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('복사가 막혀 있어요. 선택된 글을 길게 눌러 복사하세요')}};
+    const a=$('#applyTh');if(a)a.onclick=()=>{ENG.TH={same:Math.round(R.th.strict.t*100)/100,cand:Math.round(R.th.bal.t*100)/100,src:`실험 ${R.cats}마리 · ${R.photos}장`};lsSet('wander.th',ENG.TH);toast(`판정 기준을 동일 ${ENG.TH.same} · 후보 ${ENG.TH.cand}로 바꿨어요`)}};
+  paint();
+}
+
+/* ---------- 두 사진 비교 (엔진 데모) ---------- */
+function openCompare(){
+  const st={q:null,regs:[]};
+  const el=openSheet(`${topBar('두 사진 비교')}<div class="sheet-body gut" id="cmpBody"></div>`);wireClose(el);
+  const pick=(multi,cb)=>{const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=multi;inp.onchange=async()=>{const out=[];for(const f of [...inp.files].slice(0,5)){try{out.push((await readPhoto(f,480)).photo)}catch(e){}}cb(out)};inp.click()};
+  const paint=async()=>{const b=$('#cmpBody');
+    b.innerHTML=`<p style="line-height:1.6;margin:4px 4px 12px">길에서 찍힌 <b>목격 사진 1장</b>과 보호자가 가진 <b>등록 사진 1~5장</b>을 넣으면 엔진이 같은 아이인지 점수를 매겨요.</p>
+      <div class="slots"><button class="slot" id="pq"><div class="ph">${st.q?`<img src="${st.q}" alt="">`:'목격'}</div><b>목격 사진</b><small>길에서 찍힌 사진 1장</small></button>
+      <button class="slot" id="pr"><div class="ph">${st.regs[0]?`<img src="${st.regs[0]}" alt="">`:'등록'}</div><b>등록 사진 ${st.regs.length}장</b><small>정면 · 좌 · 우 · 등, 최대 5장</small></button></div>
+      <div id="cmpOut"></div>`;
+    $('#pq').onclick=()=>pick(false,o=>{if(o[0]){st.q=o[0];paint()}});
+    $('#pr').onclick=()=>pick(true,o=>{if(o.length){st.regs=o;paint()}});
+    if(st.q&&st.regs.length){$('#cmpOut').innerHTML='<p class="notice">비교하는 중…</p>';const r=await engMatch(st.q,st.regs);$('#cmpOut').innerHTML=engCardHTML(r,st.q,st.regs,'목격 사진 vs 등록 사진')}
+  };
+  paint();
+}
+
+/* ---------- 식별 엔진 설명 ---------- */
+function openEngine(){
+  const R=lsGet('wander.labReport',null),T=ENG.Q,H2=t=>`<h2 style="font-size:20px;letter-spacing:-.02em;margin:24px 4px 10px;text-wrap:balance">${t}</h2>`;
+  const el=openSheet(`${topBar('식별 엔진')}<div class="sheet-body gut">
+    <p style="line-height:1.6;margin:4px 4px 0">어슬렁의 핵심은 <b>길에서 멀리 찍힌 사진에서도 같은 아이를 알아보는 것</b>이에요. 식별이 안 되면 그냥 길고양이 사진첩이 되기 때문에, 엔진의 동작과 판정 기준을 숫자로 공개해요.</p>
+    <div class="mini-actions" style="margin-top:12px"><button class="btn ink" id="goCmp">두 사진 비교해 보기</button><button class="btn soft" id="goLab">실험실 열기</button></div>
+    ${H2('엔진은 이렇게 비교해요')}
+    <div class="steps">
+      <div class="tip"><b>정규화</b>사진 가운데를 정사각형 256px로 맞춰요.</div>
+      <div class="tip"><b>조명 보정</b>평균 밝기로 밝기 배율(예: ×0.78)을 정하고, 주변 색이 다양하면 그 색으로 색온도를 맞춰요. 주변이 단색이면 ‘주변색 단서 부족’으로 밝기만 맞춰요.</div>
+      <div class="tip"><b>동물 영역 찾기</b>테두리 색과 다른 칸을 동물 영역으로 써요. 경계가 애매하면 전체 64칸을 다 써요.</div>
+      <div class="tip"><b>64칸 특징</b>사진을 8×8 = 64칸으로 나누고 칸마다 색 분포 12 + 무늬 방향 8 + 무늬 밀도 1, 모두 21개 숫자를 뽑아요.</div>
+      <div class="tip"><b>칸끼리 짝짓기</b>각 칸을 상대 사진에서 ±2칸 안의 가장 닮은 칸과 짝지어요. 자세가 조금 달라도 무늬 위치가 맞으면 높게 나와요.</div>
+      <div class="tip"><b>두 가지 근거로 점수</b>점수 = ½ × 패치 유사도(닮은 칸 상위 70% 평균) + ½ × 위치 일관성(짝지은 칸들이 같은 방향으로 움직인 비율). 색만 비슷한 다른 고양이는 유사도는 높아도 칸들이 제각각 짝지어져 일관성이 낮아요.</div>
+      <div class="tip"><b>원본 · 보정 둘 다</b>원본 사진과 조명 보정 사진을 각각 비교해 높은 쪽을 써요.</div>
+      <div class="tip"><b>여러 장 종합</b>최종 점수 = 0.6 × 가장 닮은 등록 사진 + 0.4 × 상위 2장 평균. 한 장만 우연히 닮은 경우보다 여러 각도에서 고르게 닮을 때 높아요.</div>
+      <div class="tip"><b>위치 · 시간과 결합</b>수색 순위 = 사진 점수 60% + 마지막 본 곳과의 거리 25% + 목격 시간 15%.</div>
+    </div>
+    ${H2('몇 점이면 같은 고양이인가요')}
+    <p style="line-height:1.6;margin:0 4px 10px">기계가 확정하지 않아요. 점수는 후보 줄을 세우는 데만 쓰고, 기준 점수는 후보로 보여줄지만 정해요. 같은 고양이인지는 보호자가 골라요.</p>
+    <div style="background:var(--surface);border-radius:18px;padding:4px 8px;overflow-x:auto"><table class="cmp">
+      <tr><th>점수</th><th>판정</th><th>앱 동작</th></tr>
+      <tr><td>${ENG.TH.same.toFixed(2)} 이상</td><td>아주 닮음</td><td>후보 맨 위에 보여요</td></tr>
+      <tr><td>${ENG.TH.cand.toFixed(2)} ~ ${ENG.TH.same.toFixed(2)}</td><td>후보</td><td>순위대로 다섯 장까지 보여요</td></tr>
+      <tr><td>${ENG.TH.cand.toFixed(2)} 미만</td><td>닮음 낮음</td><td>위치 · 시간이 아주 가까울 때만 표시</td></tr></table></div>
+    <p class="notice">지금 기준: ${h(ENG.TH.src)}. 실험실에서 다른 고양이를 같다고 할 확률이 1% 이하가 되는 점수를 ‘동일’ 기준으로, 같다 · 다르다를 가장 잘 가르는 점수를 ‘후보’ 기준으로 계산해 바꿀 수 있어요.</p>
+    ${H2('팀 엔진 실험 (발표 기준)')}
+    <div class="kpis">
+      <div class="fact"><b>92.4%</b><span>등록 2장 · 1등 정답</span><small>찾는 고양이 3마리 사진 17장을 다른 고양이 26마리 29장과 섞어서</small></div>
+      <div class="fact"><b>100%</b><span>후보 5장 안</span><small>등록 2장 기준 · 3등 안 99.4%</small></div>
+      <div class="fact"><b>81 → 92%</b><span>등록 1장 → 2장</span><small>3장 90.4% · 그래서 2장 이상을 받아요</small></div>
+      <div class="fact"><b>0.7</b><span>후보 기준 점수</span><small>다른 고양이 통과 5%일 때 · 같은 고양이 85% 통과</small></div>
+    </div>
+    <p class="notice">공개 모델(고양이 · 개 69만 마리 학습) 공개 시험: 상위 5장 96.6%, 1등 85.5%. 뒷모습 사진은 19번 중 1등 0번, 3등 안 17번(89%). 어두운 사진은 아직 측정하지 않았어요(12월 본 시험). 위 숫자는 팀 엔진 기준이고, 아래는 이 앱 안의 경량 엔진을 실험실에서 잰 결과예요.</p>
+    ${H2('앱 안 경량 엔진 실험 결과')}
+    ${R?`<div class="slide">${h(slideText(R))}</div><p class="notice">${ago(R.at)} 실험실에서 측정 · 팀이 모은 사진 기준이에요.</p>`:'<div class="unc"><b>아직 측정 전이에요</b>실험실에 고양이 10마리 · 마리당 5장 이상을 넣고 실행하면 1등 정답률, 상위 5장 정답률, 동일 판정 기준, 어두운 사진 · 뒷모습 정답률, 등록 1장 → 4장 변화가 여기에 채워져요. 측정 전에는 정확도를 주장하지 않아요.</div>'}
+    ${H2('정확도가 떨어지는 패턴과 대처')}
+    <div style="background:var(--surface);border-radius:18px;padding:4px 8px;overflow-x:auto"><table class="cmp">
+      <tr><th>상황</th><th>엔진이 알아채는 기준</th><th>대처</th></tr>
+      <tr><td>어두운 사진</td><td>평균 밝기 &lt; ${T.dark}</td><td>보정 점수 사용 · 밝은 사진 1장 추가</td></tr>
+      <tr><td>역광 · 과노출</td><td>평균 밝기 &gt; ${T.bright}</td><td>그늘에서 다시 찍기</td></tr>
+      <tr><td>흐린 사진</td><td>선명도 &lt; ${T.blur}</td><td>다시 찍기</td></tr>
+      <tr><td>멀리서 작게</td><td>동물 영역 &lt; ${T.small}칸 (64칸 중)</td><td>화면 절반 이상 차게</td></tr>
+      <tr><td>단색 고양이 (검정 · 흰색)</td><td>무늬 대비 &lt; ${T.plain}</td><td>특징 부위 사진 추가 · 위치 · 시간 비중을 높임</td></tr>
+      <tr><td>등록 사진 부족</td><td>${T.regMin}장 미만 · 뒷모습 없음</td><td>뒷모습 포함 2장 이상</td></tr>
+      <tr><td>닮은 후보가 둘 이상</td><td>1 · 2위 점수 차 &lt; ${T.close}</td><td>위에서 본 등 무늬 사진 추가</td></tr></table></div>
+    <p class="notice">기준값은 엔진 설계값이에요. 실험실의 ‘어두움 · 뒷모습 · 옆모습’ 조건별 결과로 실제 영향을 확인해요.</p>
+    ${H2('등록 사진 기준: 2장 이상 · 뒷모습 포함')}
+    <div class="steps">${SLOTS.map(s=>`<div class="tip"><b>${s.t}${s.req?' (필수)':''}</b>${s.d}</div>`).join('')}</div>
+    <p class="notice">팀 실험에서 등록 사진을 1장에서 2장으로 늘리면 1등 정답이 81%에서 92%로 올랐어요. 틀린 건 뒷모습 사진이라 뒷모습을 꼭 받아요. 공통: 자연광 · 플래시 없이 · 흔들림 없이.</p>
+    ${H2('펫나우와 무엇이 다른가요')}
+    <div style="background:var(--surface);border-radius:18px;padding:4px 8px;overflow-x:auto"><table class="cmp">
+      <tr><th></th><th>펫나우</th><th>WANDER</th></tr>
+      <tr><th>누가 찍나</th><td>보호자가 미리</td><td>키우지 않는 이웃이 평소에</td></tr>
+      <tr><th>무엇을 찍나</th><td>코 · 얼굴 근접 스캔</td><td>멀리서 찍힌 전신 · 등 무늬</td></tr>
+      <tr><th>등록 안 된 아이</th><td>찾을 수 없어요</td><td>목격 기록이 있으면 찾아요</td></tr>
+      <tr><th>도망가는 고양이</th><td>근접 스캔이 어려워요</td><td>원거리 사진으로 충분해요</td></tr>
+      <tr><th>어디부터 찾나</th><td>알림 후 기다림</td><td>목격 위치 + 습성으로 반경 제시</td></tr></table></div>
+    <p class="notice">반려묘 등록률은 29.1%예요(KREI 인용 2024). 미리 등록에 기대는 방식은 고양이 열 마리 중 일곱을 놓쳐요.</p>
+    ${H2('한 달 뒤에도 찍게 하려면')}
+    <div class="tips">
+      <div class="tip"><b>쓰이면 바로 알림</b>내 사진이 수색 후보가 되면 즉시 알려요. 카드 · 스티커보다 ‘내 사진이 쓰였다’는 경험이 핵심이에요.</div>
+      <div class="tip"><b>귀가하면 감사 메시지</b>보호자가 ‘찾았어요’를 누르면 단서를 준 사람에게 감사 메시지와 귀가 도움 기록이 남아요.</div>
+      <div class="tip"><b>기여 기록</b>목격 기록 수 · 단서가 된 횟수 · 귀가 도움 횟수를 메뉴 › 내 기여에서 확인서로 보여 줘요.</div>
+      <div class="tip"><b>돈은 플랫폼 밖에서</b>보호자가 사례하고 싶으면 직접 해요. 플랫폼이 돈을 중계하면 포획 · 거래 유인이 생기기 때문이에요.</div>
+    </div>
+    <div class="unc" style="margin-top:12px"><b>심사 질문에 대비할 점</b>지역 동물병원 · 펫샵 제휴 같은 실물 보상은 아직 계획 단계예요. 확정된 제휴가 생기기 전까지는 ‘있다’고 말하지 않는 게 안전해요.</div>
+    <div style="height:16px"></div>
+  </div>`);
+  wireClose(el);$('#goCmp').onclick=openCompare;$('#goLab').onclick=openLab;
+}
+
+
+/* ---------- 위치 열람 요청 (보안) ---------- */
+async function requestExact(x,L){
+  const ex=Store.requests.find(r=>r.cardId===x.c.id&&r.from===Store.me&&r.status!=='declined');
+  if(ex){toast(ex.status==='approved'?'이미 승인됐어요. 알림에서 위치를 볼 수 있어요':'이미 요청했어요. 제보자 승인을 기다리는 중이에요');return}
+  await Store.addRequest({id:uid(),cardId:x.c.id,cardNo:x.c.no,cardName:x.c.name,lostName:L.name||'우리 아이',from:Store.me,to:x.c.by||null,status:'pending',score:x.eng?Math.round(x.eng.final*1000)/1000:null,at:Date.now()});
+  toast('제보자에게 위치 열람을 요청했어요. 승인되면 72시간 동안 정확한 위치가 보여요');
+}
+function showExact(r){
+  const layer=document.createElement('div');layer.className='sheet';layer.style.zIndex=40;document.body.appendChild(layer);
+  const left=Math.max(0,r.expires-Date.now());
+  layer.innerHTML=`${topBar(`#${pad2(r.cardNo)} ${h(r.cardName)} 위치`,'back')}<div class="gut map-note">제보자가 승인한 정확한 위치예요. ${Math.ceil(left/HOUR)}시간 뒤 다시 구역 단위로 돌아가요. 다른 사람에게 공유하지 마세요.</div><div class="map-wrap" id="exMap"></div>`;
+  const m=new WMap(layer.querySelector('#exMap'),{cx:r.exact.x,cy:r.exact.y,half:220,onTap:()=>{},onCard:()=>{}});m.set({cards:[],pick:r.exact});
+  layer.querySelector('[data-close]').onclick=()=>{m.destroy();layer.remove()};
+}
+
+/* ---------- 내 기여 ---------- */
+function myStats(){
+  const me=Store.me,mine=Store.cards.filter(c=>c.by===me||(Store.mode==='local'&&!c.sample));
+  const toMe=a=>!a.to||a.to===me;
+  const clues=Store.alerts.filter(a=>(a.type||'clue')==='clue'&&toMe(a)).length,thanks=Store.alerts.filter(a=>a.type==='thanks'&&toMe(a));
+  return{mine,seen:mine.reduce((s,c)=>s+(c.seen||1),0),clues,thanks};
+}
+function openContrib(){
+  const S=myStats();
+  const badges=[['첫 기록',S.mine.length>=1,'카드 1장'],['동네 기록가',S.mine.length>=5,'카드 5장'],['단서 제공자',S.clues>=1,'내 사진이 수색 후보로 1번'],['귀가 도우미',S.thanks.length>=1,'귀가를 1번 도움']];
+  const cert=`WANDER 기여 기록\n목격 카드 ${S.mine.length}장 · 목격 기록 ${S.seen}회\n수색 단서로 쓰인 횟수 ${S.clues}회\n귀가 도움 ${S.thanks.length}회\n${fmtDate(Date.now())} 기준`;
+  const el=openSheet(`${topBar('내 기여')}<div class="sheet-body gut">
+    <div class="kpis"><div class="fact"><b>${S.mine.length}</b><span>내가 만든 카드</span></div><div class="fact"><b>${S.seen}</b><span>목격 기록</span></div><div class="fact"><b>${S.clues}</b><span>단서로 쓰인 횟수</span></div><div class="fact"><b>${S.thanks.length}</b><span>귀가 도움</span></div></div>
+    <div class="sec-label">배지</div><div class="chips">${badges.map(([t,ok,d])=>`<span class="qq ${ok?'ok':'warn'}" style="font-size:13px;padding:6px 10px">${ok?'✓ ':''}${t} · ${d}</span>`).join('')}</div>
+    <div class="sec-label">받은 감사 메시지</div>
+    ${S.thanks.length?S.thanks.map(a=>`<div class="alert"><div><small>${ago(a.at)} · ${h(a.lostName)} 보호자</small><p>“${h(a.msg||'고마워요')}”</p></div></div>`).join(''):'<div class="tip">아직 없어요. 내 카드가 귀가에 쓰이면 보호자의 감사 메시지가 여기 모여요.</div>'}
+    <div class="sec-label">기여 확인서</div><div class="slide" id="certTxt">${h(cert)}</div>
+    <div class="mini-actions"><button class="btn soft" id="copyCert">확인서 복사</button></div>
+  </div>`);wireClose(el);
+  $('#copyCert').onclick=async()=>{try{await navigator.clipboard.writeText(cert);toast('확인서를 복사했어요')}catch(e){const r=document.createRange();r.selectNodeContents($('#certTxt'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('선택된 글을 길게 눌러 복사하세요')}};
+}
+
+/* ---------- 알림 (요청 · 승인 · 감사) ---------- */
+function openAlerts(){
+  const me=Store.me,toMe=a=>!a.to||a.to===me;
+  const incoming=Store.requests.filter(r=>r.status==='pending'&&(!r.to||r.to===me));
+  const mine=Store.requests.filter(r=>r.from===me);
+  const al=Store.alerts.filter(toMe);
+  const el=openSheet(`${topBar('알림')}<div class="sheet-body gut">
+    ${incoming.length?`<div class="sec-label">위치 열람 요청 · 승인이 필요해요</div>${incoming.map(r=>`<div class="alert"><div style="flex:1"><small>WANDER · ${ago(r.at)}</small><p>${h(r.lostName)} 보호자가 내가 찍은 #${pad2(r.cardNo)} ${h(r.cardName)}의 정확한 위치를 요청했어요${r.score!=null?` (엔진 ${r.score.toFixed(3)})`:''}</p><div class="req-actions"><button class="btn light" data-dec="${r.id}">거절</button><button class="btn ink" data-ok="${r.id}">72시간 공개 승인</button></div></div></div>`).join('')}`:''}
+    ${mine.length?`<div class="sec-label">내가 보낸 요청</div>${mine.map(r=>`<div class="alert"><div style="flex:1"><small>${ago(r.at)}</small><p>#${pad2(r.cardNo)} ${h(r.cardName)} 위치 · ${r.status==='approved'?(r.expires>Date.now()?'승인됨':'기간 끝남'):r.status==='declined'?'거절됨':'승인 기다리는 중'}</p>${r.status==='approved'&&r.expires>Date.now()?`<div class="req-actions"><button class="btn ink" data-see="${r.id}">위치 보기</button></div>`:''}</div></div>`).join('')}`:''}
+    <div class="sec-label">알림</div>
+    ${al.length?al.map(x=>x.type==='thanks'?`<div class="alert"><div><small>WANDER · ${ago(x.at)}</small><p>${h(x.lostName)}가 집에 돌아왔어요. 내가 찍은 #${pad2(x.cardNo||0)} ${h(x.cardName)} 사진이 도움이 됐어요<br>“${h(x.msg||'고마워요')}”</p></div></div>`:`<div class="alert"><div><small>WANDER · ${ago(x.at)}</small><p>내가 찍은 #${pad2(x.cardNo||0)} ${h(x.cardName)} 사진이<br>${h(x.lostName)}를 찾는 단서가 됐어요</p></div></div>`).join(''):'<div class="empty"><strong>아직 알림이 없어요</strong>내가 찍은 카드가 누군가의 수색에 쓰이면<br>여기에서 알려 드려요</div>'}
+  </div>`);wireClose(el);
+  el.querySelectorAll('[data-ok]').forEach(b=>b.onclick=async()=>{const r=Store.requests.find(x=>x.id===b.dataset.ok);const c=Store.cards.find(x=>x.id===r.cardId)||{};
+    const ex=(await Store.getExact(r.cardId))||{x:c.x||0,y:c.y||0};
+    try{await Store.updateRequest(r.id,{status:'approved',exact:ex,expires:Date.now()+72*HOUR});toast('승인했어요. 72시간 뒤 자동으로 닫혀요');openAlerts()}catch(e){toast('승인하지 못했어요. 잠시 후 다시 눌러 주세요.')}});
+  el.querySelectorAll('[data-dec]').forEach(b=>b.onclick=async()=>{try{await Store.updateRequest(b.dataset.dec,{status:'declined'});openAlerts()}catch(e){toast('처리하지 못했어요.')}});
+  el.querySelectorAll('[data-see]').forEach(b=>b.onclick=()=>showExact(Store.requests.find(x=>x.id===b.dataset.see)));
+}
+
+
+function pickPlace(init,title,done){
+  const prevHTML=$('#sheetRoot').innerHTML;
+  const layer=document.createElement('div');layer.className='sheet';layer.style.zIndex=40;
+  layer.innerHTML=`${topBar(title,'back')}<div class="gut map-note">지도를 눌러 위치를 고르세요. 정확한 위치는 나만 갖고, 다른 사람에게는 150m 구역으로만 보여요.</div><div class="map-wrap" id="pickMap"></div><div class="sheet-foot gut"><button class="btn ink wide" id="pickOk">이 구역으로 할게요</button></div>`;
+  document.body.appendChild(layer);
+  let p={x:init.x,y:init.y};
+  const m=new WMap(layer.querySelector('#pickMap'),{cx:p.x,cy:p.y,half:300,onTap:(x,y)=>{p={x,y};m.set({pick:p});layer.querySelector('#pickOk').textContent=zoneName(x,y)+'으로 할게요'},onCard:()=>{}});
+  m.set({cards:Store.cards,pick:p});
+  const close=()=>{m.destroy();layer.remove()};
+  layer.querySelector('[data-close]').onclick=close;
+  layer.querySelector('#pickOk').onclick=()=>{close();done(p)};
+}
+
+
+/* ---------- AR camera (the app opens here) ----------
+   Live camera works on a normal https site, localhost, and an iPhone home-screen web app.
+   Inside the Claude link the frame refuses the camera, so the shutter opens the phone camera instead.
+   Animal detection: COCO-SSD (TensorFlow.js) finds cats · dogs · birds in the live picture and the
+   app draws the box. Every ~2.5 s the boxed animal is compared with the dex using the patch engine. */
+const TFJS='https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js';
+const COCO='https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js';
+const DET_KO={cat:'고양이',dog:'강아지',bird:'새'};
+const Cam={stream:null,track:null,facing:'environment',state:'idle',open:true,det:null,detState:'idle',
+  box:null,cls:null,seenAt:0,match:null,matchAt:0,matching:false,torch:false};
+const CK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+function camOpen(){Cam.open=true;$('#cam').hidden=false;renderCamSide();camStart();if(Cam.det)detLoop()}
+function camClose(){Cam.open=false;$('#cam').hidden=true;camStop()}
+function camMsg(html){const m=$('#camMsg');m.hidden=!html;m.innerHTML=html||''}
+async function camStart(){
+  if(Cam.stream||Cam.state==='starting')return;
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)||!window.isSecureContext){Cam.state='unsupported';camFallback();return}
+  Cam.state='starting';
+  try{
+    const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:Cam.facing},width:{ideal:1920},height:{ideal:1080}},audio:false});
+    if(!Cam.open||document.hidden){s.getTracks().forEach(t=>t.stop());Cam.state='idle';return}
+    Cam.stream=s;Cam.track=s.getVideoTracks()[0];
+    const v=$('#camVideo');v.srcObject=s;v.hidden=false;await v.play().catch(()=>{});
+    $('#camStill').hidden=true;Cam.state='live';camMsg('');
+    let caps={};try{caps=Cam.track.getCapabilities?Cam.track.getCapabilities():{}}catch(e){}
+    $('#camTorch').hidden=!caps.torch;
+    loadDetector();
+  }catch(e){Cam.state=(e&&(e.name==='NotAllowedError'||e.name==='SecurityError'))?'denied':'error';camFallback()}
+}
+function camFallback(){
+  $('#camVideo').hidden=true;$('#camStill').hidden=false;$('#camTorch').hidden=true;
+  const inClaude=!!(window.claude&&window.claude.use);
+  $('#arHint').innerHTML=inClaude?'셔터를 누르면 휴대폰 카메라가 열려요<small>화면 안에서 바로 찍는 AR 카메라는 홈 화면 앱 버전에서 켜져요</small>'
+    :Cam.state==='denied'?'카메라 권한이 꺼져 있어요<small>설정에서 카메라를 허용하면 바로 찍을 수 있어요</small>':'셔터를 누르면 휴대폰 카메라가 열려요<small>이 브라우저에서는 카메라를 바로 켤 수 없어요</small>';
+  $('#arHint').hidden=false;
+  camMsg(!inClaude&&Cam.state==='denied'?'<button id="camRetry">카메라 다시 켜기</button>':'');
+  const r=$('#camRetry');if(r)r.onclick=()=>{Cam.state='idle';camStart()};
+}
+function camStop(){
+  if(Cam.stream){Cam.stream.getTracks().forEach(t=>t.stop());Cam.stream=null;Cam.track=null}
+  $('#camVideo').srcObject=null;if(Cam.state==='live'||Cam.state==='starting')Cam.state='idle';
+  Cam.torch=false;$('#camTorch').setAttribute('aria-pressed','false');
+}
+function loadScript(src){return new Promise((res,rej)=>{if([...document.scripts].some(s=>s.src===src))return res();const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+async function loadDetector(){
+  if(Cam.det){detLoop();return}
+  if(Cam.detState==='loading'||Cam.detState==='failed')return;
+  Cam.detState='loading';
+  try{
+    if(!window.cocoSsd){await loadScript(TFJS);await loadScript(COCO)}
+    Cam.det=await window.cocoSsd.load({base:'lite_mobilenet_v2'});Cam.detState='ready';detLoop();
+  }catch(e){Cam.detState='failed';$('#arHint').innerHTML='가운데 칸에 동물을 맞춰 찍어 주세요<small>자동 인식을 불러오지 못했어요 · 촬영과 카드 만들기는 그대로 돼요</small>'}
+}
+let detBusy=false,detTimer=0;
+function detLoop(){
+  clearTimeout(detTimer);
+  detTimer=setTimeout(async()=>{
+    if(!Cam.open)return;                                  // camera screen closed: stop until camOpen
+    if(Cam.state!=='live'||!Cam.det){detLoop();return}  // camera restarting or model loading: keep waiting
+    const v=$('#camVideo');
+    if(v.readyState>=2&&!detBusy){
+      detBusy=true;
+      try{
+        const preds=await Cam.det.detect(v,6,.42);
+        const hit=preds.filter(p=>DET_KO[p.class]).sort((a,b)=>b.score*b.bbox[2]*b.bbox[3]-a.score*a.bbox[2]*a.bbox[3])[0];
+        if(hit){Cam.box=hit.bbox;Cam.cls=hit.class;Cam.seenAt=Date.now();arMatch()}
+      }catch(e){}
+      detBusy=false;
+    }
+    arDraw();detLoop();
+  },180);
+}
+/* video pixels -> screen pixels for object-fit: cover */
+function toScreen(b){
+  const v=$('#camVideo'),W=innerWidth,H=innerHeight,vw=v.videoWidth||W,vh=v.videoHeight||H,k=Math.max(W/vw,H/vh),ox=(W-vw*k)/2,oy=(H-vh*k)/2;
+  return{x:b[0]*k+ox,y:b[1]*k+oy,w:b[2]*k,h:b[3]*k};
+}
+function arDraw(){
+  const box=$('#arBox'),lab=$('#arLabel'),hint=$('#arHint');
+  const live=Cam.box&&Date.now()-Cam.seenAt<900;
+  if(!live){Cam.match=null;box.classList.add('guide');Object.assign(box.style,{left:'15%',top:'24%',width:'70%',height:'44%'});lab.hidden=true;if(Cam.detState!=='failed')hint.hidden=false;return}
+  const r=toScreen(Cam.box),pad=10;
+  box.classList.remove('guide');
+  Object.assign(box.style,{left:(r.x-pad)+'px',top:(r.y-pad)+'px',width:(r.w+pad*2)+'px',height:(r.h+pad*2)+'px'});
+  hint.hidden=true;
+  const m=Cam.match&&Store.cards.find(c=>c.id===Cam.match.id);
+  lab.innerHTML=m?`<span class="ck">${CK}</span>${h(m.name)} 같아요 <small>Lv.${m.seen||1}</small>`:`<span class="ck">${CK}</span>${DET_KO[Cam.cls]||'동물'}가 보여요`;
+  lab.hidden=false;
+  const lx=Math.max(12,Math.min(innerWidth-lab.offsetWidth-12,r.x-pad)),ly=Math.max(90,r.y-pad-48);
+  lab.style.left=lx+'px';lab.style.top=ly+'px';
+}
+/* crop what is inside the AR box (padded, square) from the live frame */
+function grabCrop(size=520,pad=.14){
+  const v=$('#camVideo'),vw=v.videoWidth,vh=v.videoHeight;if(!vw)return null;
+  let sx,sy,s;
+  if(Cam.box&&Date.now()-Cam.seenAt<900){const [x,y,w,hh]=Cam.box;s=Math.min(Math.max(w,hh)*(1+pad*2),Math.min(vw,vh));sx=x+w/2-s/2;sy=y+hh/2-s/2}
+  else{ // what the guide frame shows
+    const W=innerWidth,H=innerHeight,k=Math.max(W/vw,H/vh),ox=(W-vw*k)/2,oy=(H-vh*k)/2;
+    const gw=W*.7,gh=H*.44,cx=W/2,cy=H*.24+gh/2;s=Math.min(Math.max(gw,gh)/k,Math.min(vw,vh));sx=(cx-ox)/k-s/2;sy=(cy-oy)/k-s/2}
+  sx=Math.max(0,Math.min(vw-s,sx));sy=Math.max(0,Math.min(vh-s,sy));
+  const c=document.createElement('canvas');c.width=c.height=size;c.getContext('2d').drawImage(v,sx,sy,s,s,0,0,size,size);return c;
+}
+async function arMatch(){
+  if(Cam.matching||Date.now()-Cam.matchAt<2500)return;
+  const pool=Store.cards.filter(c=>c.photo&&(!Cam.cls||c.species===({cat:'cat',dog:'dog',bird:'bird'}[Cam.cls]||c.species)));
+  if(!pool.length)return;
+  Cam.matching=true;Cam.matchAt=Date.now();
+  try{
+    const c=grabCrop(256,.1);if(!c)return;
+    const Q=await engPrep(c.toDataURL('image/jpeg',.8));let best=null;
+    for(const card of pool){const B=await engPrep(card.photo);const s=engPairScore(Q,B).score;if(!best||s>best.s)best={id:card.id,s}}
+    Cam.match=best&&best.s>=ENG.TH.cand?{id:best.id,score:best.s}:null;
+  }catch(e){}finally{Cam.matching=false}
+}
+function renderCamSide(){
+  $('#camCount').textContent=Store.cards.length;
+  const last=Store.cards.slice().sort((a,b)=>(b.lastSeen||0)-(a.lastSeen||0))[0];
+  if(last&&last.photo)$('#albumThumb').innerHTML=`<img src="${last.photo}" alt="">`;
+}
+async function camShot(){
+  if(Cam.state!=='live')return $('#camInput').click();
+  const c=grabCrop(560);if(!c)return $('#camInput').click();
+  const f=$('#camFlash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),70);
+  const hint={match:Cam.match,cls:Cam.cls&&Date.now()-Cam.seenAt<900?Cam.cls:null};
+  const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.9));
+  camClose();
+  if(b)startCreate(new File([b],'wander.jpg',{type:'image/jpeg'}),hint);
+}
+$('#shutter').onclick=camShot;
+$('#camClose').onclick=()=>{camClose();show(current==='camera'?'home':current)};
+$('#camAlbum').onclick=()=>$('#albumInput').click();
+$('#camDex').onclick=()=>{camClose();show('dex')};
+$('#fabCam').onclick=camOpen;
+$('#camTorch').onclick=async()=>{if(!Cam.track)return;Cam.torch=!Cam.torch;try{await Cam.track.applyConstraints({advanced:[{torch:Cam.torch}]});$('#camTorch').setAttribute('aria-pressed',Cam.torch)}catch(e){Cam.torch=false;$('#camTorch').hidden=true}};
+['#camInput','#albumInput'].forEach(s=>$(s).addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f){camClose();startCreate(f,{})}}));
+document.addEventListener('visibilitychange',()=>{if(document.hidden)camStop();else if(Cam.open)camStart()});
+addEventListener('resize',()=>{if(Cam.open)arDraw()});
+
+/* ---------- views ---------- */
+let current='home',dexF='all',mainMap=null;
+function show(v){
+  current=v;document.querySelectorAll('.view').forEach(e=>e.hidden=e.id!=='v-'+v);
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.v===v));
+  if(v==='map'){if(!mainMap)mainMap=new WMap($('#mainMap'),{onCard:id=>mapPopup(id),onTap:()=>mapPopup(null)});mainMap.set({cards:Store.cards})}
+  if(v==='find')renderFind();
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>show(t.dataset.v));
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)show(g.dataset.go)});
+
+const imgOrArt=c=>c.photo?`<img src="${c.photo}" alt="${h(c.name)}" loading="lazy">`:art(c.coat,c.species);
+function miniCard(c){
+  const r=rarity(c),R=RARITY[r];
+  return `<button class="mcard r-${r}" data-card="${h(c.id)}">${isNew(c)?'<span class="new-badge">NEW</span>':''}<div class="ph">${imgOrArt(c)}</div><b><span class="rglyph">${R.g}</span>${h(c.name)}</b><small>Lv.${c.seen||1} · ${R.label}</small></button>`;
+}
+function bigCard(c,opt={}){
+  const r=opt.r||rarity(c),R=RARITY[r];
+  return `<div class="wcard r-${r}" ${opt.id?`id="${opt.id}"`:''}><div class="shine"></div>
+    <div class="hd"><b><span class="rglyph">${R.g}</span><span>${h(c.name||'이름 없음')}</span></b><span class="lv">Lv.<b>${c.seen||1}</b></span></div>
+    <div class="pic">${imgOrArt(c)}${r==='clue'?'<span class="clue-badge">단서가 된 카드</span>':''}</div>
+    <div class="meta"><span>처음 만난 날</span><b>${fmtDT(c.createdAt||Date.now())}</b>
+      <span>구역</span><b><i class="zone-ic"></i>${ZONE}</b>
+      <span>생김새</span><b>${(c.traits&&c.traits.length?c.traits:COATS[c.coat].traits).slice(0,3).map(t=>`<span class="tag">${h(t)}</span>`).join('')}</b></div>
+    <div class="ft"><span><span class="rglyph">${R.g}</span>${R.label} · No.${String(c.no||0).padStart(3,'0')}</span><small>WANDER</small></div></div>`;
+}
+function bindCards(root){root.querySelectorAll('[data-card]').forEach(b=>b.onclick=()=>openDetail(b.dataset.card))}
+function tilt(el){
+  if(!el)return;
+  const move=e=>{const r=el.getBoundingClientRect(),px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/r.height;
+    el.style.transform=`perspective(900px) rotateY(${(px-.5)*16}deg) rotateX(${(.5-py)*14}deg)`;el.style.setProperty('--gx',px*100+'%');el.style.setProperty('--gy',py*100+'%');el.classList.add('tilting')};
+  const reset=()=>{el.style.transform='';el.classList.remove('tilting')};
+  el.addEventListener('pointermove',move);el.addEventListener('pointerdown',move);el.addEventListener('pointerleave',reset);el.addEventListener('pointerup',()=>setTimeout(reset,350));el.addEventListener('pointercancel',reset);
+}
+
+function renderHome(){
+  const cards=Store.cards,n=cards.length,slots=Math.max(DEX_SLOTS,n);
+  $('#homeTitle').innerHTML=`${NB}에서 <em>${n}마리</em>를<br>알아봤어요`;
+  $('#homeSub').textContent=slots-n>0?`빈칸 ${slots-n}개가 남았어요`:'도감을 다 채웠어요';
+  $('#homeDexTitle').textContent=NB+' 도감';$('#homeProg').style.width=Math.round(n/slots*100)+'%';
+  const byNo=cards.slice().sort((a,b)=>(b.lastSeen||0)-(a.lastSeen||0));
+  $('#homeStrip').innerHTML=byNo.slice(0,4).map(c=>`<button class="t" data-card="${h(c.id)}" style="background:${COATS[c.coat].bg}">${imgOrArt(c)}</button>`).join('')+'<button class="t q" data-go="find" aria-label="빈칸">?</button>';
+  const rec=byNo.slice(0,3);$('#recentMore').textContent=rec.length+'장 ›';
+  $('#homeRecent').innerHTML=rec.length?rec.map(miniCard).join(''):'<p class="notice" style="grid-column:1/-1">아직 만난 친구가 없어요. 가운데 카메라로 찍어 보세요.</p>';
+  bindCards($('#v-home'));
+  const me=Store.me,nA=Store.alerts.filter(a=>!a.to||a.to===me).length,pend=Store.requests.filter(r=>r.status==='pending'&&(!r.to||r.to===me)).length;
+  $('#bellBadge').hidden=!(nA+pend);$('#bellBadge').textContent=nA+pend;
+}
+function renderDex(){
+  const cards=Store.cards,n=cards.length,slots=Math.max(DEX_SLOTS,n);
+  $('#dexZone').textContent=ZONE;$('#dexTitle').textContent=NB+' 도감';
+  $('#dexSub').innerHTML=`${slots}칸 중 <b class="hl">${n}칸</b> 채웠어요`;$('#dexProg').style.width=Math.round(n/slots*100)+'%';
+  const F=[['all','전체'],['rare','레어 이상'],['recent','최근 만남']];
+  $('#dexFilter').innerHTML=F.map(([k,l])=>`<button class="chip" aria-pressed="${dexF===k}" data-f="${k}">${l}</button>`).join('');
+  $('#dexFilter').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{dexF=b.dataset.f;renderDex()});
+  let list=cards.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(dexF==='rare')list=list.filter(c=>rarity(c)!=='normal');
+  if(dexF==='recent')list=list.filter(c=>Date.now()-(c.lastSeen||0)<3*DAY).sort((a,b)=>b.lastSeen-a.lastSeen);
+  const g=$('#dexGrid');
+  if(Store.mode==='loading'){g.innerHTML='<div class="empty"><strong>도감을 불러오는 중이에요</strong></div>';return}
+  const empties=dexF==='all'?Math.max(0,slots-list.length):0;
+  g.innerHTML=list.length||empties?`<div class="dex-grid">${list.map(miniCard).join('')}${Array.from({length:empties},()=>'<div class="slot-empty">?</div>').join('')}</div>`:'<div class="empty"><strong>아직 없어요</strong>자주 만날수록 레벨이 올라 레어 카드가 돼요</div>';
+  bindCards(g);
+  $('#modeNote').textContent=Store.mode==='db'?'카드는 이 앱을 함께 쓰는 사람들과 공유돼요':'카드는 이 휴대폰에 저장돼요';
+}
+function mapPopup(id){
+  const slot=$('#mainMap .pop-slot'),c=Store.cards.find(x=>x.id===id);
+  if(!c){slot.innerHTML='';return}
+  slot.innerHTML=`<button class="popup" data-card="${h(c.id)}">${c.photo?`<img src="${c.photo}" alt="">`:''}<div><span>No.${String(c.no).padStart(3,'0')} · Lv.${c.seen||1} · ${RARITY[rarity(c)].label}</span><b>${h(c.name)}</b><span>${h(zoneName(c.x,c.y))} · 150m 구역 · ${ago(c.lastSeen||c.createdAt)}</span></div></button>`;
+  bindCards(slot);
+}
+Store.sub(()=>{renderHome();renderDex();renderCamSide();if(current==='map'&&mainMap)mainMap.set({cards:Store.cards})});
+
+/* ---------- location: real GPS where allowed, private; public card keeps a 150m zone ---------- */
+function getHere(){
+  return new Promise(res=>{
+    if(!navigator.geolocation)return res(null);
+    const to=setTimeout(()=>res(null),6000);
+    try{navigator.geolocation.getCurrentPosition(p=>{clearTimeout(to);
+      let o=lsGet('wander2.origin',null);if(!o){o={lat:p.coords.latitude,lng:p.coords.longitude};lsSet('wander2.origin',o)}
+      const x=(p.coords.longitude-o.lng)*111320*Math.cos(o.lat*Math.PI/180),y=-(p.coords.latitude-o.lat)*110540;
+      res({x,y,acc:p.coords.accuracy})},()=>{clearTimeout(to);res(null)},{enableHighAccuracy:true,timeout:5500,maximumAge:60000})}catch(e){clearTimeout(to);res(null)}
+  });
+}
+
+/* ---------- capture -> card ---------- */
+async function startCreate(file,hint){
+  const url=URL.createObjectURL(file);
+  const el=openSheet(`${topBar('카드 만드는 중')}<div class="sheet-body gut"><div class="scan" id="scanBox"><img src="${url}" alt=""></div><p class="sub" style="text-align:center;font-weight:700;color:var(--ink)" id="scanTxt">생김새를 읽고 있어요</p><p class="notice" style="text-align:center">시간 · 구역 · 생김새를 카드에 담는 중</p></div>`);
+  wireClose(el);
+  const herePromise=getHere();
+  let res;try{res=await readPhoto(file)}catch(err){URL.revokeObjectURL(url);closeSheet();toast('사진을 열 수 없어요. 다시 찍어 주세요.');return}
+  const d={id:uid(),no:Store.nextNo(),species:hint&&hint.cls?({cat:'cat',dog:'dog',bird:'bird'}[hint.cls]):'cat',coat:guessCoat(res.avg),photo:res.photo,traits:[],
+    seen:1,createdAt:Date.now(),lastSeen:Date.now(),known:null,matchScore:null,aiUsed:false};
+  // 1) Claude vision when this view may use it (the Claude link)
+  let ai=null;
+  if(AI.ready()){try{ai=await aiRecognize(res.photo,Store.cards.filter(c=>c.photo).slice(0,4))}catch(e){AI.fail(e)}}
+  if(ai){d.aiUsed=true;d.species=ai.species;if(ai.coat)d.coat=ai.coat;d.name=ai.name;d.breed=ai.breed;if(ai.known)d.known=ai.known}
+  // 2) the patch engine always: is this someone already in the dex?
+  try{
+    const Q=await engPrep(res.photo);let best=null;
+    for(const c of Store.cards.filter(c=>c.photo&&c.species===d.species)){const s=engPairScore(Q,await engPrep(c.photo)).score;if(!best||s>best.s)best={id:c.id,s}}
+    if(hint&&hint.match&&(!best||hint.match.score>best.s))best={id:hint.match.id,s:hint.match.score};
+    if(best&&best.s>=ENG.TH.cand){d.suggest=best;if(!d.known&&best.s>=ENG.TH.same)d.known=best.id}
+  }catch(e){}
+  const here=await herePromise;
+  if(here){d.x=here.x;d.y=here.y;d.gps=true}else{const L=LANDMARKS[Math.floor(Math.random()*LANDMARKS.length)];d.x=L.x+Math.random()*80-40;d.y=L.y+Math.random()*80-40}
+  d.traits=COATS[d.coat].traits.slice();
+  if(!d.name)d.name=COATS[d.coat].names[Math.floor(Math.random()*COATS[d.coat].names.length)];
+  URL.revokeObjectURL(url);
+  if(!$('#sheetRoot .sheet'))return;
+  const k=d.known&&Store.cards.find(c=>c.id===d.known);
+  $('#scanBox').classList.add('done');
+  $('#scanBox').insertAdjacentHTML('afterbegin',`<span class="scan-label">${k?`${h(k.name)} 같아요 · Lv.${(k.seen||1)+1}`:`새 친구 · ${SPECIES[d.species]}`}</span>`);
+  $('#scanTxt').textContent=k?'도감에 있는 친구와 닮았어요':'새 카드가 준비됐어요';
+  await new Promise(r=>setTimeout(r,800));
+  if($('#sheetRoot .sheet'))editCard(d);
+}
+function editCard(d){
+  const el=openSheet(`${topBar('새 카드')}<div class="sheet-body gut">
+    <div id="cardPrev" style="max-width:330px;margin:0 auto"></div>
+    <p class="notice" id="aiNote" style="text-align:center"></p>
+    <div class="field" id="knownField"><span class="lab">또 만난 친구인가요?</span><div class="chips" id="cKnown"></div></div>
+    <div class="field"><label for="cName">이름</label><input class="txt" id="cName" maxlength="12" autocomplete="off"></div>
+    <div class="field"><span class="lab">생김새 (3개까지)</span><div class="chips" id="cTraits"></div></div>
+    <div class="field"><span class="lab">어떤 동물인가요</span><div class="chips" id="cSpecies"></div></div>
+    <div class="field"><span class="lab">구역</span><div class="tip" style="font-size:13px"><b>${ZONE}</b>${d.gps?'지금 위치로 기록했어요. 다른 사람에게는 150m 구역으로만 보여요.':'위치를 쓸 수 없어 동네 안 구역으로 기록했어요. 공개는 150m 구역 단위예요.'}</div></div>
+  </div><div class="foot gut"><div class="row2"><button class="btn light" id="retake">다시 찍기</button><button class="btn primary" id="saveCard">카드 저장</button></div></div>`);
+  wireClose(el);
+  const paint=()=>{
+    const k=d.known&&Store.cards.find(c=>c.id===d.known);
+    const view=k?{...k,photo:d.photo,seen:(k.seen||1)+1,traits:d.traits.length?d.traits:k.traits}:{...d};
+    $('#cardPrev').innerHTML=bigCard(view,{id:'prevCard'});tilt($('#prevCard'));
+    $('#aiNote').innerHTML=d.aiUsed?'Claude가 사진을 보고 종 · 무늬 · 이름을 채웠어요. 틀린 건 고쳐 주세요.':d.suggest?`식별 엔진이 도감 속 친구와 닮았다고 봤어요 (점수 ${d.suggest.s.toFixed(2)}). 맞는지 골라 주세요.`:'';
+    const cands=Store.cards.filter(c=>c.id===d.known||c.id===(d.suggest&&d.suggest.id)||(c.species===d.species&&(c.coat===d.coat||(NEAR[d.coat]||[]).includes(c.coat)))).slice(0,6);
+    $('#knownField').hidden=!cands.length;
+    $('#cKnown').innerHTML=`<button class="chip" aria-pressed="${!d.known}" data-k="">새 친구예요</button>`+cands.map(c=>`<button class="chip" aria-pressed="${d.known===c.id}" data-k="${h(c.id)}">${h(c.name)}${d.suggest&&d.suggest.id===c.id?' · 닮음':''}</button>`).join('');
+    $('#cKnown').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{d.known=b.dataset.k||null;syncName();paint()});
+    $('#cTraits').innerHTML=TRAITS.map(t=>`<button class="chip" aria-pressed="${d.traits.includes(t)}" data-t="${t}">${t}</button>`).join('');
+    $('#cTraits').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const t=b.dataset.t;d.traits=d.traits.includes(t)?d.traits.filter(x=>x!==t):[...d.traits,t].slice(-3);paint()});
+    $('#cSpecies').innerHTML=Object.entries(SPECIES).map(([k2,l])=>`<button class="chip" aria-pressed="${d.species===k2}" data-s="${k2}">${l}</button>`).join('');
+    $('#cSpecies').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{d.species=b.dataset.s;paint()});
+  };
+  const syncName=()=>{const k=d.known&&Store.cards.find(c=>c.id===d.known);$('#cName').value=k?k.name:d.name;$('#cName').disabled=!!k};
+  $('#cName').oninput=e=>{d.name=e.target.value;if(!d.known)paint()};
+  syncName();paint();
+  $('#retake').onclick=()=>{closeSheet();camOpen()};
+  $('#saveCard').onclick=async()=>{
+    const btn=$('#saveCard');btn.disabled=true;btn.textContent='저장 중…';
+    try{
+      let saved;
+      if(d.known){const k=Store.cards.find(c=>c.id===d.known),seen=(k.seen||1)+1,traits=d.traits.length?d.traits:(k.traits||[]);
+        saved={...k,seen,photo:d.photo,traits,lastSeen:Date.now()};
+        await Store.saveExact(k.id,d);
+        await Store.update(k.id,{seen,lastSeen:saved.lastSeen,photo:d.photo,x:snap(d.x),y:snap(d.y),traits});revealCard(saved,'level')}
+      else{const name=(d.name||'').trim()||COATS[d.coat].names[0];
+        saved={id:d.id,no:Store.nextNo(),name,species:d.species,coat:d.coat,traits:d.traits,photo:d.photo,x:snap(d.x),y:snap(d.y),by:Store.me,seen:1,createdAt:d.createdAt,lastSeen:d.lastSeen};
+        await Store.saveExact(saved.id,d);await Store.add(saved);revealCard(saved,'new')}
+    }catch(err){btn.disabled=false;btn.textContent='카드 저장';toast('저장하지 못했어요. 잠시 후 다시 눌러 주세요.');if(err&&err.code==='not_granted')Store.useLocal()}
+  };
+}
+function revealCard(c,kind){
+  const r=rarity(c),up=kind==='level';
+  const el=openSheet(`<div class="sheet-body gut" style="display:flex;flex-direction:column;justify-content:center">
+    <div class="done-hero"><h2>${up?`${h(c.name)} Lv.${c.seen}`:'도감에 새 칸이 채워졌어요'}</h2><p>${up?(r!=='normal'?`자주 만나서 ${RARITY[r].label} 카드가 됐어요`:'또 만났어요. 자주 만날수록 레벨이 올라요'):`${ZONE}에서 ${Store.cards.length}번째로 알아본 친구예요`}</p></div>
+    <div class="reveal-wrap" style="position:relative;margin-top:18px">${bigCard(c,{id:'revCard'})}<div class="sparkle"></div></div>
+  </div><div class="foot gut"><div class="row2"><button class="btn light" id="moreShot">계속 찍기</button><button class="btn primary" id="toDex">도감에서 보기</button></div></div>`);
+  setTimeout(()=>tilt($('#revCard')),900);
+  $('#moreShot').onclick=()=>{closeSheet();camOpen()};
+  $('#toDex').onclick=()=>{closeSheet();show('dex')};
+}
+
+/* ---------- card detail ---------- */
+function openDetail(id){
+  const c=Store.cards.find(x=>x.id===id);if(!c)return;
+  const el=openSheet(`${topBar(RARITY[rarity(c)].label+' · No.'+String(c.no).padStart(3,'0'))}<div class="sheet-body gut">
+    <div style="max-width:340px;margin:0 auto">${bigCard(c,{id:'dCard'})}</div>
+    <div class="list"><div class="lrow"><div><b>마지막 만난 날</b><span>${fmtDT(c.lastSeen||c.createdAt)} · ${ago(c.lastSeen||c.createdAt)}</span></div></div>
+      <div class="lrow"><div><b>만난 횟수</b><span>${c.seen||1}번 · ${c.seen>=4?'스페셜':c.seen>=2?'레어':'한 번 더 만나면 레어'}</span></div></div>
+      ${c.helped?`<div class="lrow"><div><b>단서가 된 카드</b><span>${c.realName?`진짜 이름은 ${h(c.realName)} · `:''}보호자 귀가에 쓰였어요</span></div></div>`:''}</div>
+    <div id="delSlot"></div>
+  </div><div class="foot gut"><div class="row2"><button class="btn light" id="dMap">동네에서 보기</button><button class="btn primary" id="dAgain">또 만났어요</button></div></div>`);
+  wireClose(el);tilt($('#dCard'));
+  const delSlot=$('#delSlot');
+  const showDel=()=>{delSlot.innerHTML='<button class="btn soft wide" style="margin-top:12px" id="dDel">카드 지우기</button>';$('#dDel').onclick=()=>{delSlot.innerHTML=`<div class="confirm"><b>${h(c.name)} 카드를 지울까요?</b><span class="notice" style="padding:0">지우면 되돌릴 수 없어요.</span><div class="actions"><button class="btn light" id="dNo">그대로 두기</button><button class="btn primary" id="dYes">지우기</button></div></div>`;$('#dNo').onclick=showDel;$('#dYes').onclick=async()=>{try{await Store.remove(c.id);closeSheet();toast('카드를 지웠어요')}catch(e){toast('지우지 못했어요.')}}}};
+  showDel();
+  $('#dMap').onclick=()=>{closeSheet();show('map');mainMap.center(snap(c.x),snap(c.y),260);mapPopup(c.id)};
+  $('#dAgain').onclick=()=>{closeSheet();camOpen()};
+}
+
+/* ---------- 찾기 (lost pet) — follows the film: 등록 → 챗봇 → 먼저 찾을 구역 + 닮은 기록 5장 → 단서 카드 ---------- */
+let F=null;
+const newFind=()=>({stage:'register',name:'',photos:{},traits:[],since:null,answers:{},species:'cat',coat:'cheese',pick:null,R:null});
+const QS=[
+  {k:'outdoor',q:'평소에 밖에 나간 적 있나요?',a:[['in','실내에서만'],['out','가끔 외출']]},
+  {k:'last',q:'마지막으로 본 곳은요?',a:[['home','집 앞'],['map','지도에서 고르기']]},
+  {k:'how',q:'언제, 어떻게 나갔나요?',a:[['door','문이 열려서'],['window','창문 · 방충망'],['walk','산책 중'],['unknown','모르겠어요']]},
+  {k:'temper',q:'낯선 사람을 보면 어떤가요?',a:[['shy','숨어요'],['social','다가와요'],['unknown','잘 몰라요']]}];
+const SINCE=[[0,'오늘부터'],[1,'어제부터'],[3,'2~3일 전부터'],[7,'일주일 넘게']];
+function lostOf(F){
+  const ph=SLOTS.map(s=>F.photos[s.k]).filter(Boolean);
+  return{name:F.name||'우리 아이',photos:ph,species:F.species,coat:F.coat,traits:F.traits,outdoor:F.answers.outdoor==='out',
+    last:F.answers.last==='map'&&F.lastPt?F.lastPt:{x:0,y:0,label:'집 앞'},when:(F.since&&F.since[0])||0,how:F.answers.how,temper:F.answers.temper};
+}
+function renderFind(){
+  if(!F)F=lsGet('wander2.find',null)||newFind();
+  const v=$('#v-find');
+  const save=()=>lsSet('wander2.find',{...F,R:null});
+  const top=(title,back)=>`<div class="sheet-top" style="padding-top:10px"><button class="icon-btn" id="fBack" aria-label="${back?'뒤로':'처음부터'}">${back?ICON.back:ICON.close}</button><b>${h(title)}</b><span></span></div>`;
+  const profile=()=>{const p=SLOTS.map(s=>F.photos[s.k]).find(Boolean);return `<div class="profile">${p?`<img src="${p.photo}" alt="">`:'<span class="noimg"></span>'}<div><b>${h(F.name||'우리 아이')}</b><span>${h([...(F.traits.length?F.traits:COATS[F.coat].traits)].slice(0,2).join(' · '))} · ${NB}</span></div>${F.since?`<span class="pill-pink">${h(F.since[1])} 못 봤어요</span>`:''}</div>`};
+  if(F.stage==='register'){
+    const n=Object.keys(F.photos).length,hasBack=!!F.photos.back,ok=n>=2&&hasBack&&F.since;
+    v.innerHTML=`${top('잃어버린 아이 등록',false)}
+      <h1 class="title" style="font-size:22px">집에서 찍은 사진을 올려 주세요</h1>
+      <p class="sub">2장 이상, 뒷모습은 꼭 넣어 주세요. 길에서 찍힌 사진은 뒷모습이 많아요.</p>
+      <div class="photo-slots" style="margin-top:14px">${SLOTS.map(s=>{const p=F.photos[s.k];return `<button class="pslot${s.req&&!p?' req':''}" data-slot="${s.k}">${p?`<img src="${p.photo}" alt="${s.t}">${p.badge||''}`:`<b style="font-size:20px">+</b>${s.t}${s.req?' · 필수':''}`}</button>`}).join('')}</div>
+      <div class="field"><label for="fName">이름</label><input class="txt" id="fName" maxlength="10" placeholder="예: 콩이" value="${h(F.name)}" autocomplete="off"></div>
+      <div class="field"><span class="lab">어떤 동물인가요</span><div class="chips" id="fSp">${[['cat','고양이'],['dog','강아지']].map(([k,l])=>`<button class="chip ans" aria-pressed="${F.species===k}" data-sp="${k}">${l}</button>`).join('')}</div></div>
+      <div class="field"><span class="lab">생김새 (3개까지)</span><div class="chips" id="fTr">${TRAITS.map(t=>`<button class="chip ans" aria-pressed="${F.traits.includes(t)}" data-t="${t}">${t}</button>`).join('')}</div></div>
+      <div class="field"><span class="lab">언제부터 못 봤나요</span><div class="chips" id="fSince">${SINCE.map(s=>`<button class="chip ans" aria-pressed="${!!F.since&&F.since[0]===s[0]}" data-s="${s[0]}">${s[1]}</button>`).join('')}</div></div>
+      <div class="foot" style="position:sticky;bottom:0;margin-top:18px"><div class="note">${ok?'찾기는 무료예요':!hasBack?'뒷모습 사진이 필요해요':n<2?'사진을 2장 이상 넣어 주세요':'못 본 날을 골라 주세요'}</div><button class="btn primary wide" id="fNext" ${ok?'':'disabled'}>다음</button></div>`;
+    $('#fBack').onclick=()=>{F=newFind();save();renderFind()};
+    $('#fName').oninput=e=>{F.name=e.target.value.trim();save()};
+    v.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{F.species=b.dataset.sp;save();renderFind()});
+    v.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const t=b.dataset.t;F.traits=F.traits.includes(t)?F.traits.filter(x=>x!==t):[...F.traits,t].slice(-3);save();renderFind()});
+    v.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{F.since=SINCE.find(s=>String(s[0])===b.dataset.s);save();renderFind()});
+    v.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+      inp.onchange=async()=>{const f=inp.files[0];if(!f)return;try{const r=await readPhoto(f,480);const Q=await engPrep(r.photo);const qb=qualityBadges(Q).replace(/class="qq /g,'class="qb qq ');
+        F.photos[b.dataset.slot]={photo:r.photo,avg:r.avg,slot:b.dataset.slot,label:SLOTS.find(s=>s.k===b.dataset.slot).t,badge:qb};
+        if(Object.keys(F.photos).length===1){F.coat=guessCoat(r.avg);if(!F.traits.length)F.traits=COATS[F.coat].traits.slice()}
+        save();renderFind()}catch(e){toast('사진을 열 수 없어요. 다른 사진을 골라 주세요.')}};inp.click()});
+    $('#fNext').onclick=()=>{F.stage='chat';save();renderFind()};
+    return;
+  }
+  if(F.stage==='chat'){
+    const shown=[];for(const q of QS){shown.push(q);if(!F.answers[q.k])break}
+    const done=QS.every(q=>F.answers[q.k]);
+    v.innerHTML=`${top((F.name||'우리 아이')+' 찾기',true)}${profile()}
+      <div class="msgs">${shown.map(q=>`<div class="q"><span class="w">W</span><div class="bub">${q.q}</div></div><div class="ansrow">${q.a.map(([k,l])=>`<button class="chip ans" aria-pressed="${F.answers[q.k]===k}" data-q="${q.k}" data-a="${k}">${l}${q.k==='last'&&k==='map'&&F.lastPt&&F.answers.last==='map'?' ✓':''}</button>`).join('')}</div>`).join('')}</div>
+      <div style="height:90px"></div>
+      <div class="foot" style="position:sticky;bottom:0"><div class="note">찾기는 무료예요</div><button class="btn primary wide" id="fGo" ${done?'':'disabled'}>구역과 닮은 기록 보기</button></div>`;
+    $('#fBack').onclick=()=>{F.stage='register';save();renderFind()};
+    v.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{
+      const k=b.dataset.q,a=b.dataset.a;
+      if(k==='last'&&a==='map'){pickPlace({x:0,y:0},'마지막으로 본 곳',p=>{F.lastPt={x:p.x,y:p.y,label:zoneName(p.x,p.y)};F.answers.last='map';save();renderFind()});return}
+      F.answers[k]=a;save();renderFind();requestAnimationFrame(()=>v.scrollTop=v.scrollHeight)});
+    $('#fGo').onclick=async()=>{const b=$('#fGo');b.disabled=true;b.textContent='닮은 기록을 비교하는 중…';
+      const L=lostOf(F);F.R=await analyzeEngine(L,(i,n)=>{b.textContent=`닮은 기록 비교 중 ${i}/${n}`});F.stage='result';F.pick=null;renderFind()};
+    return;
+  }
+  if(F.stage==='result'){
+    if(!F.R){v.innerHTML='<p class="notice" style="padding-top:40px;text-align:center">다시 비교하는 중…</p>';analyzeEngine(lostOf(F)).then(R=>{F.R=R;renderFind()});return}
+    const R=F.R,L=lostOf(F),km=R.r>=1000?(R.r/1000).toFixed(1)+'km':R.r+'m';
+    v.innerHTML=`${top((F.name||'우리 아이')+' 찾기',true)}
+      <h1 class="title" style="font-size:22px;margin-top:0">먼저 찾을 구역이에요</h1>
+      <div class="zone-map" style="margin-top:12px">${zoneSVG(R)}<span class="zm-label" style="left:10px">집 앞에서 <span class="hl">${km}</span> 안</span>${R.cands.length?'<span class="zm-label" style="left:46%;color:var(--pink)">닮은 기록이 찍힌 구역</span>':''}</div>
+      <p class="notice">${L.species==='cat'?(L.outdoor?'외출하던 고양이':'실내에서만 산 고양이')+'의 75%가 이 거리 안에서 발견됐어요 · Huang 외 2018':'강아지는 넓게 1.6km부터 봐요'}</p>
+      <div class="sec">이웃이 찍은 닮은 기록 <small>${R.cands.length}장</small></div>
+      ${R.cands.length?R.cands.map((x,i)=>`<div class="cand-block"><button class="cand-row" aria-pressed="${F.pick===x.c.id}" data-pick="${h(x.c.id)}"><span class="n">${i+1}</span>${x.c.photo?`<img src="${x.c.photo}" alt="">`:'<span class="ph"></span>'}<div><b>${h(x.c.name)}</b><small>${ZONE} · ${whenLabel(x.c.lastSeen||x.c.createdAt)}</small></div><span class="radio">${F.pick===x.c.id?CK:''}</span></button>${x.eng?`<button class="why" data-why="${i}">엔진 점수 ${x.eng.final.toFixed(3)} · 근거 보기 ›</button><div data-whyslot="${i}"></div>`:''}</div>`).join(''):'<div class="tip">아직 닮은 기록이 없어요. 동네에 카드가 쌓이면 여기에 후보가 나타나요.</div>'}
+      <div class="sec">수색 팁</div><div class="tips">${tipsFor(L,R.r).slice(0,4).map(([a,b])=>`<div class="tip"><b>${h(a)}</b>${h(b)}</div>`).join('')}</div>
+      <div style="height:20px"></div>
+      <div class="foot" style="position:sticky;bottom:0"><div class="note">같은 고양이인지는 보호자님이 확인해요</div><button class="btn primary wide" id="fSame" ${F.pick?'':'disabled'}>이 아이 같아요</button></div>`;
+    $('#fBack').onclick=()=>{F.stage='chat';save();renderFind()};
+    v.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{F.pick=F.pick===b.dataset.pick?null:b.dataset.pick;const st=v.scrollTop;renderFind();v.scrollTop=st});
+    v.querySelectorAll('[data-why]').forEach(b=>b.onclick=()=>{const i=+b.dataset.why,slot=v.querySelector(`[data-whyslot="${i}"]`),x=R.cands[i];slot.innerHTML=slot.innerHTML?'':engCardHTML(x.eng,x.c.photo,R.regs,'이웃이 찍은 사진 vs 등록 사진')});
+    $('#fSame').onclick=()=>confirmSame(R.cands.find(x=>x.c.id===F.pick),L);
+    return;
+  }
+}
+function zoneSVG(R){
+  // stylised street grid like the film: dashed search circle, home in a dashed square, pink rectangles where look-alikes were seen
+  const W=380,H=200,cx=W*.4,cy=H*.5,sc=R.r>=1000?.06:.6;
+  let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="${W}" height="${H}" fill="#EEF0F8"/>`;
+  for(let x=-10;x<W;x+=46)for(let y=-12;y<H;y+=40)s+=`<rect x="${x+6}" y="${y+6}" width="36" height="30" rx="5" fill="#E1E4F2"/>`;
+  s+=`<path d="M0 ${H*.72}L${W} ${H*.6}" stroke="#fff" stroke-width="10"/><path d="M${W*.62} 0L${W*.7} ${H}" stroke="#fff" stroke-width="10"/>`;
+  s+=`<ellipse cx="${cx}" cy="${cy}" rx="${Math.min(W*.42,150)}" ry="${H*.62}" fill="rgba(101,115,227,.07)" stroke="#6573E3" stroke-width="1.6" stroke-dasharray="6 5"/>`;
+  R.cands.slice(0,3).forEach(x=>{const px=cx+(x.c.x-R.home.x)*sc,py=cy+(x.c.y-R.home.y)*sc*.6;const X=Math.max(10,Math.min(W-62,px-26)),Y=Math.max(8,Math.min(H-40,py-16));s+=`<rect x="${X}" y="${Y}" width="52" height="32" rx="7" fill="rgba(240,96,126,.18)" stroke="#F0607E" stroke-width="1.8"/>`});
+  s+=`<rect x="${cx-34}" y="${cy-22}" width="68" height="44" rx="8" fill="rgba(101,115,227,.14)" stroke="#6573E3" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="${cx-12}" y="${cy-11}" width="24" height="22" rx="6" fill="#3D4AB5"/><path d="M${cx-6} ${cy+4}v-4l6-5 6 5v4z" fill="#fff"/></svg>`;
+  return s;
+}
+async function confirmSame(x,L){
+  if(!x)return;
+  const c=x.c;
+  try{await requestExact(x,L)}catch(e){}
+  try{await Store.addAlert({id:uid(),type:'clue',to:c.by||null,cardId:c.id,cardName:c.name,cardNo:c.no,lostName:L.name,at:Date.now()})}catch(e){}
+  const el=openSheet(`${topBar(L.name+' 찾기')}<div class="sheet-body gut" style="display:flex;flex-direction:column;justify-content:center;text-align:center">
+    <div class="done-hero"><h2>찍은 이웃에게 알렸어요</h2><p>정확한 위치는 이웃이 승인하면 72시간 동안 열려요.<br>찾으면 이웃에게 고맙다고 전해 주세요.</p></div>
+    <div style="max-width:260px;margin:18px auto 0">${bigCard(c)}</div>
+  </div><div class="foot gut"><div class="row2"><button class="btn light" id="fLater">나중에</button><button class="btn primary" id="fFound">${h(L.name)}를 찾았어요</button></div></div>`);
+  wireClose(el);
+  $('#fLater').onclick=closeSheet;
+  $('#fFound').onclick=async()=>{
+    // the owner found the pet: the card becomes a clue card for the person who took it
+    try{await Store.update(c.id,{helped:(c.helped||0)+1,seen:(c.seen||1)+1,realName:L.name});
+      await Store.addAlert({id:uid(),type:'thanks',to:c.by||null,cardId:c.id,cardName:c.name,cardNo:c.no,lostName:L.name,msg:'덕분에 집에 데려왔어요. 고마워요!',at:Date.now()})}catch(e){}
+    closeSheet();F=newFind();lsSet('wander2.find',F);show('home');
+    // the film shows the photographer's side next; on one demo phone both sides are the same person
+    if(!c.by||c.by===Store.me)setTimeout(()=>pushClue(c.id,L.name),900);
+  };
+}
+function pushClue(cardId,lostName){
+  const r=$('#pushRoot');
+  r.innerHTML=`<button class="push" id="pushBtn"><span class="app-ic">WANDER</span><div><small>WANDER</small><p>내가 찍은 사진이 ${h(lostName)}를 찾는 단서가 됐어요</p></div><time>방금</time></button>`;
+  const t=setTimeout(()=>r.innerHTML='',7000);
+  $('#pushBtn').onclick=()=>{clearTimeout(t);r.innerHTML='';showClue(cardId,lostName)};
+}
+function showClue(cardId,lostName){
+  const c=Store.cards.find(x=>x.id===cardId);if(!c)return;
+  const el=openSheet(`<div class="sheet-body gut" style="padding-top:22px">
+    <div class="done-hero"><h2>단서 카드가 됐어요</h2><p>${h(c.name)}의 진짜 이름은 <b class="hl">${h(lostName)}</b>였어요</p></div>
+    <div class="reveal-wrap" style="position:relative;margin-top:18px">${bigCard(c,{id:'clueCard',r:'clue'})}<div class="sparkle"></div></div>
+    <div class="thanks">${c.photo?`<img src="${c.photo}" alt="">`:''}<div><b>${h(lostName)} 보호자</b> · 덕분에 집에 데려왔어요. 고마워요!</div></div>
+  </div><div class="foot gut"><button class="btn primary wide" id="clueDex">도감에서 보기</button></div>`);
+  setTimeout(()=>tilt($('#clueCard')),900);
+  $('#clueDex').onclick=()=>{closeSheet();show('dex')};
+}
+
+/* ---------- small sheets ---------- */
+$('#bellBtn').onclick=()=>openAlerts();
+$('#openEngine').onclick=()=>openEngine();
+$('#openContrib').onclick=()=>openContrib();
+$('#openInstall').onclick=()=>{const el=openSheet(`${topBar('홈 화면에 앱으로 두기')}<div class="sheet-body gut"><div class="steps">
+  <div class="tip"><b>Safari로 열기</b>WANDER 웹 주소를 아이폰 Safari에서 열어요.</div>
+  <div class="tip"><b>공유 버튼</b>화면 아래 가운데 네모에 화살표가 있는 버튼을 눌러요.</div>
+  <div class="tip"><b>홈 화면에 추가</b>목록에서 ‘홈 화면에 추가’를 누르면 WANDER 아이콘이 생겨요.</div>
+  <div class="tip"><b>아이콘을 누르면</b>주소창 없이 앱처럼 열리고, 바로 카메라가 켜져요. 처음 한 번은 카메라와 위치를 허용해 주세요.</div></div>
+  <p class="notice">Claude 링크에서는 보안 때문에 화면 안 카메라가 막혀 있어요. 시연은 웹 주소로 연 홈 화면 앱에서 해 주세요.</p></div>`);wireClose(el)};
+
+/* ---------- boot: open straight into the camera ---------- */
+renderHome();renderDex();
+Store.init();
+AI.init();
+show('home');
+camOpen();
+
+</script>
+</body>
+</html>
