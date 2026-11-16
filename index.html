@@ -265,7 +265,7 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
 
 /* map tab (WMap) */
 .map-wrap{position:relative;flex:1;min-height:300px;overflow:hidden;background:#EEF0F8;touch-action:none}
-.map-wrap svg{width:100%;height:100%;display:block}
+.map-wrap:not(.real) svg{width:100%;height:100%;display:block}
 .mb{fill:#E1E4F2}.mp{fill:#DCEFDF}.mw{fill:none;stroke:#D3E2F6;stroke-linecap:round}
 .mlabel{font:700 12px var(--font-ui);fill:#5A5F82}
 .map-ui{position:absolute;top:10px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none}
@@ -344,6 +344,39 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
 .answer-input{display:flex;gap:8px;width:100%}.answer-input .txt{flex:1;min-width:0}
 .map-note{font-size:13px;color:var(--muted);padding-block:6px}
 
+/* 카드: 사진 · 별명 · 종 (레벨 · 등급 표시 없음) */
+.wcard .pic{margin:12px 12px 0;aspect-ratio:1;background-color:#EEF0F8;background-image:none}
+.wcard .cap{padding:14px 18px 18px}
+.wcard .nick{font-size:24px;font-weight:800;letter-spacing:-.03em;line-height:1.25;overflow-wrap:anywhere}
+.wcard .brd{font-size:14px;font-weight:600;color:var(--muted);margin-top:3px}
+.wcard.r-clue .nick{background:linear-gradient(90deg,#7A6BF0,#C77DF0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mcard b{font-size:14px}
+
+/* 카드 아래쪽 정보 (처음 만난 날 · 구역 · 생김새) */
+.wcard .cap{padding:14px 18px 8px}
+.wcard .meta{padding:6px 18px 18px;border-top:1px dashed var(--line);margin:8px 0 0}
+/* 채팅으로 찾기 */
+.msgs{display:flex;flex-direction:column;gap:12px;padding-block:14px 8px}
+.me-row{display:flex;justify-content:flex-end}
+.me-b{background:var(--accent);color:#fff;border-radius:18px 18px 4px 18px;padding:10px 14px;font-weight:700;max-width:82%;line-height:1.45;overflow-wrap:anywhere}
+.me-b img{width:52px;height:52px;border-radius:10px;object-fit:cover;margin:2px;vertical-align:middle}
+.chatfoot{position:sticky;bottom:0;padding-block:8px 14px;background:linear-gradient(to bottom,rgba(242,243,251,0),var(--bg) 22%);display:flex;flex-direction:column;gap:8px}
+.chatfoot .note{text-align:center;font-size:12px;color:var(--muted)}
+.chatbar{display:flex;gap:8px;align-items:center}
+.chatbar .txt{flex:1;min-width:0}
+.ansrow{display:flex;gap:8px;flex-wrap:wrap;padding-left:38px}
+.lrow{text-decoration:none;color:inherit}
+
+/* 실제 지도 */
+.map-wrap.real{background:#e8ebf5}
+.map-wrap.real .map-ui{z-index:1000}
+.map-wrap .pop-slot{position:absolute;left:0;right:0;bottom:0;z-index:1000;pointer-events:none}
+.map-wrap .pop-slot .popup{pointer-events:auto;bottom:34px}
+.rm-mk{background:none;border:none}
+.rm-ph{width:40px;height:40px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.3);background-size:cover;background-position:center;background-color:var(--bg2)}
+.leaflet-container{font-family:var(--font-ui)}
+.leaflet-top.leaflet-right{top:50px}
+
 </style>
 <div class="app" id="app">
   <!-- HOME -->
@@ -353,7 +386,6 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
     <div class="sub" id="homeSub">빈칸 16개가 남았어요</div>
     <div class="panel">
       <div class="panel-head"><b id="homeDexTitle">궁동 도감</b><button class="more" data-go="dex">전체 보기 ›</button></div>
-      <div class="progress"><i id="homeProg" style="width:0"></i></div>
       <div class="dex-strip" id="homeStrip"></div>
     </div>
     <div class="panel">
@@ -362,13 +394,14 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
     </div>
     <div class="banner">
       <b>우리 고양이를 잃어버렸나요?</b>
-      <p>몇 가지만 물어볼게요 · 무료</p>
+      <p>채팅으로 몇 가지만 물어볼게요</p>
       <button class="go" data-go="find">찾기 시작 ›</button>
       <img src="assets/cats/cheese.jpg" alt="">
     </div>
     <div class="list">
       <button class="lrow" id="openEngine"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span><div><b>식별 엔진 · 실험실</b><span>어떻게 같은 고양이를 알아보는지, 정확도 측정</span></div><span>›</span></button>
       <button class="lrow" id="openContrib"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg></span><div><b>내 기여</b><span>단서가 된 카드, 받은 감사 메시지</span></div><span>›</span></button>
+      <button class="lrow" id="openCredits"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5L5 20"/></svg></span><div><b>샘플 사진 출처</b><span>자유 이용 허가 사진과 촬영자 표시</span></div><span>›</span></button>
       <button class="lrow" id="openInstall"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></span><div><b>홈 화면에 앱으로 두기</b><span>누르면 바로 카메라가 열려요</span></div><span>›</span></button>
     </div>
   </section>
@@ -377,8 +410,7 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
   <section class="view gut" id="v-dex" hidden>
     <div class="eyebrow" style="padding-top:16px" id="dexZone">궁동 일대</div>
     <h1 class="title" id="dexTitle">궁동 도감</h1>
-    <div class="sub" id="dexSub">16칸 중 <b class="hl">0칸</b> 채웠어요</div>
-    <div class="progress"><i id="dexProg" style="width:0"></i></div>
+    <div class="sub" id="dexSub">수집 0마리 · 0종</div>
     <div class="chips" id="dexFilter" style="margin-top:16px"></div>
     <div id="dexGrid"></div>
     <p class="notice" id="modeNote" style="text-align:center"></p>
@@ -421,7 +453,7 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
   <div class="cam-msg" id="camMsg" hidden></div>
   <div class="cam-bottom">
     <div class="cam-bar glass">
-      <button class="cam-side" id="camAlbum"><span class="sq" id="albumThumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></span>앨범</button>
+      <button class="cam-side" id="camAlbum"><span class="sq" id="albumThumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></span>업로드</button>
       <button class="shutter" id="shutter" aria-label="사진 찍기"><span></span></button>
       <button class="cam-side" id="camDex"><span class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><path d="M14 15h6M14 19h6"/></svg></span><span class="cnt" id="camCount">0</span>도감</button>
     </div>
@@ -437,9 +469,10 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
 <script>
 "use strict";
 /* ---------- data ---------- */
-const NB='궁동';                                  // 동네 이름 (발표 영상 기준)
-const ZONE=NB+' 일대';
-const DEX_SLOTS=16;                               // 도감 칸 수 (영상: 16칸 중 11칸)
+/* 동네 이름: 앱을 열 때 GPS로 읽은 실제 동 이름. 위치를 못 읽으면 마지막으로 읽은 이름, 처음엔 발표 기준 '궁동' */
+const NB_DEFAULT='궁동';
+let NB=(()=>{try{const v=JSON.parse(localStorage.getItem('wander2.hood')||'null');return(v&&v.name)||NB_DEFAULT}catch(e){return NB_DEFAULT}})();
+let ZONE=NB+' 일대';
 const COATS={
   cheese:{label:'치즈',bg:'#FFE9D6',ink:'#6E2F0C',fur:'#F29A4A',fur2:'#D7712A',names:['치즈대장','노랑이','호박이','귤이'],traits:['치즈 무늬']},
   mackerel:{label:'고등어',bg:'#E4E8F2',ink:'#263147',fur:'#9AA0AD',fur2:'#565B69',names:['담장 위 고등어','줄무늬','회색이'],traits:['고등어 무늬']},
@@ -456,25 +489,41 @@ const LANDMARKS=[
   {n:'편의점 앞',x:60,y:-40},{n:'놀이터',x:-170,y:-160},{n:'화분 골목',x:-220,y:170},{n:'담장길',x:230,y:120},
   {n:'주차장',x:190,y:-230},{n:'화단 옆',x:-30,y:270},{n:'학교 담장',x:340,y:-70},{n:'개울가',x:-340,y:-20}
 ];
-const RARITY={normal:{label:'일반',g:'●'},rare:{label:'레어',g:'◆'},special:{label:'스페셜',g:'★'},clue:{label:'단서',g:'✦'}};
 const HOUR=3600e3,DAY=24*HOUR;
 const T0=Date.now();
 const cat=k=>'assets/cats/'+k+'.jpg';
 const SAMPLES=[
-  {id:'s1',no:12,name:'담장 위 고등어',species:'cat',coat:'mackerel',traits:['고등어 무늬','흰 양말','초록 눈'],photo:cat('godeungeo'),x:235,y:115,seen:1,r:'normal',createdAt:T0-3*HOUR,lastSeen:T0-3*HOUR,sample:true},
-  {id:'s2',no:7,name:'화분 옆 치즈',species:'cat',coat:'cheese',traits:['치즈 무늬','흰 양말'],photo:cat('cheese'),x:-210,y:160,seen:5,r:'rare',createdAt:T0-19*DAY,lastSeen:T0-8*HOUR,sample:true},
-  {id:'s3',no:9,name:'회색 대장',species:'cat',coat:'mackerel',traits:['회색','흰 가슴','통통함'],photo:cat('hoesaek'),x:70,y:-30,seen:4,r:'special',createdAt:T0-13*DAY,lastSeen:T0-26*HOUR,sample:true},
-  {id:'s4',no:11,name:'까망이',species:'cat',coat:'black',traits:['올블랙','금빛 눈'],photo:cat('kkamangi'),x:195,y:-225,seen:2,r:'rare',createdAt:T0-7*DAY,lastSeen:T0-2*DAY,sample:true},
-  {id:'s5',no:5,name:'삼색 공주',species:'cat',coat:'calico',traits:['삼색 무늬'],photo:cat('samsaek'),x:-165,y:-150,seen:3,r:'rare',createdAt:T0-15*DAY,lastSeen:T0-3*DAY,sample:true},
-  {id:'s6',no:4,name:'턱시도 신사',species:'cat',coat:'tuxedo',traits:['턱시도','흰 양말'],photo:cat('tuxedo'),x:330,y:-60,seen:2,r:'normal',createdAt:T0-16*DAY,lastSeen:T0-4*DAY,sample:true},
-  {id:'s7',no:3,name:'눈송이',species:'cat',coat:'white',traits:['흰 털','파란 눈'],photo:cat('nunsong'),x:-30,y:265,seen:3,r:'rare',createdAt:T0-18*DAY,lastSeen:T0-5*DAY,sample:true},
-  {id:'s8',no:8,name:'은빛 낮잠',species:'cat',coat:'mackerel',traits:['고등어 무늬','회색'],photo:cat('eunbit'),x:-335,y:-25,seen:1,r:'normal',createdAt:T0-9*DAY,lastSeen:T0-9*DAY,sample:true},
-  {id:'s9',no:10,name:'카오스',species:'cat',coat:'calico',traits:['삼색 무늬','노란 눈'],photo:cat('chaos'),x:180,y:-210,seen:2,r:'normal',createdAt:T0-10*DAY,lastSeen:T0-6*DAY,sample:true}
+  {id:'s1',breed:'코리안 숏헤어',no:12,name:'담장 위 고등어',species:'cat',coat:'mackerel',traits:['고등어 무늬','초록 눈','흰 양말'],photo:cat('godeungeo'),x:235,y:115,seen:1,createdAt:T0-3*HOUR,lastSeen:T0-3*HOUR,sample:true,zone:'궁동 일대'},
+  {id:'s2',breed:'코리안 숏헤어',no:7,name:'화분 옆 치즈',species:'cat',coat:'cheese',traits:['치즈 무늬','흰 가슴','줄무늬 꼬리'],photo:cat('cheese'),x:-210,y:160,seen:5,createdAt:T0-19*DAY,lastSeen:T0-8*HOUR,sample:true,zone:'궁동 일대'},
+  {id:'s3',breed:'코리안 숏헤어',no:9,name:'회색 대장',species:'cat',coat:'mackerel',traits:['회색','흰 가슴','흰 양말'],photo:cat('hoesaek'),x:70,y:-30,seen:4,createdAt:T0-13*DAY,lastSeen:T0-26*HOUR,sample:true,zone:'궁동 일대'},
+  {id:'s4',breed:'코리안 숏헤어',no:11,name:'까망이',species:'cat',coat:'black',traits:['올블랙'],photo:cat('kkamangi'),x:195,y:-225,seen:2,createdAt:T0-7*DAY,lastSeen:T0-2*DAY,sample:true,zone:'궁동 일대'},
+  {id:'s5',breed:'코리안 숏헤어',no:5,name:'삼색 공주',species:'cat',coat:'calico',traits:['삼색 무늬','줄무늬 꼬리'],photo:cat('samsaek'),x:-165,y:-150,seen:3,createdAt:T0-15*DAY,lastSeen:T0-3*DAY,sample:true,zone:'궁동 일대'},
+  {id:'s6',breed:'코리안 숏헤어',no:4,name:'턱시도 신사',species:'cat',coat:'tuxedo',traits:['턱시도','흰 양말'],photo:cat('tuxedo'),x:330,y:-60,seen:2,createdAt:T0-16*DAY,lastSeen:T0-4*DAY,sample:true,zone:'궁동 일대'},
+  {id:'s7',breed:'믹스',no:3,name:'솜털이',species:'cat',coat:'white',traits:['장모','털복숭이','초록 눈'],photo:cat('nunsong'),x:-30,y:265,seen:3,createdAt:T0-18*DAY,lastSeen:T0-5*DAY,sample:true,zone:'궁동 일대'},
+  {id:'s8',breed:'아메리칸 숏헤어',no:8,name:'밥때 손님',species:'cat',coat:'tuxedo',traits:['흰 털','검은 얼룩'],photo:cat('eunbit'),x:-335,y:-25,seen:1,createdAt:T0-9*DAY,lastSeen:T0-9*DAY,sample:true,zone:'궁동 일대'},
+  {id:'s9',breed:'코리안 숏헤어',no:10,name:'카오스',species:'cat',coat:'calico',traits:['삼색 무늬','긴 꼬리'],photo:cat('chaos'),x:180,y:-210,seen:2,createdAt:T0-10*DAY,lastSeen:T0-6*DAY,sample:true,zone:'궁동 일대'}
 ];
-/* 자주 만날수록 레벨 업: 1번 일반 · 2번 레어 · 4번 스페셜 · 보호자 귀가에 쓰이면 단서 */
-const R_ORD=['normal','rare','special'];
-function rarity(c){if(c.helped>0)return'clue';const s=c.seen||1,byLv=s>=4?2:s>=2?1:0;return R_ORD[Math.max(byLv,R_ORD.indexOf(c.r||'normal'))]}
 const isNew=c=>Date.now()-(c.createdAt||0)<DAY;
+
+/* 종(품종): 카드에는 별명 아래에 실제 종을 보여요. 도감 위에는 모은 마릿수와 종 수만 보여요. */
+const BREEDS={
+  cat:['코리안 숏헤어','브리티시 숏헤어','아메리칸 숏헤어','러시안 블루','터키시 앙고라','스코티시 폴드','페르시안','샴','노르웨이 숲','벵갈','먼치킨','믹스'],
+  dog:['말티즈','푸들','포메라니안','진돗개','시츄','믹스견'],
+  bird:['비둘기','참새','까치','기타 새'],
+  etc:['기타']};
+const breedOf=c=>c.breed||(BREEDS[c.species]?BREEDS[c.species][0]:'기타');
+const speciesCount=cards=>new Set(cards.map(breedOf)).size;
+
+/* 공통 좌표: 모든 폰이 같은 기준점(REF, 궁동)에서 잰 미터(x=동쪽, y=남쪽)를 써요.
+   그래서 같은 장소는 어느 폰에서 찍어도 같은 150m 칸에 들어가요. (REF에서 멀수록 칸이 몇 % 어긋날 수 있어요) */
+const REF={lat:36.3615,lng:127.3466};
+const ll2xy=(lat,lng)=>({x:(lng-REF.lng)*111320*Math.cos(REF.lat*Math.PI/180),y:-(lat-REF.lat)*110540});
+const xy2ll=(x,y)=>({lat:REF.lat-y/110540,lng:REF.lng+x/(111320*Math.cos(REF.lat*Math.PI/180))});
+const REAL=!(window.claude&&window.claude.use);   // 웹 버전이면 실제 지도, Claude 링크 안이면 그림 지도
+const getHome=()=>{try{return JSON.parse(localStorage.getItem('wander2.home')||'null')||{x:0,y:0}}catch(e){return{x:0,y:0}}};
+
+/* 샘플 고양이 사진 출처 (Wikimedia Commons, 자유 이용 허가) */
+const CREDITS=[{"file": "cheese", "label": "화분 옆 치즈", "title": "What da Akram doin'? 2026 (cropped 2026).jpg", "artist": "əkrəm.", "license": "CC0", "page": "https://commons.wikimedia.org/wiki/File:What_da_Akram_doin%27%3F_2026_(cropped_2026).jpg"}, {"file": "hoesaek", "label": "회색 대장", "title": "Stray cat.jpg", "artist": "Enkhgerele", "license": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Stray_cat.jpg"}, {"file": "kkamangi", "label": "까망이", "title": "2025-08-09 Stray cat at Miradouro da Escarpa, Monsanto Forest Park, Lisbon 2.jpg", "artist": "Alexkom000", "license": "CC BY 4.0", "page": "https://commons.wikimedia.org/wiki/File:2025-08-09_Stray_cat_at_Miradouro_da_Escarpa,_Monsanto_Forest_Park,_Lisbon_2.jpg"}, {"file": "samsaek", "label": "삼색 공주", "title": "Calico cat at Houtong Cat Village February 2026 02.jpg", "artist": "4300streetcar", "license": "CC BY 4.0", "page": "https://commons.wikimedia.org/wiki/File:Calico_cat_at_Houtong_Cat_Village_February_2026_02.jpg"}, {"file": "tuxedo", "label": "턱시도 신사", "title": "Stray cat standing in the street.JPG", "artist": "Tokumeigakarinoaoshima", "license": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Stray_cat_standing_in_the_street.JPG"}, {"file": "nunsong", "label": "솜털이", "title": "Fluffy cat. Amir Temur Street001.jpg", "artist": "Panpanchik", "license": "CC BY 4.0", "page": "https://commons.wikimedia.org/wiki/File:Fluffy_cat._Amir_Temur_Street001.jpg"}, {"file": "eunbit", "label": "밥때 손님", "title": "Stray-cat-eating.jpg", "artist": "Ninuc10", "license": "CC BY 4.0", "page": "https://commons.wikimedia.org/wiki/File:Stray-cat-eating.jpg"}, {"file": "chaos", "label": "카오스", "title": "Nieuwe jonkerstraat ampterdam outdoors cat.jpg", "artist": "SpanishSnake", "license": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Nieuwe_jonkerstraat_ampterdam_outdoors_cat.jpg"}];
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -486,7 +535,7 @@ const fmtDT=t=>{const d=new Date(t),hh=d.getHours();return `${d.getMonth()+1}월
 const whenLabel=t=>{const d=new Date(t),n=new Date(),hh=d.getHours(),tm=`${hh<12?'오전':'오후'} ${hh%12||12}:${String(d.getMinutes()).padStart(2,'0')}`;const day=Math.round((new Date(n.toDateString())-new Date(d.toDateString()))/DAY);return day===0?'오늘 '+tm:day===1?'어제 '+tm:`${d.getMonth()+1}월 ${d.getDate()}일`};
 const CELL=150;const snap=v=>Math.floor(v/CELL)*CELL+CELL/2;
 const nearest=(x,y)=>LANDMARKS.reduce((a,l)=>{const d=Math.hypot(l.x-x,l.y-y);return d<a.d?{l,d}:a},{l:LANDMARKS[0],d:1e9}).l;
-const zoneName=(x,y)=>nearest(x,y).n+' 구역';
+const zoneName=(x,y)=>REAL?ZONE:nearest(x,y).n+' 구역';
 const lsGet=(k,f)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
@@ -1133,7 +1182,7 @@ function showExact(r){
   const layer=document.createElement('div');layer.className='sheet';layer.style.zIndex=40;document.body.appendChild(layer);
   const left=Math.max(0,r.expires-Date.now());
   layer.innerHTML=`${topBar(`#${pad2(r.cardNo)} ${h(r.cardName)} 위치`,'back')}<div class="gut map-note">제보자가 승인한 정확한 위치예요. ${Math.ceil(left/HOUR)}시간 뒤 다시 구역 단위로 돌아가요. 다른 사람에게 공유하지 마세요.</div><div class="map-wrap" id="exMap"></div>`;
-  const m=new WMap(layer.querySelector('#exMap'),{cx:r.exact.x,cy:r.exact.y,half:220,onTap:()=>{},onCard:()=>{}});m.set({cards:[],pick:r.exact});
+  const m=makeMap(layer.querySelector('#exMap'),{cx:r.exact.x,cy:r.exact.y,half:220,noLocate:true,onTap:()=>{},onCard:()=>{}});m.set({cards:[],pick:r.exact});
   layer.querySelector('[data-close]').onclick=()=>{m.destroy();layer.remove()};
 }
 
@@ -1185,13 +1234,68 @@ function pickPlace(init,title,done){
   layer.innerHTML=`${topBar(title,'back')}<div class="gut map-note">지도를 눌러 위치를 고르세요. 정확한 위치는 나만 갖고, 다른 사람에게는 150m 구역으로만 보여요.</div><div class="map-wrap" id="pickMap"></div><div class="sheet-foot gut"><button class="btn ink wide" id="pickOk">이 구역으로 할게요</button></div>`;
   document.body.appendChild(layer);
   let p={x:init.x,y:init.y};
-  const m=new WMap(layer.querySelector('#pickMap'),{cx:p.x,cy:p.y,half:300,onTap:(x,y)=>{p={x,y};m.set({pick:p});layer.querySelector('#pickOk').textContent=zoneName(x,y)+'으로 할게요'},onCard:()=>{}});
+  const m=makeMap(layer.querySelector('#pickMap'),{cx:p.x,cy:p.y,half:300,noLocate:true,onTap:(x,y)=>{p={x,y};m.set({pick:p});layer.querySelector('#pickOk').textContent=zoneName(x,y)+'으로 할게요'},onCard:()=>{}});
   m.set({cards:Store.cards,pick:p});
   const close=()=>{m.destroy();layer.remove()};
   layer.querySelector('[data-close]').onclick=close;
   layer.querySelector('#pickOk').onclick=()=>{close();done(p)};
 }
 
+
+/* ---------- 실제 지도 (OpenStreetMap + Leaflet) ----------
+   웹 버전(https 주소, 홈 화면 앱)에서만 써요. Claude 링크 안에서는 외부 지도 이미지가 막혀 있어 그림 지도(WMap)가 그대로 나와요.
+   카드는 공통 좌표(REF 기준 미터)를 150m 칸으로 나눈 칸의 가운데에만 찍혀요. 정확한 위치는 지도에 나오지 않아요. */
+let leafletP=null;
+function loadLeaflet(){
+  if(window.L&&window.L.map)return Promise.resolve();
+  if(leafletP)return leafletP;
+  const css=document.createElement('link');css.rel='stylesheet';css.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';document.head.appendChild(css);
+  return leafletP=loadScript('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js').catch(()=>null);
+}
+class RealMap{
+  constructor(el,opt={}){
+    this.el=el;this.opt=opt;this.data={cards:[]};
+    el.classList.add('real');
+    el.innerHTML=`<div class="rm-canvas" style="position:absolute;inset:0"></div><div class="map-ui"><span class="pill" style="font-size:12px">150m 구역 단위로만 보여요</span><button class="pill rm-loc" aria-label="내 위치">◎ 내 위치</button></div><div class="pop-slot"></div>`;
+    const c0=xy2ll(opt.cx||0,opt.cy||0);
+    this.m=L.map(el.querySelector('.rm-canvas'),{zoomControl:false,attributionControl:false,minZoom:10,maxZoom:19}).setView([c0.lat,c0.lng],16);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(this.m);
+    L.control.attribution({prefix:false,position:'bottomright'}).addAttribution('© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>').addTo(this.m);
+    L.control.zoom({position:'topright'}).addTo(this.m);
+    this.layer=L.layerGroup().addTo(this.m);this.meLayer=L.layerGroup().addTo(this.m);
+    this.m.on('click',e=>{if(opt.onTap){const p=ll2xy(e.latlng.lat,e.latlng.lng);opt.onTap(p.x,p.y)}});
+    el.querySelector('.rm-loc').onclick=()=>this.locate(true,true);
+    if(opt.half)this.center(opt.cx||0,opt.cy||0,opt.half);
+    this.ro=new ResizeObserver(()=>this.m.invalidateSize());this.ro.observe(el);
+    setTimeout(()=>{this.m.invalidateSize();if(!opt.noLocate)this.locate(!(opt.cx||opt.cy||opt.half),false)},150);
+  }
+  async locate(centerIt,tell){
+    const p=await getHere();
+    if(!p){if(tell)toast('위치를 읽을 수 없어요. 설정에서 위치를 허용해 주세요.');return}
+    const ll=xy2ll(p.x,p.y);this.meLayer.clearLayers();
+    if(p.acc&&p.acc<400)L.circle([ll.lat,ll.lng],{radius:p.acc,color:'#2F6BFF',weight:1,fillColor:'#2F6BFF',fillOpacity:.1,interactive:false}).addTo(this.meLayer);
+    L.circleMarker([ll.lat,ll.lng],{radius:8,color:'#fff',weight:3,fillColor:'#2F6BFF',fillOpacity:1,interactive:false}).addTo(this.meLayer);
+    if(centerIt)this.m.setView([ll.lat,ll.lng],17,{animate:false});
+  }
+  set(d){
+    Object.assign(this.data,d);const D=this.data;this.layer.clearLayers();
+    (D.cards||[]).forEach(c=>{
+      const ll=xy2ll(snap(c.x),snap(c.y));
+      L.circle([ll.lat,ll.lng],{radius:CELL/2,color:'#6573E3',weight:1.5,fillColor:'#6573E3',fillOpacity:.14,interactive:false}).addTo(this.layer);
+      const ic=L.divIcon({className:'rm-mk',html:`<div class="rm-ph" style="background-image:url('${String(c.photo||'').replace(/'/g,'%27')}')"></div>`,iconSize:[40,40],iconAnchor:[20,20]});
+      L.marker([ll.lat,ll.lng],{icon:ic,keyboard:false}).on('click',()=>{this.opt.onCard&&this.opt.onCard(c.id)}).addTo(this.layer);
+    });
+    if(D.pick){const ll=xy2ll(D.pick.x,D.pick.y);
+      L.circle([ll.lat,ll.lng],{radius:CELL/2,color:'#F0607E',weight:2,dashArray:'6 5',fillColor:'#F0607E',fillOpacity:.1,interactive:false}).addTo(this.layer);
+      L.circleMarker([ll.lat,ll.lng],{radius:9,color:'#fff',weight:3,fillColor:'#F0607E',fillOpacity:1,interactive:false}).addTo(this.layer)}
+  }
+  center(x,y,half){
+    const a=xy2ll(x-(half||300),y-(half||300)),b=xy2ll(x+(half||300),y+(half||300));
+    this.m.fitBounds([[Math.min(a.lat,b.lat),Math.min(a.lng,b.lng)],[Math.max(a.lat,b.lat),Math.max(a.lng,b.lng)]],{animate:false});
+  }
+  destroy(){this.ro.disconnect();this.m.remove()}
+}
+const makeMap=(el,opt)=>(REAL&&window.L&&window.L.map)?new RealMap(el,opt):new WMap(el,opt);
 
 /* ---------- AR camera (the app opens here) ----------
    Live camera works on a normal https site, localhost, and an iPhone home-screen web app.
@@ -1280,7 +1384,7 @@ function arDraw(){
   Object.assign(box.style,{left:(r.x-pad)+'px',top:(r.y-pad)+'px',width:(r.w+pad*2)+'px',height:(r.h+pad*2)+'px'});
   hint.hidden=true;
   const m=Cam.match&&Store.cards.find(c=>c.id===Cam.match.id);
-  lab.innerHTML=m?`<span class="ck">${CK}</span>${h(m.name)} 같아요 <small>Lv.${m.seen||1}</small>`:`<span class="ck">${CK}</span>${DET_KO[Cam.cls]||'동물'}가 보여요`;
+  lab.innerHTML=m?`<span class="ck">${CK}</span>${h(m.name)} 같아요`:`<span class="ck">${CK}</span>${DET_KO[Cam.cls]||'동물'}가 보여요`;
   lab.hidden=false;
   const lx=Math.max(12,Math.min(innerWidth-lab.offsetWidth-12,r.x-pad)),ly=Math.max(90,r.y-pad-48);
   lab.style.left=lx+'px';lab.style.top=ly+'px';
@@ -1310,8 +1414,6 @@ async function arMatch(){
 }
 function renderCamSide(){
   $('#camCount').textContent=Store.cards.length;
-  const last=Store.cards.slice().sort((a,b)=>(b.lastSeen||0)-(a.lastSeen||0))[0];
-  if(last&&last.photo)$('#albumThumb').innerHTML=`<img src="${last.photo}" alt="">`;
 }
 async function camShot(){
   if(Cam.state!=='live')return $('#camInput').click();
@@ -1337,7 +1439,8 @@ let current='home',dexF='all',mainMap=null;
 function show(v){
   current=v;document.querySelectorAll('.view').forEach(e=>e.hidden=e.id!=='v-'+v);
   document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.v===v));
-  if(v==='map'){if(!mainMap)mainMap=new WMap($('#mainMap'),{onCard:id=>mapPopup(id),onTap:()=>mapPopup(null)});mainMap.set({cards:Store.cards})}
+  if(v==='map'){const mk=()=>{if(!mainMap)mainMap=makeMap($('#mainMap'),{onCard:id=>mapPopup(id),onTap:()=>mapPopup(null)});mainMap.set({cards:Store.cards})};
+    if(REAL&&!(window.L&&window.L.map))loadLeaflet().then(mk,mk);else mk()}
   if(v==='find')renderFind();
 }
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>show(t.dataset.v));
@@ -1345,18 +1448,17 @@ document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g
 
 const imgOrArt=c=>c.photo?`<img src="${c.photo}" alt="${h(c.name)}" loading="lazy">`:art(c.coat,c.species);
 function miniCard(c){
-  const r=rarity(c),R=RARITY[r];
-  return `<button class="mcard r-${r}" data-card="${h(c.id)}">${isNew(c)?'<span class="new-badge">NEW</span>':''}<div class="ph">${imgOrArt(c)}</div><b><span class="rglyph">${R.g}</span>${h(c.name)}</b><small>Lv.${c.seen||1} · ${R.label}</small></button>`;
+  return `<button class="mcard" data-card="${h(c.id)}">${isNew(c)?'<span class="new-badge">NEW</span>':''}<div class="ph">${imgOrArt(c)}</div><b>${h(c.name)}</b><small>${h(breedOf(c))}</small></button>`;
 }
+/* 카드: 위에서 아래로 사진 · 별명(큰 글씨) · 실제 종 */
 function bigCard(c,opt={}){
-  const r=opt.r||rarity(c),R=RARITY[r];
-  return `<div class="wcard r-${r}" ${opt.id?`id="${opt.id}"`:''}><div class="shine"></div>
-    <div class="hd"><b><span class="rglyph">${R.g}</span><span>${h(c.name||'이름 없음')}</span></b><span class="lv">Lv.<b>${c.seen||1}</b></span></div>
-    <div class="pic">${imgOrArt(c)}${r==='clue'?'<span class="clue-badge">단서가 된 카드</span>':''}</div>
+  const clue=opt.r==='clue'||c.helped>0,tr=(c.traits&&c.traits.length?c.traits:COATS[c.coat].traits);
+  return `<div class="wcard${clue?' r-clue':''}" ${opt.id?`id="${opt.id}"`:''}><div class="shine"></div>
+    <div class="pic">${imgOrArt(c)}${clue?'<span class="clue-badge">단서가 된 카드</span>':''}</div>
+    <div class="cap"><div class="nick">${h(c.name||'이름 없음')}</div><div class="brd">${h(breedOf(c))}</div></div>
     <div class="meta"><span>처음 만난 날</span><b>${fmtDT(c.createdAt||Date.now())}</b>
-      <span>구역</span><b><i class="zone-ic"></i>${ZONE}</b>
-      <span>생김새</span><b>${(c.traits&&c.traits.length?c.traits:COATS[c.coat].traits).slice(0,3).map(t=>`<span class="tag">${h(t)}</span>`).join('')}</b></div>
-    <div class="ft"><span><span class="rglyph">${R.g}</span>${R.label} · No.${String(c.no||0).padStart(3,'0')}</span><small>WANDER</small></div></div>`;
+      <span>구역</span><b><i class="zone-ic"></i>${h(c.zone||ZONE)}</b>
+      <span>생김새</span><b>${tr.map(t=>`<span class="tag">${h(t)}</span>`).join('')}</b></div></div>`;
 }
 function bindCards(root){root.querySelectorAll('[data-card]').forEach(b=>b.onclick=()=>openDetail(b.dataset.card))}
 function tilt(el){
@@ -1368,12 +1470,12 @@ function tilt(el){
 }
 
 function renderHome(){
-  const cards=Store.cards,n=cards.length,slots=Math.max(DEX_SLOTS,n);
+  const cards=Store.cards,n=cards.length;
   $('#homeTitle').innerHTML=`${NB}에서 <em>${n}마리</em>를<br>알아봤어요`;
-  $('#homeSub').textContent=slots-n>0?`빈칸 ${slots-n}개가 남았어요`:'도감을 다 채웠어요';
-  $('#homeDexTitle').textContent=NB+' 도감';$('#homeProg').style.width=Math.round(n/slots*100)+'%';
+  $('#homeSub').textContent=n?`${speciesCount(cards)}종을 만났어요`:'카메라로 첫 친구를 찍어 보세요';
+  $('#homeDexTitle').textContent=NB+' 도감';
   const byNo=cards.slice().sort((a,b)=>(b.lastSeen||0)-(a.lastSeen||0));
-  $('#homeStrip').innerHTML=byNo.slice(0,4).map(c=>`<button class="t" data-card="${h(c.id)}" style="background:${COATS[c.coat].bg}">${imgOrArt(c)}</button>`).join('')+'<button class="t q" data-go="find" aria-label="빈칸">?</button>';
+  $('#homeStrip').innerHTML=byNo.slice(0,5).map(c=>`<button class="t" data-card="${h(c.id)}" style="background:${COATS[c.coat].bg}">${imgOrArt(c)}</button>`).join('');
   const rec=byNo.slice(0,3);$('#recentMore').textContent=rec.length+'장 ›';
   $('#homeRecent').innerHTML=rec.length?rec.map(miniCard).join(''):'<p class="notice" style="grid-column:1/-1">아직 만난 친구가 없어요. 가운데 카메라로 찍어 보세요.</p>';
   bindCards($('#v-home'));
@@ -1381,26 +1483,25 @@ function renderHome(){
   $('#bellBadge').hidden=!(nA+pend);$('#bellBadge').textContent=nA+pend;
 }
 function renderDex(){
-  const cards=Store.cards,n=cards.length,slots=Math.max(DEX_SLOTS,n);
+  const cards=Store.cards,n=cards.length;
   $('#dexZone').textContent=ZONE;$('#dexTitle').textContent=NB+' 도감';
-  $('#dexSub').innerHTML=`${slots}칸 중 <b class="hl">${n}칸</b> 채웠어요`;$('#dexProg').style.width=Math.round(n/slots*100)+'%';
-  const F=[['all','전체'],['rare','레어 이상'],['recent','최근 만남']];
+  $('#dexSub').innerHTML=`수집 <b class="hl">${n}마리</b> · <b class="hl">${speciesCount(cards)}종</b>`;
+  const F=[['all','전체'],['recent','최근 만남']];
+  if(!F.some(f=>f[0]===dexF))dexF='all';
   $('#dexFilter').innerHTML=F.map(([k,l])=>`<button class="chip" aria-pressed="${dexF===k}" data-f="${k}">${l}</button>`).join('');
   $('#dexFilter').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{dexF=b.dataset.f;renderDex()});
   let list=cards.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-  if(dexF==='rare')list=list.filter(c=>rarity(c)!=='normal');
   if(dexF==='recent')list=list.filter(c=>Date.now()-(c.lastSeen||0)<3*DAY).sort((a,b)=>b.lastSeen-a.lastSeen);
   const g=$('#dexGrid');
   if(Store.mode==='loading'){g.innerHTML='<div class="empty"><strong>도감을 불러오는 중이에요</strong></div>';return}
-  const empties=dexF==='all'?Math.max(0,slots-list.length):0;
-  g.innerHTML=list.length||empties?`<div class="dex-grid">${list.map(miniCard).join('')}${Array.from({length:empties},()=>'<div class="slot-empty">?</div>').join('')}</div>`:'<div class="empty"><strong>아직 없어요</strong>자주 만날수록 레벨이 올라 레어 카드가 돼요</div>';
+  g.innerHTML=list.length?`<div class="dex-grid">${list.map(miniCard).join('')}</div>`:`<div class="empty"><strong>${n?'최근 3일 안에 만난 친구가 없어요':'아직 없어요'}</strong>카메라로 길에서 만난 고양이를 찍어 보세요</div>`;
   bindCards(g);
   $('#modeNote').textContent=Store.mode==='db'?'카드는 이 앱을 함께 쓰는 사람들과 공유돼요':'카드는 이 휴대폰에 저장돼요';
 }
 function mapPopup(id){
   const slot=$('#mainMap .pop-slot'),c=Store.cards.find(x=>x.id===id);
   if(!c){slot.innerHTML='';return}
-  slot.innerHTML=`<button class="popup" data-card="${h(c.id)}">${c.photo?`<img src="${c.photo}" alt="">`:''}<div><span>No.${String(c.no).padStart(3,'0')} · Lv.${c.seen||1} · ${RARITY[rarity(c)].label}</span><b>${h(c.name)}</b><span>${h(zoneName(c.x,c.y))} · 150m 구역 · ${ago(c.lastSeen||c.createdAt)}</span></div></button>`;
+  slot.innerHTML=`<button class="popup" data-card="${h(c.id)}">${c.photo?`<img src="${c.photo}" alt="">`:''}<div><b>${h(c.name)}</b><span>${h(breedOf(c))} · ${h(c.zone||ZONE)} · ${ago(c.lastSeen||c.createdAt)}</span></div></button>`;
   bindCards(slot);
 }
 Store.sub(()=>{renderHome();renderDex();renderCamSide();if(current==='map'&&mainMap)mainMap.set({cards:Store.cards})});
@@ -1411,8 +1512,7 @@ function getHere(){
     if(!navigator.geolocation)return res(null);
     const to=setTimeout(()=>res(null),6000);
     try{navigator.geolocation.getCurrentPosition(p=>{clearTimeout(to);
-      let o=lsGet('wander2.origin',null);if(!o){o={lat:p.coords.latitude,lng:p.coords.longitude};lsSet('wander2.origin',o)}
-      const x=(p.coords.longitude-o.lng)*111320*Math.cos(o.lat*Math.PI/180),y=-(p.coords.latitude-o.lat)*110540;
+      const q=ll2xy(p.coords.latitude,p.coords.longitude),x=q.x,y=q.y;
       res({x,y,acc:p.coords.accuracy})},()=>{clearTimeout(to);res(null)},{enableHighAccuracy:true,timeout:5500,maximumAge:60000})}catch(e){clearTimeout(to);res(null)}
   });
 }
@@ -1441,11 +1541,12 @@ async function startCreate(file,hint){
   if(here){d.x=here.x;d.y=here.y;d.gps=true}else{const L=LANDMARKS[Math.floor(Math.random()*LANDMARKS.length)];d.x=L.x+Math.random()*80-40;d.y=L.y+Math.random()*80-40}
   d.traits=COATS[d.coat].traits.slice();
   if(!d.name)d.name=COATS[d.coat].names[Math.floor(Math.random()*COATS[d.coat].names.length)];
+  if(!d.breed)d.breed=(BREEDS[d.species]||['기타'])[0];
   URL.revokeObjectURL(url);
   if(!$('#sheetRoot .sheet'))return;
   const k=d.known&&Store.cards.find(c=>c.id===d.known);
   $('#scanBox').classList.add('done');
-  $('#scanBox').insertAdjacentHTML('afterbegin',`<span class="scan-label">${k?`${h(k.name)} 같아요 · Lv.${(k.seen||1)+1}`:`새 친구 · ${SPECIES[d.species]}`}</span>`);
+  $('#scanBox').insertAdjacentHTML('afterbegin',`<span class="scan-label">${k?`${h(k.name)} 같아요`:`새 친구 · ${SPECIES[d.species]}`}</span>`);
   $('#scanTxt').textContent=k?'도감에 있는 친구와 닮았어요':'새 카드가 준비됐어요';
   await new Promise(r=>setTimeout(r,800));
   if($('#sheetRoot .sheet'))editCard(d);
@@ -1455,8 +1556,9 @@ function editCard(d){
     <div id="cardPrev" style="max-width:330px;margin:0 auto"></div>
     <p class="notice" id="aiNote" style="text-align:center"></p>
     <div class="field" id="knownField"><span class="lab">또 만난 친구인가요?</span><div class="chips" id="cKnown"></div></div>
-    <div class="field"><label for="cName">이름</label><input class="txt" id="cName" maxlength="12" autocomplete="off"></div>
-    <div class="field"><span class="lab">생김새 (3개까지)</span><div class="chips" id="cTraits"></div></div>
+    <div class="field"><label for="cName">별명</label><input class="txt" id="cName" maxlength="12" autocomplete="off"></div>
+    <div class="field" id="breedField"><span class="lab">종</span><div class="chips" id="cBreed"></div></div>
+    <div class="field"><span class="lab">생김새</span><div class="chips" id="cTraits"></div><form class="answer-input" id="cTraitForm" style="margin-top:8px"><input class="txt" id="cTraitIn" maxlength="30" placeholder="직접 입력 (예: 꼬리 끝이 하얘요)" autocomplete="off"><button class="btn soft small">추가</button></form></div>
     <div class="field"><span class="lab">어떤 동물인가요</span><div class="chips" id="cSpecies"></div></div>
     <div class="field"><span class="lab">구역</span><div class="tip" style="font-size:13px"><b>${ZONE}</b>${d.gps?'지금 위치로 기록했어요. 다른 사람에게는 150m 구역으로만 보여요.':'위치를 쓸 수 없어 동네 안 구역으로 기록했어요. 공개는 150m 구역 단위예요.'}</div></div>
   </div><div class="foot gut"><div class="row2"><button class="btn light" id="retake">다시 찍기</button><button class="btn primary" id="saveCard">카드 저장</button></div></div>`);
@@ -1470,14 +1572,20 @@ function editCard(d){
     $('#knownField').hidden=!cands.length;
     $('#cKnown').innerHTML=`<button class="chip" aria-pressed="${!d.known}" data-k="">새 친구예요</button>`+cands.map(c=>`<button class="chip" aria-pressed="${d.known===c.id}" data-k="${h(c.id)}">${h(c.name)}${d.suggest&&d.suggest.id===c.id?' · 닮음':''}</button>`).join('');
     $('#cKnown').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{d.known=b.dataset.k||null;syncName();paint()});
-    $('#cTraits').innerHTML=TRAITS.map(t=>`<button class="chip" aria-pressed="${d.traits.includes(t)}" data-t="${t}">${t}</button>`).join('');
-    $('#cTraits').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const t=b.dataset.t;d.traits=d.traits.includes(t)?d.traits.filter(x=>x!==t):[...d.traits,t].slice(-3);paint()});
+    const bl=BREEDS[d.species]||['기타'],bs=d.breed&&!bl.includes(d.breed)?[d.breed,...bl]:bl;
+    $('#breedField').hidden=!!k;
+    $('#cBreed').innerHTML=bs.map(b=>`<button class="chip" aria-pressed="${d.breed===b}" data-b="${h(b)}">${h(b)}</button>`).join('');
+    $('#cBreed').querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{d.breed=b.dataset.b;paint()});
+    const tl=[...TRAITS,...d.traits.filter(t=>!TRAITS.includes(t))];
+    $('#cTraits').innerHTML=tl.map(t=>`<button class="chip" aria-pressed="${d.traits.includes(t)}" data-t="${h(t)}">${h(t)}</button>`).join('');
+    $('#cTraits').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const t=b.dataset.t;d.traits=d.traits.includes(t)?d.traits.filter(x=>x!==t):[...d.traits,t];paint()});
     $('#cSpecies').innerHTML=Object.entries(SPECIES).map(([k2,l])=>`<button class="chip" aria-pressed="${d.species===k2}" data-s="${k2}">${l}</button>`).join('');
-    $('#cSpecies').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{d.species=b.dataset.s;paint()});
+    $('#cSpecies').querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{d.species=b.dataset.s;d.breed=(BREEDS[d.species]||['기타'])[0];paint()});
   };
   const syncName=()=>{const k=d.known&&Store.cards.find(c=>c.id===d.known);$('#cName').value=k?k.name:d.name;$('#cName').disabled=!!k};
   $('#cName').oninput=e=>{d.name=e.target.value;if(!d.known)paint()};
   syncName();paint();
+  $('#cTraitForm').onsubmit=e=>{e.preventDefault();const t=$('#cTraitIn').value.trim();if(t&&!d.traits.includes(t))d.traits.push(t);$('#cTraitIn').value='';paint()};
   $('#retake').onclick=()=>{closeSheet();camOpen()};
   $('#saveCard').onclick=async()=>{
     const btn=$('#saveCard');btn.disabled=true;btn.textContent='저장 중…';
@@ -1486,17 +1594,17 @@ function editCard(d){
       if(d.known){const k=Store.cards.find(c=>c.id===d.known),seen=(k.seen||1)+1,traits=d.traits.length?d.traits:(k.traits||[]);
         saved={...k,seen,photo:d.photo,traits,lastSeen:Date.now()};
         await Store.saveExact(k.id,d);
-        await Store.update(k.id,{seen,lastSeen:saved.lastSeen,photo:d.photo,x:snap(d.x),y:snap(d.y),traits});revealCard(saved,'level')}
+        await Store.update(k.id,{seen,lastSeen:saved.lastSeen,photo:d.photo,x:snap(d.x),y:snap(d.y),traits,zone:ZONE});revealCard(saved,'level')}
       else{const name=(d.name||'').trim()||COATS[d.coat].names[0];
-        saved={id:d.id,no:Store.nextNo(),name,species:d.species,coat:d.coat,traits:d.traits,photo:d.photo,x:snap(d.x),y:snap(d.y),by:Store.me,seen:1,createdAt:d.createdAt,lastSeen:d.lastSeen};
+        saved={id:d.id,no:Store.nextNo(),name,species:d.species,breed:d.breed,coat:d.coat,traits:d.traits,photo:d.photo,x:snap(d.x),y:snap(d.y),zone:ZONE,by:Store.me,seen:1,createdAt:d.createdAt,lastSeen:d.lastSeen};
         await Store.saveExact(saved.id,d);await Store.add(saved);revealCard(saved,'new')}
     }catch(err){btn.disabled=false;btn.textContent='카드 저장';toast('저장하지 못했어요. 잠시 후 다시 눌러 주세요.');if(err&&err.code==='not_granted')Store.useLocal()}
   };
 }
 function revealCard(c,kind){
-  const r=rarity(c),up=kind==='level';
+  const up=kind==='level';
   const el=openSheet(`<div class="sheet-body gut" style="display:flex;flex-direction:column;justify-content:center">
-    <div class="done-hero"><h2>${up?`${h(c.name)} Lv.${c.seen}`:'도감에 새 칸이 채워졌어요'}</h2><p>${up?(r!=='normal'?`자주 만나서 ${RARITY[r].label} 카드가 됐어요`:'또 만났어요. 자주 만날수록 레벨이 올라요'):`${ZONE}에서 ${Store.cards.length}번째로 알아본 친구예요`}</p></div>
+    <div class="done-hero"><h2>${up?`${h(c.name)} 또 만났어요`:'도감에 새 친구가 생겼어요'}</h2><p>${up?`${c.seen}번째 만남이에요`:`${ZONE}에서 ${Store.cards.length}번째로 알아본 친구예요`}</p></div>
     <div class="reveal-wrap" style="position:relative;margin-top:18px">${bigCard(c,{id:'revCard'})}<div class="sparkle"></div></div>
   </div><div class="foot gut"><div class="row2"><button class="btn light" id="moreShot">계속 찍기</button><button class="btn primary" id="toDex">도감에서 보기</button></div></div>`);
   setTimeout(()=>tilt($('#revCard')),900);
@@ -1507,10 +1615,10 @@ function revealCard(c,kind){
 /* ---------- card detail ---------- */
 function openDetail(id){
   const c=Store.cards.find(x=>x.id===id);if(!c)return;
-  const el=openSheet(`${topBar(RARITY[rarity(c)].label+' · No.'+String(c.no).padStart(3,'0'))}<div class="sheet-body gut">
+  const el=openSheet(`${topBar('No.'+String(c.no).padStart(3,'0'))}<div class="sheet-body gut">
     <div style="max-width:340px;margin:0 auto">${bigCard(c,{id:'dCard'})}</div>
     <div class="list"><div class="lrow"><div><b>마지막 만난 날</b><span>${fmtDT(c.lastSeen||c.createdAt)} · ${ago(c.lastSeen||c.createdAt)}</span></div></div>
-      <div class="lrow"><div><b>만난 횟수</b><span>${c.seen||1}번 · ${c.seen>=4?'스페셜':c.seen>=2?'레어':'한 번 더 만나면 레어'}</span></div></div>
+      <div class="lrow"><div><b>만난 횟수</b><span>${c.seen||1}번</span></div></div>
       ${c.helped?`<div class="lrow"><div><b>단서가 된 카드</b><span>${c.realName?`진짜 이름은 ${h(c.realName)} · `:''}보호자 귀가에 쓰였어요</span></div></div>`:''}</div>
     <div id="delSlot"></div>
   </div><div class="foot gut"><div class="row2"><button class="btn light" id="dMap">동네에서 보기</button><button class="btn primary" id="dAgain">또 만났어요</button></div></div>`);
@@ -1518,88 +1626,112 @@ function openDetail(id){
   const delSlot=$('#delSlot');
   const showDel=()=>{delSlot.innerHTML='<button class="btn soft wide" style="margin-top:12px" id="dDel">카드 지우기</button>';$('#dDel').onclick=()=>{delSlot.innerHTML=`<div class="confirm"><b>${h(c.name)} 카드를 지울까요?</b><span class="notice" style="padding:0">지우면 되돌릴 수 없어요.</span><div class="actions"><button class="btn light" id="dNo">그대로 두기</button><button class="btn primary" id="dYes">지우기</button></div></div>`;$('#dNo').onclick=showDel;$('#dYes').onclick=async()=>{try{await Store.remove(c.id);closeSheet();toast('카드를 지웠어요')}catch(e){toast('지우지 못했어요.')}}}};
   showDel();
-  $('#dMap').onclick=()=>{closeSheet();show('map');mainMap.center(snap(c.x),snap(c.y),260);mapPopup(c.id)};
+  $('#dMap').onclick=()=>{closeSheet();show('map');setTimeout(()=>{if(mainMap)mainMap.center(snap(c.x),snap(c.y),260);mapPopup(c.id)},80)};
   $('#dAgain').onclick=()=>{closeSheet();camOpen()};
 }
 
-/* ---------- 찾기 (lost pet) — follows the film: 등록 → 챗봇 → 먼저 찾을 구역 + 닮은 기록 5장 → 단서 카드 ---------- */
+/* ---------- 찾기: 채팅으로 찾기 ----------
+   챗봇이 먼저 묻고, 버튼으로 답하거나 직접 써서 답해요.
+   이름 · 어떤 동물 · 생김새 · 언제부터 못 봤는지는 직접 입력도 돼요 (생김새는 개수 제한 없음). */
 let F=null;
-const newFind=()=>({stage:'register',name:'',photos:{},traits:[],since:null,answers:{},species:'cat',coat:'cheese',pick:null,R:null});
-const QS=[
-  {k:'outdoor',q:'평소에 밖에 나간 적 있나요?',a:[['in','실내에서만'],['out','가끔 외출']]},
-  {k:'last',q:'마지막으로 본 곳은요?',a:[['home','집 앞'],['map','지도에서 고르기']]},
-  {k:'how',q:'언제, 어떻게 나갔나요?',a:[['door','문이 열려서'],['window','창문 · 방충망'],['walk','산책 중'],['unknown','모르겠어요']]},
-  {k:'temper',q:'낯선 사람을 보면 어떤가요?',a:[['shy','숨어요'],['social','다가와요'],['unknown','잘 몰라요']]}];
 const SINCE=[[0,'오늘부터'],[1,'어제부터'],[3,'2~3일 전부터'],[7,'일주일 넘게']];
-function lostOf(F){
-  const ph=SLOTS.map(s=>F.photos[s.k]).filter(Boolean);
-  return{name:F.name||'우리 아이',photos:ph,species:F.species,coat:F.coat,traits:F.traits,outdoor:F.answers.outdoor==='out',
-    last:F.answers.last==='map'&&F.lastPt?F.lastPt:{x:0,y:0,label:'집 앞'},when:(F.since&&F.since[0])||0,how:F.answers.how,temper:F.answers.temper};
+const newFind=()=>({v:3,step:0,stage:'chat',photos:{},name:'',species:'cat',customSpecies:'',traits:[],since:null,answers:{},say:{},lastPt:null,pick:null,running:false});
+const sinceDays=t=>{t=String(t||'');if(/오늘|방금|아까/.test(t))return 0;if(/어제/.test(t))return 1;if(/그저께|엊그제/.test(t))return 2;const m=t.match(/(\d+)\s*(일|주|개월|달|시간)/);if(!m)return null;const n=+m[1];return m[2]==='일'?n:m[2]==='주'?n*7:m[2]==='시간'?0:n*30};
+const speciesLabel=f=>f.customSpecies||SPECIES[f.species]||'동물';
+const STEPS=[
+  {k:'photos',kind:'photos',q:()=>'잃어버린 아이 사진을 올려 주세요. <b>2장 이상, 뒷모습은 꼭</b> 넣어 주세요. 길에서 찍힌 사진은 뒷모습이 많아요.'},
+  {k:'name',kind:'text',ph:'이름 (예: 콩이)',q:()=>'이름이 뭐예요?'},
+  {k:'species',kind:'chips',chips:[['cat','고양이'],['dog','강아지']],text:'직접 입력 (예: 토끼)',q:f=>`${h(f.name)}는 어떤 동물이에요?`},
+  {k:'traits',kind:'multi',text:'직접 입력 (예: 꼬리 끝이 하얘요)',q:()=>'생김새를 알려 주세요. 여러 개 골라도 되고, 직접 써도 돼요.'},
+  {k:'since',kind:'chips',chips:SINCE.map(s=>[String(s[0]),s[1]]),text:'직접 입력 (예: 3주 전부터)',q:()=>'언제부터 못 봤나요?'},
+  {k:'outdoor',kind:'chips',chips:[['in','실내에서만'],['out','가끔 외출']],q:()=>'평소에 밖에 나간 적 있나요?'},
+  {k:'last',kind:'chips',chips:[['home','집 앞'],['map','지도에서 고르기']],q:()=>'마지막으로 본 곳은요?'},
+  {k:'how',kind:'chips',chips:[['door','문이 열려서'],['window','창문 · 방충망'],['walk','산책 중'],['unknown','모르겠어요']],q:()=>'어떻게 나갔나요?'},
+  {k:'temper',kind:'chips',chips:[['shy','숨어요'],['social','다가와요'],['unknown','잘 몰라요']],q:()=>'낯선 사람을 보면 어떤가요?'}];
+function lostOf(f){
+  const ph=SLOTS.map(s=>f.photos[s.k]).filter(Boolean);
+  return{name:f.name||'우리 아이',photos:ph,species:f.species,coat:f.coat||'cheese',traits:f.traits,outdoor:f.answers.outdoor==='out',
+    last:f.answers.last==='map'&&f.lastPt?f.lastPt:{...getHome(),label:'집 앞'},when:f.since&&f.since[0]!=null?f.since[0]:3,how:f.answers.how,temper:f.answers.temper};
 }
 function renderFind(){
-  if(!F)F=lsGet('wander2.find',null)||newFind();
-  const v=$('#v-find');
-  const save=()=>lsSet('wander2.find',{...F,R:null});
-  const top=(title,back)=>`<div class="sheet-top" style="padding-top:10px"><button class="icon-btn" id="fBack" aria-label="${back?'뒤로':'처음부터'}">${back?ICON.back:ICON.close}</button><b>${h(title)}</b><span></span></div>`;
-  const profile=()=>{const p=SLOTS.map(s=>F.photos[s.k]).find(Boolean);return `<div class="profile">${p?`<img src="${p.photo}" alt="">`:'<span class="noimg"></span>'}<div><b>${h(F.name||'우리 아이')}</b><span>${h([...(F.traits.length?F.traits:COATS[F.coat].traits)].slice(0,2).join(' · '))} · ${NB}</span></div>${F.since?`<span class="pill-pink">${h(F.since[1])} 못 봤어요</span>`:''}</div>`};
-  if(F.stage==='register'){
-    const n=Object.keys(F.photos).length,hasBack=!!F.photos.back,ok=n>=2&&hasBack&&F.since;
-    v.innerHTML=`${top('잃어버린 아이 등록',false)}
-      <h1 class="title" style="font-size:22px">집에서 찍은 사진을 올려 주세요</h1>
-      <p class="sub">2장 이상, 뒷모습은 꼭 넣어 주세요. 길에서 찍힌 사진은 뒷모습이 많아요.</p>
-      <div class="photo-slots" style="margin-top:14px">${SLOTS.map(s=>{const p=F.photos[s.k];return `<button class="pslot${s.req&&!p?' req':''}" data-slot="${s.k}">${p?`<img src="${p.photo}" alt="${s.t}">${p.badge||''}`:`<b style="font-size:20px">+</b>${s.t}${s.req?' · 필수':''}`}</button>`}).join('')}</div>
-      <div class="field"><label for="fName">이름</label><input class="txt" id="fName" maxlength="10" placeholder="예: 콩이" value="${h(F.name)}" autocomplete="off"></div>
-      <div class="field"><span class="lab">어떤 동물인가요</span><div class="chips" id="fSp">${[['cat','고양이'],['dog','강아지']].map(([k,l])=>`<button class="chip ans" aria-pressed="${F.species===k}" data-sp="${k}">${l}</button>`).join('')}</div></div>
-      <div class="field"><span class="lab">생김새 (3개까지)</span><div class="chips" id="fTr">${TRAITS.map(t=>`<button class="chip ans" aria-pressed="${F.traits.includes(t)}" data-t="${t}">${t}</button>`).join('')}</div></div>
-      <div class="field"><span class="lab">언제부터 못 봤나요</span><div class="chips" id="fSince">${SINCE.map(s=>`<button class="chip ans" aria-pressed="${!!F.since&&F.since[0]===s[0]}" data-s="${s[0]}">${s[1]}</button>`).join('')}</div></div>
-      <div class="foot" style="position:sticky;bottom:0;margin-top:18px"><div class="note">${ok?'찾기는 무료예요':!hasBack?'뒷모습 사진이 필요해요':n<2?'사진을 2장 이상 넣어 주세요':'못 본 날을 골라 주세요'}</div><button class="btn primary wide" id="fNext" ${ok?'':'disabled'}>다음</button></div>`;
-    $('#fBack').onclick=()=>{F=newFind();save();renderFind()};
-    $('#fName').oninput=e=>{F.name=e.target.value.trim();save()};
-    v.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{F.species=b.dataset.sp;save();renderFind()});
-    v.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const t=b.dataset.t;F.traits=F.traits.includes(t)?F.traits.filter(x=>x!==t):[...F.traits,t].slice(-3);save();renderFind()});
-    v.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{F.since=SINCE.find(s=>String(s[0])===b.dataset.s);save();renderFind()});
-    v.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
-      inp.onchange=async()=>{const f=inp.files[0];if(!f)return;try{const r=await readPhoto(f,480);const Q=await engPrep(r.photo);const qb=qualityBadges(Q).replace(/class="qq /g,'class="qb qq ');
-        F.photos[b.dataset.slot]={photo:r.photo,avg:r.avg,slot:b.dataset.slot,label:SLOTS.find(s=>s.k===b.dataset.slot).t,badge:qb};
-        if(Object.keys(F.photos).length===1){F.coat=guessCoat(r.avg);if(!F.traits.length)F.traits=COATS[F.coat].traits.slice()}
-        save();renderFind()}catch(e){toast('사진을 열 수 없어요. 다른 사진을 골라 주세요.')}};inp.click()});
-    $('#fNext').onclick=()=>{F.stage='chat';save();renderFind()};
-    return;
+  if(!F||F.v!==3){const s=lsGet('wander2.find',null);F=s&&s.v===3?s:newFind()}
+  const v=$('#v-find'),save=()=>lsSet('wander2.find',{...F,R:null,running:false});
+  const L=STEPS.length;
+  if(F.stage==='result'&&!F.R){F.stage='chat';F.step=L}
+  if(F.stage==='result')return renderFindResult(v,save);
+  const S=F.step;
+  const adv=label=>{F.say[STEPS[F.step].k]=label;F.step++;save();renderFind();requestAnimationFrame(()=>{v.scrollTop=v.scrollHeight})};
+  const bot=t=>`<div class="q"><span class="w">W</span><div class="bub">${t}</div></div>`;
+  const me=t=>`<div class="me-row"><div class="me-b">${t}</div></div>`;
+  const thumbs=()=>SLOTS.map(s=>F.photos[s.k]).filter(Boolean).map(p=>`<img src="${p.photo}" alt="${h(p.label)}">`).join('');
+  const firstPhoto=SLOTS.map(s=>F.photos[s.k]).find(Boolean);
+  let log='';
+  for(let i=0;i<Math.min(S,L);i++){const st=STEPS[i];log+=bot(st.q(F))+me(st.k==='photos'?thumbs():h(F.say[st.k]||'-'))}
+  let foot='';
+  if(S<L){
+    const st=STEPS[S];log+=bot(st.q(F));
+    const n=Object.keys(F.photos).length,hasBack=!!F.photos.back;
+    if(st.kind==='photos'){
+      log+=`<div style="padding-left:38px"><div class="photo-slots">${SLOTS.map(s=>{const p=F.photos[s.k];return `<button class="pslot${s.req&&!p?' req':''}" data-slot="${s.k}">${p?`<img src="${p.photo}" alt="${s.t}">${p.badge||''}`:`<b style="font-size:20px">+</b>${s.t}${s.req?' · 필수':''}`}</button>`}).join('')}</div></div>`;
+      foot=`<div class="note">${n>=2&&hasBack?'':!hasBack?'뒷모습 사진이 필요해요':'사진을 2장 이상 넣어 주세요'}</div><button class="btn primary wide" id="cbNext" ${n>=2&&hasBack?'':'disabled'}>다음</button>`;
+    }else if(st.kind==='chips'){
+      log+=`<div class="ansrow">${st.chips.map(([val,l])=>`<button class="chip ans" data-cv="${h(val)}">${h(l)}</button>`).join('')}</div>`;
+    }else if(st.kind==='multi'){
+      const tl=[...TRAITS,...F.traits.filter(t=>!TRAITS.includes(t))];
+      log+=`<div class="ansrow">${tl.map(t=>`<button class="chip ans" aria-pressed="${F.traits.includes(t)}" data-tr="${h(t)}">${h(t)}</button>`).join('')}</div>`;
+      foot=`<button class="btn primary wide" id="cbNext">다음</button>`;
+    }
+    if(st.kind==='text'||st.text)foot=`<form class="chatbar" id="cbForm"><input class="txt" id="cbIn" maxlength="40" placeholder="${h(st.kind==='text'?st.ph:st.text)}" autocomplete="off"><button class="btn primary small">${st.kind==='multi'?'추가':'보내기'}</button></form>`+foot;
+  }else{
+    log+=bot('고마워요. 식별 엔진이 이웃이 찍은 사진과 비교하고 있어요… <span id="engProg"></span>');
   }
-  if(F.stage==='chat'){
-    const shown=[];for(const q of QS){shown.push(q);if(!F.answers[q.k])break}
-    const done=QS.every(q=>F.answers[q.k]);
-    v.innerHTML=`${top((F.name||'우리 아이')+' 찾기',true)}${profile()}
-      <div class="msgs">${shown.map(q=>`<div class="q"><span class="w">W</span><div class="bub">${q.q}</div></div><div class="ansrow">${q.a.map(([k,l])=>`<button class="chip ans" aria-pressed="${F.answers[q.k]===k}" data-q="${q.k}" data-a="${k}">${l}${q.k==='last'&&k==='map'&&F.lastPt&&F.answers.last==='map'?' ✓':''}</button>`).join('')}</div>`).join('')}</div>
-      <div style="height:90px"></div>
-      <div class="foot" style="position:sticky;bottom:0"><div class="note">찾기는 무료예요</div><button class="btn primary wide" id="fGo" ${done?'':'disabled'}>구역과 닮은 기록 보기</button></div>`;
-    $('#fBack').onclick=()=>{F.stage='register';save();renderFind()};
-    v.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{
-      const k=b.dataset.q,a=b.dataset.a;
-      if(k==='last'&&a==='map'){pickPlace({x:0,y:0},'마지막으로 본 곳',p=>{F.lastPt={x:p.x,y:p.y,label:zoneName(p.x,p.y)};F.answers.last='map';save();renderFind()});return}
-      F.answers[k]=a;save();renderFind();requestAnimationFrame(()=>v.scrollTop=v.scrollHeight)});
-    $('#fGo').onclick=async()=>{const b=$('#fGo');b.disabled=true;b.textContent='닮은 기록을 비교하는 중…';
-      const L=lostOf(F);F.R=await analyzeEngine(L,(i,n)=>{b.textContent=`닮은 기록 비교 중 ${i}/${n}`});F.stage='result';F.pick=null;renderFind()};
-    return;
-  }
-  if(F.stage==='result'){
-    if(!F.R){v.innerHTML='<p class="notice" style="padding-top:40px;text-align:center">다시 비교하는 중…</p>';analyzeEngine(lostOf(F)).then(R=>{F.R=R;renderFind()});return}
-    const R=F.R,L=lostOf(F),km=R.r>=1000?(R.r/1000).toFixed(1)+'km':R.r+'m';
-    v.innerHTML=`${top((F.name||'우리 아이')+' 찾기',true)}
-      <h1 class="title" style="font-size:22px;margin-top:0">먼저 찾을 구역이에요</h1>
-      <div class="zone-map" style="margin-top:12px">${zoneSVG(R)}<span class="zm-label" style="left:10px">집 앞에서 <span class="hl">${km}</span> 안</span>${R.cands.length?'<span class="zm-label" style="left:46%;color:var(--pink)">닮은 기록이 찍힌 구역</span>':''}</div>
-      <p class="notice">${L.species==='cat'?(L.outdoor?'외출하던 고양이':'실내에서만 산 고양이')+'의 75%가 이 거리 안에서 발견됐어요 · Huang 외 2018':'강아지는 넓게 1.6km부터 봐요'}</p>
-      <div class="sec">이웃이 찍은 닮은 기록 <small>${R.cands.length}장</small></div>
-      ${R.cands.length?R.cands.map((x,i)=>`<div class="cand-block"><button class="cand-row" aria-pressed="${F.pick===x.c.id}" data-pick="${h(x.c.id)}"><span class="n">${i+1}</span>${x.c.photo?`<img src="${x.c.photo}" alt="">`:'<span class="ph"></span>'}<div><b>${h(x.c.name)}</b><small>${ZONE} · ${whenLabel(x.c.lastSeen||x.c.createdAt)}</small></div><span class="radio">${F.pick===x.c.id?CK:''}</span></button>${x.eng?`<button class="why" data-why="${i}">엔진 점수 ${x.eng.final.toFixed(3)} · 근거 보기 ›</button><div data-whyslot="${i}"></div>`:''}</div>`).join(''):'<div class="tip">아직 닮은 기록이 없어요. 동네에 카드가 쌓이면 여기에 후보가 나타나요.</div>'}
-      <div class="sec">수색 팁</div><div class="tips">${tipsFor(L,R.r).slice(0,4).map(([a,b])=>`<div class="tip"><b>${h(a)}</b>${h(b)}</div>`).join('')}</div>
-      <div style="height:20px"></div>
-      <div class="foot" style="position:sticky;bottom:0"><div class="note">같은 고양이인지는 보호자님이 확인해요</div><button class="btn primary wide" id="fSame" ${F.pick?'':'disabled'}>이 아이 같아요</button></div>`;
-    $('#fBack').onclick=()=>{F.stage='chat';save();renderFind()};
-    v.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{F.pick=F.pick===b.dataset.pick?null:b.dataset.pick;const st=v.scrollTop;renderFind();v.scrollTop=st});
-    v.querySelectorAll('[data-why]').forEach(b=>b.onclick=()=>{const i=+b.dataset.why,slot=v.querySelector(`[data-whyslot="${i}"]`),x=R.cands[i];slot.innerHTML=slot.innerHTML?'':engCardHTML(x.eng,x.c.photo,R.regs,'이웃이 찍은 사진 vs 등록 사진')});
-    $('#fSame').onclick=()=>confirmSame(R.cands.find(x=>x.c.id===F.pick),L);
-    return;
-  }
+  v.innerHTML=`<div class="sheet-top" style="padding-top:10px;grid-template-columns:44px 1fr auto"><button class="icon-btn" id="fBack" aria-label="뒤로">${ICON.back}</button><b>${F.name?h(F.name)+' 찾기':'찾기'}</b><button class="more" id="fReset" style="padding:8px">처음부터</button></div>
+    ${F.name?`<div class="profile">${firstPhoto?`<img src="${firstPhoto.photo}" alt="">`:'<span class="noimg"></span>'}<div><b>${h(F.name)}</b><span>${h([speciesLabel(F),...F.traits].slice(0,3).join(' · '))} · ${h(NB)}</span></div>${F.since?`<span class="pill-pink">${h(F.since[1])} 못 봤어요</span>`:''}</div>`:''}
+    <div class="msgs">${log}</div><div style="height:12px"></div>
+    <div class="chatfoot">${foot}</div>`;
+  $('#fBack').onclick=()=>{if(F.step>0){F.step--;save();renderFind()}else show('home')};
+  $('#fReset').onclick=()=>{F=newFind();save();renderFind()};
+  v.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+    inp.onchange=async()=>{const f=inp.files[0];if(!f)return;try{const r=await readPhoto(f,480);const Q=await engPrep(r.photo);const qb=qualityBadges(Q).replace(/class="qq /g,'class="qb qq ');
+      F.photos[b.dataset.slot]={photo:r.photo,avg:r.avg,slot:b.dataset.slot,label:SLOTS.find(s=>s.k===b.dataset.slot).t,badge:qb};
+      if(Object.keys(F.photos).length===1){F.coat=guessCoat(r.avg)}
+      save();renderFind()}catch(e){toast('사진을 열 수 없어요. 다른 사진을 골라 주세요.')}};inp.click()});
+  v.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{const t=b.dataset.tr;F.traits=F.traits.includes(t)?F.traits.filter(x=>x!==t):[...F.traits,t];save();renderFind()});
+  v.querySelectorAll('[data-cv]').forEach(b=>b.onclick=()=>{
+    const st=STEPS[F.step],val=b.dataset.cv,label=(st.chips.find(c=>c[0]===val)||[])[1]||val;
+    if(st.k==='species'){F.species=val;F.customSpecies=''}
+    else if(st.k==='since'){F.since=[+val,label]}
+    else F.answers[st.k]=val;
+    if(st.k==='last'&&val==='map'){pickPlace(getHome(),'마지막으로 본 곳',p=>{F.lastPt={x:p.x,y:p.y,label:zoneName(p.x,p.y)};adv(label)});return}
+    adv(label)});
+  const form=$('#cbForm');
+  if(form)form.onsubmit=e=>{e.preventDefault();const t=$('#cbIn').value.trim();if(!t)return;const st=STEPS[F.step];
+    if(st.k==='name'){F.name=t.slice(0,10);adv(F.name)}
+    else if(st.k==='species'){F.species=/강아지|멍멍|^개$/.test(t)?'dog':/고양이|냥/.test(t)?'cat':'etc';F.customSpecies=F.species==='etc'?t:'';adv(t)}
+    else if(st.k==='since'){F.since=[sinceDays(t),t];adv(t)}
+    else if(st.k==='traits'){if(!F.traits.includes(t))F.traits.push(t);save();renderFind()}};
+  const nx=$('#cbNext');
+  if(nx)nx.onclick=()=>{const st=STEPS[F.step];
+    if(st.k==='photos'){adv('사진 '+Object.keys(F.photos).length+'장')}
+    else if(st.k==='traits'){adv(F.traits.length?F.traits.join(', '):'잘 모르겠어요')}};
+  if(S>=L&&!F.running){F.running=true;
+    analyzeEngine(lostOf(F),(i,n)=>{const e=$('#engProg');if(e)e.textContent=`${i}/${n}`}).then(R=>{F.R=R;F.running=false;F.stage='result';F.pick=null;renderFind()}).catch(()=>{F.running=false})}
+}
+function renderFindResult(v,save){
+  const R=F.R,L=lostOf(F),km=R.r>=1000?(R.r/1000).toFixed(1)+'km':R.r+'m';
+  v.innerHTML=`<div class="sheet-top" style="padding-top:10px"><button class="icon-btn" id="fBack" aria-label="뒤로">${ICON.back}</button><b>${h(F.name||'우리 아이')} 찾기</b><span></span></div>
+    <h1 class="title" style="font-size:22px;margin-top:0">먼저 찾을 구역이에요</h1>
+    <div class="zone-map" style="margin-top:12px">${zoneSVG(R)}<span class="zm-label" style="left:10px">집 앞에서 <span class="hl">${km}</span> 안</span>${R.cands.length?'<span class="zm-label" style="left:46%;color:var(--pink)">닮은 기록이 찍힌 구역</span>':''}</div>
+    <p class="notice">${L.species==='cat'?(L.outdoor?'외출하던 고양이':'실내에서만 산 고양이')+'의 75%가 이 거리 안에서 발견됐어요 · Huang 외 2018':'고양이 자료를 바탕으로 넓게 잡은 반경이에요'}</p>
+    <div class="sec">이웃이 찍은 닮은 기록 <small>${R.cands.length}장</small></div>
+    ${R.cands.length?R.cands.map((x,i)=>`<div class="cand-block"><button class="cand-row" aria-pressed="${F.pick===x.c.id}" data-pick="${h(x.c.id)}"><span class="n">${i+1}</span>${x.c.photo?`<img src="${x.c.photo}" alt="">`:'<span class="ph"></span>'}<div><b>${h(x.c.name)}</b><small>${h(x.c.zone||ZONE)} · ${whenLabel(x.c.lastSeen||x.c.createdAt)}</small></div><span class="radio">${F.pick===x.c.id?CK:''}</span></button>${x.eng?`<button class="why" data-why="${i}">엔진 점수 ${x.eng.final.toFixed(3)} · 근거 보기 ›</button><div data-whyslot="${i}"></div>`:''}</div>`).join(''):'<div class="tip">아직 닮은 기록이 없어요. 동네에 카드가 쌓이면 여기에 후보가 나타나요.</div>'}
+    <div class="sec">수색 팁</div><div class="tips">${tipsFor(L,R.r).slice(0,4).map(([a,b])=>`<div class="tip"><b>${h(a)}</b>${h(b)}</div>`).join('')}</div>
+    <div style="height:20px"></div>
+    <div class="foot" style="position:sticky;bottom:0"><div class="note">같은 고양이인지는 보호자님이 확인해요</div><button class="btn primary wide" id="fSame" ${F.pick?'':'disabled'}>이 아이 같아요</button></div>`;
+  $('#fBack').onclick=()=>{F.stage='chat';F.step=STEPS.length-1;F.R=null;save();renderFind()};
+  v.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{F.pick=F.pick===b.dataset.pick?null:b.dataset.pick;const st=v.scrollTop;renderFind();v.scrollTop=st});
+  v.querySelectorAll('[data-why]').forEach(b=>b.onclick=()=>{const i=+b.dataset.why,slot=v.querySelector(`[data-whyslot="${i}"]`),x=R.cands[i];slot.innerHTML=slot.innerHTML?'':engCardHTML(x.eng,x.c.photo,R.regs,'이웃이 찍은 사진 vs 등록 사진')});
+  $('#fSame').onclick=()=>confirmSame(R.cands.find(x=>x.c.id===F.pick),L);
 }
 function zoneSVG(R){
   // stylised street grid like the film: dashed search circle, home in a dashed square, pink rectangles where look-alikes were seen
@@ -1653,6 +1785,7 @@ function showClue(cardId,lostName){
 $('#bellBtn').onclick=()=>openAlerts();
 $('#openEngine').onclick=()=>openEngine();
 $('#openContrib').onclick=()=>openContrib();
+$('#openCredits').onclick=()=>{const el=openSheet(`${topBar('샘플 사진 출처')}<div class="sheet-body gut"><p class="notice" style="padding-top:0">앱에 들어 있는 샘플 고양이 사진은 위키미디어 커먼즈의 자유 이용 허가(CC0 · CC BY) 사진이에요. 정사각형으로 잘라 사용했어요. 웹 버전 지도는 © OpenStreetMap contributors 자료예요.</p><div class="list">${CREDITS.map(c=>`<a class="lrow" href="${h(c.page)}" target="_blank" rel="noopener"><img src="assets/cats/${h(c.file)}.jpg" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex:none"><div><b>${h(c.label)}</b><span>${h(c.artist)} · ${h(c.license)}</span></div><span>›</span></a>`).join('')}</div></div>`);wireClose(el)};
 $('#openInstall').onclick=()=>{const el=openSheet(`${topBar('홈 화면에 앱으로 두기')}<div class="sheet-body gut"><div class="steps">
   <div class="tip"><b>Safari로 열기</b>WANDER 웹 주소를 아이폰 Safari에서 열어요.</div>
   <div class="tip"><b>공유 버튼</b>화면 아래 가운데 네모에 화살표가 있는 버튼을 눌러요.</div>
@@ -1660,12 +1793,40 @@ $('#openInstall').onclick=()=>{const el=openSheet(`${topBar('홈 화면에 앱�
   <div class="tip"><b>아이콘을 누르면</b>주소창 없이 앱처럼 열리고, 바로 카메라가 켜져요. 처음 한 번은 카메라와 위치를 허용해 주세요.</div></div>
   <p class="notice">Claude 링크에서는 보안 때문에 화면 안 카메라가 막혀 있어요. 시연은 웹 주소로 연 홈 화면 앱에서 해 주세요.</p></div>`);wireClose(el)};
 
+/* ---------- real neighbourhood name ----------
+   GPS -> OpenStreetMap reverse geocoding (Nominatim) -> 동 이름. Cached; asked again only after moving ~300m or a day later.
+   Coordinates are rounded to ~100m before they leave the phone. Without GPS the last known name (or 궁동) stays. */
+function setNB(n){
+  if(!n)return;NB=n;ZONE=n+' 일대';
+  $('#camZone').innerHTML='<i></i>'+h(ZONE);$('#mapTitle').textContent=ZONE;
+  renderHome();renderDex();
+}
+async function locateHood(){
+  if(!navigator.geolocation||!window.isSecureContext)return;
+  const pos=await new Promise(res=>{const to=setTimeout(()=>res(null),9000);try{navigator.geolocation.getCurrentPosition(p=>{clearTimeout(to);res(p.coords)},()=>{clearTimeout(to);res(null)},{enableHighAccuracy:false,timeout:8000,maximumAge:300000})}catch(e){clearTimeout(to);res(null)}});
+  if(!pos)return;
+  lsSet('wander2.home',ll2xy(pos.latitude,pos.longitude));
+  const c=lsGet('wander2.hood',null);
+  const moved=c?Math.hypot((pos.longitude-c.lng)*111320*Math.cos(pos.latitude*Math.PI/180),(pos.latitude-c.lat)*110540):1e9;
+  if(c&&c.name&&moved<300&&Date.now()-c.at<DAY){setNB(c.name);return}
+  try{
+    const lat=pos.latitude.toFixed(3),lon=pos.longitude.toFixed(3);
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=16&accept-language=ko`);
+    const a=((await r.json())||{}).address||{};
+    let n=a.quarter||a.suburb||a.neighbourhood||a.village||a.town||a.city_district||a.borough||a.city;
+    if(n){n=String(n).replace(/\(.*\)/,'').trim().split(' ').pop();lsSet('wander2.hood',{name:n,lat:pos.latitude,lng:pos.longitude,at:Date.now()});setNB(n)}
+  }catch(e){}
+}
+
 /* ---------- boot: open straight into the camera ---------- */
+$('#camZone').innerHTML='<i></i>'+h(ZONE);$('#mapTitle').textContent=ZONE;
 renderHome();renderDex();
 Store.init();
 AI.init();
 show('home');
 camOpen();
+locateHood();
+if(REAL)loadLeaflet();
 
 </script>
 </body>
