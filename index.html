@@ -377,6 +377,8 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
 .leaflet-container{font-family:var(--font-ui)}
 .leaflet-top.leaflet-right{top:50px}
 
+.info-i{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;font:700 11px var(--font-brand);margin-left:6px;vertical-align:middle;line-height:1;opacity:.8}
+
 </style>
 <div class="app" id="app">
   <!-- HOME -->
@@ -402,7 +404,6 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
 
   <!-- DEX -->
   <section class="view gut" id="v-dex" hidden>
-    <div class="eyebrow" style="padding-top:16px" id="dexZone">궁동 일대</div>
     <h1 class="title" id="dexTitle">궁동 도감</h1>
     <div class="sub" id="dexSub">수집 0마리 · 0종</div>
     <div class="chips" id="dexFilter" style="margin-top:16px"></div>
@@ -412,7 +413,7 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
 
   <!-- NEIGHBORHOOD MAP -->
   <section class="view" id="v-map" hidden style="display:flex;flex-direction:column;padding-bottom:0">
-    <div class="gut" style="padding-top:16px"><div class="eyebrow">동네</div><h1 class="title" id="mapTitle" style="text-align:center">궁동 일대</h1><p class="notice" style="text-align:center;padding-top:2px">기록은 150m 구역으로만 보여요 · 정확한 위치는 찍은 사람만 알아요</p></div>
+    <div class="gut" style="padding-top:16px"><div class="eyebrow">동네</div><h1 class="title" style="text-align:center">주변 고양이</h1><p class="notice" style="text-align:center;padding-top:2px">기록은 150m 구역으로만 보여요<button class="info-i" data-zoneinfo aria-label="150m 구역 설명">i</button></p></div>
     <div class="map-wrap" id="mainMap"></div>
   </section>
 
@@ -441,7 +442,7 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
   <div class="flash" id="camFlash"></div>
   <div class="cam-top gut">
     <button class="cam-btn glass" id="camClose" aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <span class="zone-pill glass" id="camZone"><i></i>궁동 일대</span>
+    <span class="zone-pill glass" id="camZone"><i></i>현재 위치</span>
     <button class="cam-btn glass" id="camTorch" aria-label="플래시" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button>
   </div>
   <div class="cam-msg" id="camMsg" hidden></div>
@@ -464,9 +465,9 @@ h1.title em,.hl{font-style:normal;color:var(--accent-text)}
 "use strict";
 /* ---------- data ---------- */
 /* 동네 이름: 앱을 열 때 GPS로 읽은 실제 동 이름. 위치를 못 읽으면 마지막으로 읽은 이름, 처음엔 발표 기준 '궁동' */
-const NB_DEFAULT='궁동';
+const NB_DEFAULT='';
 let NB=(()=>{try{const v=JSON.parse(localStorage.getItem('wander2.hood')||'null');return(v&&v.name)||NB_DEFAULT}catch(e){return NB_DEFAULT}})();
-let ZONE=NB+' 일대';
+let ZONE=NB?NB+' 일대':'현재 위치';
 const COATS={
   cheese:{label:'치즈',bg:'#FFE9D6',ink:'#6E2F0C',fur:'#F29A4A',fur2:'#D7712A',names:['치즈대장','노랑이','호박이','귤이'],traits:['치즈 무늬']},
   mackerel:{label:'고등어',bg:'#E4E8F2',ink:'#263147',fur:'#9AA0AD',fur2:'#565B69',names:['담장 위 고등어','줄무늬','회색이'],traits:['고등어 무늬']},
@@ -515,9 +516,6 @@ const ll2xy=(lat,lng)=>({x:(lng-REF.lng)*111320*Math.cos(REF.lat*Math.PI/180),y:
 const xy2ll=(x,y)=>({lat:REF.lat-y/110540,lng:REF.lng+x/(111320*Math.cos(REF.lat*Math.PI/180))});
 const REAL=!(window.claude&&window.claude.use);   // 웹 버전이면 실제 지도, Claude 링크 안이면 그림 지도
 const getHome=()=>{try{return JSON.parse(localStorage.getItem('wander2.home')||'null')||{x:0,y:0}}catch(e){return{x:0,y:0}}};
-
-/* 샘플 고양이 사진 출처 (Wikimedia Commons, 자유 이용 허가) */
-const CREDITS=[{"file": "cheese", "label": "화분 옆 치즈", "title": "What da Akram doin'? 2026 (cropped 2026).jpg", "artist": "əkrəm.", "license": "CC0", "page": "https://commons.wikimedia.org/wiki/File:What_da_Akram_doin%27%3F_2026_(cropped_2026).jpg"}, {"file": "hoesaek", "label": "회색 대장", "title": "Stray cat.jpg", "artist": "Enkhgerele", "license": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Stray_cat.jpg"}, {"file": "kkamangi", "label": "까망이", "title": "2025-08-09 Stray cat at Miradouro da Escarpa, Monsanto Forest Park, Lisbon 2.jpg", "artist": "Alexkom000", "license": "CC BY 4.0", "page": "https://commons.wikimedia.org/wiki/File:2025-08-09_Stray_cat_at_Miradouro_da_Escarpa,_Monsanto_Forest_Park,_Lisbon_2.jpg"}, {"file": "samsaek", "label": "삼색 공주", "title": "Calico cat at Houtong Cat Village February 2026 02.jpg", "artist": "4300streetcar", "license": "CC BY 4.0", "page": "https://commons.wikimedia.org/wiki/File:Calico_cat_at_Houtong_Cat_Village_February_2026_02.jpg"}, {"file": "tuxedo", "label": "턱시도 신사", "title": "Stray cat standing in the street.JPG", "artist": "Tokumeigakarinoaoshima", "license": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Stray_cat_standing_in_the_street.JPG"}, {"file": "nunsong", "label": "솜털이", "title": "Fluffy cat. Amir Temur Street001.jpg", "artist": "Panpanchik", "license": "CC BY 4.0", "page": "https://commons.wikimedia.org/wiki/File:Fluffy_cat._Amir_Temur_Street001.jpg"}, {"file": "eunbit", "label": "밥때 손님", "title": "Stray-cat-eating.jpg", "artist": "Ninuc10", "license": "CC BY 4.0", "page": "https://commons.wikimedia.org/wiki/File:Stray-cat-eating.jpg"}, {"file": "chaos", "label": "카오스", "title": "Nieuwe jonkerstraat ampterdam outdoors cat.jpg", "artist": "SpanishSnake", "license": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Nieuwe_jonkerstraat_ampterdam_outdoors_cat.jpg"}];
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -654,7 +652,7 @@ function baseLayer(){
 class WMap{
   constructor(el,opt={}){
     this.el=el;this.opt=opt;this.cx=opt.cx||0;this.cy=opt.cy||0;this.half=opt.half||560;
-    el.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><g>${baseLayer()}</g><g class="ov"></g></svg>`+(opt.controls!==false?`<div class="map-ui"><span class="pill" style="font-size:12px">150m 구역 단위로만 보여요</span><div class="zoom"><button aria-label="확대">+</button><button aria-label="축소">−</button></div></div>`:'')+`<div class="scale"><span></span><i></i></div><div class="pop-slot"></div>`;
+    el.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><g>${baseLayer()}</g><g class="ov"></g></svg>`+(opt.controls!==false?`<div class="map-ui"><span class="pill" style="font-size:12px">150m 구역 단위로만 보여요<button class="info-i" data-zoneinfo aria-label="150m 구역 설명">i</button></span><div class="zoom"><button aria-label="확대">+</button><button aria-label="축소">−</button></div></div>`:'')+`<div class="scale"><span></span><i></i></div><div class="pop-slot"></div>`;
     this.svg=el.querySelector('svg');this.ov=el.querySelector('.ov');this.data={cards:[]};
     const z=el.querySelectorAll('.zoom button');
     if(z.length){z[0].onclick=()=>this.zoom(.6);z[1].onclick=()=>this.zoom(1/.6)}
@@ -786,7 +784,7 @@ function tipsFor(L,r){
    7 등록 여러 장: 최종 = 0.6 × 최고 + 0.4 × 상위 2장 평균
    ===================================================================== */
 const ENG={N:256,G:8,cache:new Map(),
-  TH:Object.assign({same:.75,cand:.55,src:'기본값 · 실험실 측정 전'},lsGet('wander.th',{})),
+  TH:Object.assign({same:.75,cand:.55,src:'기본값'},lsGet('wander.th',{})),
   /* score = ½ 패치 유사도(0.80→0, 0.98→1) + ½ 위치 일관성(0.35→0, 0.95→1) */
   CAL:{simLo:.80,simHi:.98,consLo:.35,consHi:.95},
   Q:{dark:.28,bright:.78,blur:.018,plain:.06,small:14,regMin:2,close:.04}};
@@ -970,213 +968,6 @@ async function analyzeEngine(L,onProg){
   return{...base,cands,engine:true,regs,labels};
 }
 
-/* ---------- IndexedDB (lab photos stay on this device) ---------- */
-const IDB={db:null,
-  async open(){if(this.db)return this.db;return this.db=await new Promise((res,rej)=>{const r=indexedDB.open('wander',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})},
-  async get(k){try{const d=await this.open();return await new Promise((res,rej)=>{const t=d.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error)})}catch(e){return lsGet('wander.idb.'+k,null)}},
-  async set(k,v){try{const d=await this.open();await new Promise((res,rej)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error)})}catch(e){lsSet('wander.idb.'+k,v)}}};
-
-/* ---------- 실험실: 정확도 · 판정 기준 측정 ---------- */
-const CONDS=[['normal','정상'],['dark','어두움'],['back','뒷모습'],['side','옆모습']];
-let LAB={cats:[]},labCond='normal';
-async function labLoad(){const v=await IDB.get('lab');LAB=v&&Array.isArray(v.cats)?v:{cats:[]}}
-const labSave=()=>IDB.set('lab',LAB);
-function bestThreshold(gen,imp){
-  let bal=null,strict=null;
-  for(let t=.30;t<=.995;t+=.005){
-    const tpr=gen.filter(s=>s>=t).length/(gen.length||1),fpr=imp.filter(s=>s>=t).length/(imp.length||1);
-    const b=(tpr+1-fpr)/2;if(!bal||b>bal.b)bal={t,b,tpr,fpr,acc:(gen.filter(s=>s>=t).length+imp.filter(s=>s<t).length)/((gen.length+imp.length)||1)};
-    if(!strict&&fpr<=.01)strict={t,tpr,fpr};
-  }
-  return{bal,strict:strict||{t:.995,tpr:0,fpr:0}};
-}
-async function labEval(onProg){
-  const items=[];LAB.cats.forEach(c=>c.photos.forEach(p=>items.push({cat:c.id,p})));
-  for(let k=0;k<items.length;k++){items[k].f=await engPrep(items[k].p.photo);onProg('특징 추출',k+1,items.length);if(k%4===0)await tick()}
-  const n=items.length,S=Array.from({length:n},()=>new Float32Array(n));let done=0;const total=n*(n-1)/2;
-  for(let a=0;a<n;a++)for(let b=a+1;b<n;b++){S[a][b]=S[b][a]=engPairScore(items[a].f,items[b].f).score;if(++done%40===0){onProg('사진끼리 비교',done,total);await tick()}}
-  const cats=LAB.cats.filter(c=>c.photos.length>=2).map(c=>c.id);
-  const run=kmax=>{let q=0,t1=0,t5=0;const gen=[],imp=[],byCond={};
-    for(let a=0;a<n;a++){const mine=items[a].cat;if(!cats.includes(mine))continue;
-      const sc=[];for(const cid of cats){let idx=[];for(let b=0;b<n;b++)if(b!==a&&items[b].cat===cid)idx.push(b);
-        if(kmax&&idx.length){const r=a%idx.length;idx=idx.slice(r).concat(idx.slice(0,r)).slice(0,kmax)}
-        if(idx.length)sc.push({cid,s:engAgg(idx.map(b=>S[a][b]))})}
-      sc.sort((x,y)=>y.s-x.s);const rank=sc.findIndex(x=>x.cid===mine);q++;if(rank===0)t1++;if(rank>=0&&rank<5)t5++;
-      const cd=items[a].p.cond||'normal';byCond[cd]=byCond[cd]||{n:0,ok:0};byCond[cd].n++;if(rank===0)byCond[cd].ok++;
-      sc.forEach(x=>(x.cid===mine?gen:imp).push(x.s))}
-    return{q,top1:q?t1/q:0,top5:q?t5/q:0,gen,imp,byCond}};
-  const all=run(0),byK=[1,2,3,4].map(k=>({k,top1:run(k).top1})),th=bestThreshold(all.gen,all.imp);
-  const meanOf=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
-  return{at:Date.now(),cats:cats.length,photos:n,queries:all.q,top1:all.top1,top5:all.top5,byCond:all.byCond,byK,th,
-    genMean:meanOf(all.gen),impMean:meanOf(all.imp),gen:all.gen,imp:all.imp};
-}
-const pct=v=>Math.round(v*1000)/10+'%';
-function labChart(R){
-  const W=320,H=130,bins=20,cnt=a=>{const c=new Array(bins).fill(0);a.forEach(s=>c[Math.min(bins-1,Math.floor(s*bins))]++);const m=a.length||1;return c.map(v=>v/m)};
-  const g=cnt(R.gen),i=cnt(R.imp),mx=Math.max(...g,...i,.01),bw=(W-30)/bins;
-  const bar=(arr,col,off)=>arr.map((v,k)=>`<rect x="${24+k*bw+off}" y="${H-18-(v/mx)*(H-30)}" width="${bw/2-1}" height="${(v/mx)*(H-30)}" fill="${col}" rx="1"/>`).join('');
-  const tx=t=>24+t*(W-30);
-  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="같은 고양이와 다른 고양이 점수 분포">
-    <line x1="24" y1="${H-18}" x2="${W-6}" y2="${H-18}" stroke="var(--line)"/>
-    ${bar(i,'var(--muted)',bw/2)}${bar(g,'var(--indigo)',0)}
-    <line x1="${tx(R.th.bal.t)}" y1="8" x2="${tx(R.th.bal.t)}" y2="${H-18}" stroke="var(--coral)" stroke-dasharray="3 3"/>
-    <line x1="${tx(R.th.strict.t)}" y1="8" x2="${tx(R.th.strict.t)}" y2="${H-18}" stroke="var(--ok-ink)" stroke-dasharray="3 3"/>
-    ${[0,.25,.5,.75,1].map(v=>`<text x="${tx(v)}" y="${H-4}" text-anchor="middle">${v}</text>`).join('')}
-  </svg><div class="legend"><span><i style="background:var(--indigo)"></i>같은 고양이 점수</span><span><i style="background:var(--muted)"></i>다른 고양이 점수</span><span><i style="background:var(--coral)"></i>후보 기준 ${R.th.bal.t.toFixed(2)}</span><span><i style="background:var(--ok-ink)"></i>동일 기준 ${R.th.strict.t.toFixed(2)}</span></div></div>`;
-}
-function slideText(R){
-  const c=k=>R.byCond[k]?`${pct(R.byCond[k].ok/R.byCond[k].n)} (${R.byCond[k].n}회)`:'측정 안 함';
-  return `고양이 ${R.cats}마리 · 사진 ${R.photos}장 · 비교 ${R.queries}회
-1등 정답 ${pct(R.top1)} · 상위 5장 안 ${pct(R.top5)}
-동일 판정 기준 ${R.th.strict.t.toFixed(2)} 이상 (다른 고양이를 같다고 할 확률 ${pct(R.th.strict.fpr)}, 같은 고양이 인정률 ${pct(R.th.strict.tpr)})
-비교 후보 기준 ${R.th.bal.t.toFixed(2)} 이상 (판정 정확도 ${pct(R.th.bal.acc)})
-같은 고양이 평균 ${R.genMean.toFixed(3)} / 다른 고양이 평균 ${R.impMean.toFixed(3)}
-어두운 사진 ${c('dark')} · 뒷모습 ${c('back')} · 옆모습 ${c('side')}
-등록 1장 → 4장: ${R.byK.map(x=>pct(x.top1)).join(' → ')}`;
-}
-function labReportHTML(R){
-  const weak=R.cats<10||R.photos<50;
-  return `<div class="kpis" style="margin-top:12px">
-    <div class="fact"><b>${pct(R.top1)}</b><span>1등 정답</span><small>질의 ${R.queries}회 · 다른 사진들 중 같은 고양이를 1등으로 고른 비율</small></div>
-    <div class="fact"><b>${pct(R.top5)}</b><span>상위 5장 안</span><small>후보 다섯 장 안에 진짜가 있는 비율</small></div>
-    <div class="fact"><b>${R.th.strict.t.toFixed(2)}</b><span>동일 개체 기준</span><small>다른 고양이를 같다고 할 확률 ${pct(R.th.strict.fpr)} 이하</small></div>
-    <div class="fact"><b>${pct(R.th.bal.acc)}</b><span>같다 · 다르다 판정 정확도</span><small>후보 기준 ${R.th.bal.t.toFixed(2)}에서</small></div>
-  </div>
-  ${labChart(R)}
-  <div class="sec-label">조건별 1등 정답</div>
-  <div style="background:var(--surface);border-radius:18px;padding:4px 8px;overflow-x:auto"><table class="cmp"><tr><th>조건</th><th>질의</th><th>1등 정답</th></tr>
-    ${CONDS.map(([k,l])=>R.byCond[k]?`<tr><td>${l}</td><td>${R.byCond[k].n}회</td><td>${pct(R.byCond[k].ok/R.byCond[k].n)}</td></tr>`:`<tr><td>${l}</td><td>0회</td><td>측정 안 함</td></tr>`).join('')}</table></div>
-  <div class="sec-label">등록 사진 수에 따른 1등 정답</div>
-  <div style="background:var(--surface);border-radius:18px;padding:4px 8px;overflow-x:auto"><table class="cmp"><tr><th>등록</th>${R.byK.map(x=>`<th>${x.k}장</th>`).join('')}</tr><tr><td>1등 정답</td>${R.byK.map(x=>`<td>${pct(x.top1)}</td>`).join('')}</tr></table></div>
-  <p class="notice">등록 k장은 고양이마다 다른 사진 중 k장만 남기고 다시 잰 값이에요. 사진이 k+1장보다 적은 고양이는 가진 만큼만 써요.</p>
-  ${weak?`<div class="unc"><b>표본이 아직 작아요</b>고양이 ${R.cats}마리 · 사진 ${R.photos}장으로는 정확도가 크게 흔들려요. 발표 근거로 쓰려면 최소 10마리 · 마리당 5장(정면 · 좌 · 우 · 등 + 어두운 사진 1장) 이상을 권장해요.</div>`:''}
-  <div class="sec-label">발표용 요약</div>
-  <div class="slide" id="slideTxt">${h(slideText(R))}</div>
-  <div class="mini-actions"><button class="btn soft" id="copySlide">요약 복사</button><button class="btn ink" id="applyTh">이 기준을 앱 판정에 적용</button></div>`;
-}
-async function openLab(){
-  await labLoad();
-  const el=openSheet(`${topBar('실험실')}<div class="sheet-body gut" id="labBody"></div>`);wireClose(el);
-  const body=$('#labBody');
-  const paint=()=>{
-    const nPh=LAB.cats.reduce((a,c)=>a+c.photos.length,0),last=lsGet('wander.labReport',null);
-    body.innerHTML=`<p style="line-height:1.6;margin:4px 4px 10px">같은 고양이 사진을 마리마다 여러 장 넣고 실행하면, 엔진이 <b>몇 %로 같은 고양이를 맞히는지</b>와 <b>몇 점 이상이면 같은 고양이로 볼지</b>를 계산해요. 사진은 이 기기에만 저장돼요.</p>
-      <div class="field" style="margin-top:0"><span class="lab">다음에 넣을 사진의 상태</span><div class="chips" id="condChips">${CONDS.map(([k,l])=>`<button class="chip" aria-pressed="${labCond===k}" data-k="${k}">${l}</button>`).join('')}</div></div>
-      <form class="answer-input" id="addCat" style="margin-top:12px"><input class="txt" id="catName" maxlength="12" placeholder="고양이 이름 (예: 콩이)" autocomplete="off"><button class="btn ink">추가</button></form>
-      ${LAB.cats.map(c=>`<div class="lab-cat"><header><b>${h(c.name)} · ${c.photos.length}장</b><span style="display:flex;gap:6px"><button class="btn soft" style="padding:8px 12px;font-size:12px" data-add="${c.id}">사진 추가</button><button class="btn light" style="padding:8px 12px;font-size:12px" data-del="${c.id}">삭제</button></span></header>
-        <div class="thumbs">${c.photos.map(p=>`<button class="thumb" data-cat="${c.id}" data-ph="${p.id}" title="눌러서 지우기"><img src="${p.photo}" alt=""><span>${(CONDS.find(x=>x[0]===p.cond)||CONDS[0])[1]}</span></button>`).join('')}</div><div data-confirm="${c.id}"></div></div>`).join('')}
-      <div class="unc" style="margin-top:14px"><b>지금 ${LAB.cats.length}마리 · ${nPh}장</b>최소 3마리 · 마리당 2장이 있어야 실행돼요. 발표 근거로는 10마리 · 마리당 5장 이상을 권장해요.</div>
-      <button class="btn coral wide" style="margin-top:12px" id="runLab" ${LAB.cats.filter(c=>c.photos.length>=2).length>=3?'':'disabled'}>실험 실행</button>
-      <div id="labProg"></div><div id="labOut">${last?`<div class="sec-label">지난 실험 · ${ago(last.at)}</div>`+labReportHTML(last):''}</div>`;
-    body.querySelectorAll('#condChips .chip').forEach(b=>b.onclick=()=>{labCond=b.dataset.k;paint()});
-    $('#addCat').onsubmit=async e=>{e.preventDefault();const n=$('#catName').value.trim();if(!n)return;LAB.cats.push({id:uid(),name:n,photos:[]});await labSave();paint()};
-    body.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const c=LAB.cats.find(x=>x.id===b.dataset.add);const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;
-      inp.onchange=async()=>{for(const f of [...inp.files]){try{const r=await readPhoto(f,360);c.photos.push({id:uid(),photo:r.photo,cond:labCond})}catch(e){}}await labSave();paint()};inp.click()});
-    body.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const slot=body.querySelector(`[data-confirm="${b.dataset.del}"]`);slot.innerHTML=`<div class="confirm"><b>이 고양이와 사진을 모두 지울까요?</b><div class="actions"><button class="btn light" data-no>그대로 두기</button><button class="btn coral" data-yes>지우기</button></div></div>`;
-      slot.querySelector('[data-no]').onclick=()=>slot.innerHTML='';slot.querySelector('[data-yes]').onclick=async()=>{LAB.cats=LAB.cats.filter(x=>x.id!==b.dataset.del);await labSave();paint()}});
-    body.querySelectorAll('.thumb').forEach(b=>b.onclick=()=>{const slot=body.querySelector(`[data-confirm="${b.dataset.cat}"]`);slot.innerHTML=`<div class="confirm"><b>이 사진을 뺄까요?</b><div class="actions"><button class="btn light" data-no>그대로 두기</button><button class="btn coral" data-yes>빼기</button></div></div>`;
-      slot.querySelector('[data-no]').onclick=()=>slot.innerHTML='';slot.querySelector('[data-yes]').onclick=async()=>{const c=LAB.cats.find(x=>x.id===b.dataset.cat);c.photos=c.photos.filter(p=>p.id!==b.dataset.ph);await labSave();paint()}});
-    const run=$('#runLab');if(run)run.onclick=async()=>{run.disabled=true;const pg=$('#labProg');
-      try{const R=await labEval((stage,i,n)=>{pg.innerHTML=`<p class="notice">${stage} ${i}/${n}</p><div class="prog"><i style="width:${Math.round(i/n*100)}%"></i></div>`});
-        const keep={...R,gen:R.gen.slice(0,3000),imp:R.imp.slice(0,6000)};lsSet('wander.labReport',keep);pg.innerHTML='';
-        $('#labOut').innerHTML='<div class="sec-label">이번 실험 결과</div>'+labReportHTML(R);wireReport(R)}
-      catch(e){pg.innerHTML='<p class="notice">실험을 끝내지 못했어요. 사진 수를 줄여 다시 실행해 주세요.</p>';run.disabled=false}};
-    if(last)wireReport(last);
-  };
-  const wireReport=R=>{const c=$('#copySlide');if(c)c.onclick=async()=>{try{await navigator.clipboard.writeText(slideText(R));toast('요약을 복사했어요')}catch(e){const r=document.createRange();r.selectNodeContents($('#slideTxt'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('복사가 막혀 있어요. 선택된 글을 길게 눌러 복사하세요')}};
-    const a=$('#applyTh');if(a)a.onclick=()=>{ENG.TH={same:Math.round(R.th.strict.t*100)/100,cand:Math.round(R.th.bal.t*100)/100,src:`실험 ${R.cats}마리 · ${R.photos}장`};lsSet('wander.th',ENG.TH);toast(`판정 기준을 동일 ${ENG.TH.same} · 후보 ${ENG.TH.cand}로 바꿨어요`)}};
-  paint();
-}
-
-/* ---------- 두 사진 비교 (엔진 데모) ---------- */
-function openCompare(){
-  const st={q:null,regs:[]};
-  const el=openSheet(`${topBar('두 사진 비교')}<div class="sheet-body gut" id="cmpBody"></div>`);wireClose(el);
-  const pick=(multi,cb)=>{const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=multi;inp.onchange=async()=>{const out=[];for(const f of [...inp.files].slice(0,5)){try{out.push((await readPhoto(f,480)).photo)}catch(e){}}cb(out)};inp.click()};
-  const paint=async()=>{const b=$('#cmpBody');
-    b.innerHTML=`<p style="line-height:1.6;margin:4px 4px 12px">길에서 찍힌 <b>목격 사진 1장</b>과 보호자가 가진 <b>등록 사진 1~5장</b>을 넣으면 엔진이 같은 아이인지 점수를 매겨요.</p>
-      <div class="slots"><button class="slot" id="pq"><div class="ph">${st.q?`<img src="${st.q}" alt="">`:'목격'}</div><b>목격 사진</b><small>길에서 찍힌 사진 1장</small></button>
-      <button class="slot" id="pr"><div class="ph">${st.regs[0]?`<img src="${st.regs[0]}" alt="">`:'등록'}</div><b>등록 사진 ${st.regs.length}장</b><small>정면 · 좌 · 우 · 등, 최대 5장</small></button></div>
-      <div id="cmpOut"></div>`;
-    $('#pq').onclick=()=>pick(false,o=>{if(o[0]){st.q=o[0];paint()}});
-    $('#pr').onclick=()=>pick(true,o=>{if(o.length){st.regs=o;paint()}});
-    if(st.q&&st.regs.length){$('#cmpOut').innerHTML='<p class="notice">비교하는 중…</p>';const r=await engMatch(st.q,st.regs);$('#cmpOut').innerHTML=engCardHTML(r,st.q,st.regs,'목격 사진 vs 등록 사진')}
-  };
-  paint();
-}
-
-/* ---------- 식별 엔진 설명 ---------- */
-function openEngine(){
-  const R=lsGet('wander.labReport',null),T=ENG.Q,H2=t=>`<h2 style="font-size:20px;letter-spacing:-.02em;margin:24px 4px 10px;text-wrap:balance">${t}</h2>`;
-  const el=openSheet(`${topBar('식별 엔진')}<div class="sheet-body gut">
-    <p style="line-height:1.6;margin:4px 4px 0">어슬렁의 핵심은 <b>길에서 멀리 찍힌 사진에서도 같은 아이를 알아보는 것</b>이에요. 식별이 안 되면 그냥 길고양이 사진첩이 되기 때문에, 엔진의 동작과 판정 기준을 숫자로 공개해요.</p>
-    <div class="mini-actions" style="margin-top:12px"><button class="btn ink" id="goCmp">두 사진 비교해 보기</button><button class="btn soft" id="goLab">실험실 열기</button></div>
-    ${H2('엔진은 이렇게 비교해요')}
-    <div class="steps">
-      <div class="tip"><b>정규화</b>사진 가운데를 정사각형 256px로 맞춰요.</div>
-      <div class="tip"><b>조명 보정</b>평균 밝기로 밝기 배율(예: ×0.78)을 정하고, 주변 색이 다양하면 그 색으로 색온도를 맞춰요. 주변이 단색이면 ‘주변색 단서 부족’으로 밝기만 맞춰요.</div>
-      <div class="tip"><b>동물 영역 찾기</b>테두리 색과 다른 칸을 동물 영역으로 써요. 경계가 애매하면 전체 64칸을 다 써요.</div>
-      <div class="tip"><b>64칸 특징</b>사진을 8×8 = 64칸으로 나누고 칸마다 색 분포 12 + 무늬 방향 8 + 무늬 밀도 1, 모두 21개 숫자를 뽑아요.</div>
-      <div class="tip"><b>칸끼리 짝짓기</b>각 칸을 상대 사진에서 ±2칸 안의 가장 닮은 칸과 짝지어요. 자세가 조금 달라도 무늬 위치가 맞으면 높게 나와요.</div>
-      <div class="tip"><b>두 가지 근거로 점수</b>점수 = ½ × 패치 유사도(닮은 칸 상위 70% 평균) + ½ × 위치 일관성(짝지은 칸들이 같은 방향으로 움직인 비율). 색만 비슷한 다른 고양이는 유사도는 높아도 칸들이 제각각 짝지어져 일관성이 낮아요.</div>
-      <div class="tip"><b>원본 · 보정 둘 다</b>원본 사진과 조명 보정 사진을 각각 비교해 높은 쪽을 써요.</div>
-      <div class="tip"><b>여러 장 종합</b>최종 점수 = 0.6 × 가장 닮은 등록 사진 + 0.4 × 상위 2장 평균. 한 장만 우연히 닮은 경우보다 여러 각도에서 고르게 닮을 때 높아요.</div>
-      <div class="tip"><b>위치 · 시간과 결합</b>수색 순위 = 사진 점수 60% + 마지막 본 곳과의 거리 25% + 목격 시간 15%.</div>
-    </div>
-    ${H2('몇 점이면 같은 고양이인가요')}
-    <p style="line-height:1.6;margin:0 4px 10px">기계가 확정하지 않아요. 점수는 후보 줄을 세우는 데만 쓰고, 기준 점수는 후보로 보여줄지만 정해요. 같은 고양이인지는 보호자가 골라요.</p>
-    <div style="background:var(--surface);border-radius:18px;padding:4px 8px;overflow-x:auto"><table class="cmp">
-      <tr><th>점수</th><th>판정</th><th>앱 동작</th></tr>
-      <tr><td>${ENG.TH.same.toFixed(2)} 이상</td><td>아주 닮음</td><td>후보 맨 위에 보여요</td></tr>
-      <tr><td>${ENG.TH.cand.toFixed(2)} ~ ${ENG.TH.same.toFixed(2)}</td><td>후보</td><td>순위대로 다섯 장까지 보여요</td></tr>
-      <tr><td>${ENG.TH.cand.toFixed(2)} 미만</td><td>닮음 낮음</td><td>위치 · 시간이 아주 가까울 때만 표시</td></tr></table></div>
-    <p class="notice">지금 기준: ${h(ENG.TH.src)}. 실험실에서 다른 고양이를 같다고 할 확률이 1% 이하가 되는 점수를 ‘동일’ 기준으로, 같다 · 다르다를 가장 잘 가르는 점수를 ‘후보’ 기준으로 계산해 바꿀 수 있어요.</p>
-    ${H2('팀 엔진 실험 (발표 기준)')}
-    <div class="kpis">
-      <div class="fact"><b>92.4%</b><span>등록 2장 · 1등 정답</span><small>찾는 고양이 3마리 사진 17장을 다른 고양이 26마리 29장과 섞어서</small></div>
-      <div class="fact"><b>100%</b><span>후보 5장 안</span><small>등록 2장 기준 · 3등 안 99.4%</small></div>
-      <div class="fact"><b>81 → 92%</b><span>등록 1장 → 2장</span><small>3장 90.4% · 그래서 2장 이상을 받아요</small></div>
-      <div class="fact"><b>0.7</b><span>후보 기준 점수</span><small>다른 고양이 통과 5%일 때 · 같은 고양이 85% 통과</small></div>
-    </div>
-    <p class="notice">공개 모델(고양이 · 개 69만 마리 학습) 공개 시험: 상위 5장 96.6%, 1등 85.5%. 뒷모습 사진은 19번 중 1등 0번, 3등 안 17번(89%). 어두운 사진은 아직 측정하지 않았어요(12월 본 시험). 위 숫자는 팀 엔진 기준이고, 아래는 이 앱 안의 경량 엔진을 실험실에서 잰 결과예요.</p>
-    ${H2('앱 안 경량 엔진 실험 결과')}
-    ${R?`<div class="slide">${h(slideText(R))}</div><p class="notice">${ago(R.at)} 실험실에서 측정 · 팀이 모은 사진 기준이에요.</p>`:'<div class="unc"><b>아직 측정 전이에요</b>실험실에 고양이 10마리 · 마리당 5장 이상을 넣고 실행하면 1등 정답률, 상위 5장 정답률, 동일 판정 기준, 어두운 사진 · 뒷모습 정답률, 등록 1장 → 4장 변화가 여기에 채워져요. 측정 전에는 정확도를 주장하지 않아요.</div>'}
-    ${H2('정확도가 떨어지는 패턴과 대처')}
-    <div style="background:var(--surface);border-radius:18px;padding:4px 8px;overflow-x:auto"><table class="cmp">
-      <tr><th>상황</th><th>엔진이 알아채는 기준</th><th>대처</th></tr>
-      <tr><td>어두운 사진</td><td>평균 밝기 &lt; ${T.dark}</td><td>보정 점수 사용 · 밝은 사진 1장 추가</td></tr>
-      <tr><td>역광 · 과노출</td><td>평균 밝기 &gt; ${T.bright}</td><td>그늘에서 다시 찍기</td></tr>
-      <tr><td>흐린 사진</td><td>선명도 &lt; ${T.blur}</td><td>다시 찍기</td></tr>
-      <tr><td>멀리서 작게</td><td>동물 영역 &lt; ${T.small}칸 (64칸 중)</td><td>화면 절반 이상 차게</td></tr>
-      <tr><td>단색 고양이 (검정 · 흰색)</td><td>무늬 대비 &lt; ${T.plain}</td><td>특징 부위 사진 추가 · 위치 · 시간 비중을 높임</td></tr>
-      <tr><td>등록 사진 부족</td><td>${T.regMin}장 미만 · 뒷모습 없음</td><td>뒷모습 포함 2장 이상</td></tr>
-      <tr><td>닮은 후보가 둘 이상</td><td>1 · 2위 점수 차 &lt; ${T.close}</td><td>위에서 본 등 무늬 사진 추가</td></tr></table></div>
-    <p class="notice">기준값은 엔진 설계값이에요. 실험실의 ‘어두움 · 뒷모습 · 옆모습’ 조건별 결과로 실제 영향을 확인해요.</p>
-    ${H2('등록 사진 기준: 2장 이상 · 뒷모습 포함')}
-    <div class="steps">${SLOTS.map(s=>`<div class="tip"><b>${s.t}${s.req?' (필수)':''}</b>${s.d}</div>`).join('')}</div>
-    <p class="notice">팀 실험에서 등록 사진을 1장에서 2장으로 늘리면 1등 정답이 81%에서 92%로 올랐어요. 틀린 건 뒷모습 사진이라 뒷모습을 꼭 받아요. 공통: 자연광 · 플래시 없이 · 흔들림 없이.</p>
-    ${H2('펫나우와 무엇이 다른가요')}
-    <div style="background:var(--surface);border-radius:18px;padding:4px 8px;overflow-x:auto"><table class="cmp">
-      <tr><th></th><th>펫나우</th><th>WANDER</th></tr>
-      <tr><th>누가 찍나</th><td>보호자가 미리</td><td>키우지 않는 이웃이 평소에</td></tr>
-      <tr><th>무엇을 찍나</th><td>코 · 얼굴 근접 스캔</td><td>멀리서 찍힌 전신 · 등 무늬</td></tr>
-      <tr><th>등록 안 된 아이</th><td>찾을 수 없어요</td><td>목격 기록이 있으면 찾아요</td></tr>
-      <tr><th>도망가는 고양이</th><td>근접 스캔이 어려워요</td><td>원거리 사진으로 충분해요</td></tr>
-      <tr><th>어디부터 찾나</th><td>알림 후 기다림</td><td>목격 위치 + 습성으로 반경 제시</td></tr></table></div>
-    <p class="notice">반려묘 등록률은 29.1%예요(KREI 인용 2024). 미리 등록에 기대는 방식은 고양이 열 마리 중 일곱을 놓쳐요.</p>
-    ${H2('한 달 뒤에도 찍게 하려면')}
-    <div class="tips">
-      <div class="tip"><b>쓰이면 바로 알림</b>내 사진이 수색 후보가 되면 즉시 알려요. 카드 · 스티커보다 ‘내 사진이 쓰였다’는 경험이 핵심이에요.</div>
-      <div class="tip"><b>귀가하면 감사 메시지</b>보호자가 ‘찾았어요’를 누르면 단서를 준 사람에게 감사 메시지와 귀가 도움 기록이 남아요.</div>
-      <div class="tip"><b>기여 기록</b>목격 기록 수 · 단서가 된 횟수 · 귀가 도움 횟수를 메뉴 › 내 기여에서 확인서로 보여 줘요.</div>
-      <div class="tip"><b>돈은 플랫폼 밖에서</b>보호자가 사례하고 싶으면 직접 해요. 플랫폼이 돈을 중계하면 포획 · 거래 유인이 생기기 때문이에요.</div>
-    </div>
-    <div class="unc" style="margin-top:12px"><b>심사 질문에 대비할 점</b>지역 동물병원 · 펫샵 제휴 같은 실물 보상은 아직 계획 단계예요. 확정된 제휴가 생기기 전까지는 ‘있다’고 말하지 않는 게 안전해요.</div>
-    <div style="height:16px"></div>
-  </div>`);
-  wireClose(el);$('#goCmp').onclick=openCompare;$('#goLab').onclick=openLab;
-}
-
 
 /* ---------- 위치 열람 요청 (보안) ---------- */
 async function requestExact(x,L){
@@ -1265,7 +1056,7 @@ class RealMap{
   constructor(el,opt={}){
     this.el=el;this.opt=opt;this.data={cards:[]};
     el.classList.add('real');
-    el.innerHTML=`<div class="rm-canvas" style="position:absolute;inset:0"></div><div class="map-ui"><span class="pill" style="font-size:12px">150m 구역 단위로만 보여요</span><button class="pill rm-loc" aria-label="내 위치">◎ 내 위치</button></div><div class="pop-slot"></div>`;
+    el.innerHTML=`<div class="rm-canvas" style="position:absolute;inset:0"></div><div class="map-ui"><span class="pill" style="font-size:12px">150m 구역 단위로만 보여요<button class="info-i" data-zoneinfo aria-label="150m 구역 설명">i</button></span><button class="pill rm-loc" aria-label="내 위치">◎ 내 위치</button></div><div class="pop-slot"></div>`;
     const c0=xy2ll(opt.cx||0,opt.cy||0);
     this.m=L.map(el.querySelector('.rm-canvas'),{zoomControl:false,attributionControl:false,minZoom:10,maxZoom:19}).setView([c0.lat,c0.lng],16);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(this.m);
@@ -1527,27 +1318,25 @@ function openPost(id){
   base();
 }
 function openMyPage(){
-  const me=Store.me,mine=Store.posts.filter(p=>p.by===me).sort((a,b)=>b.at-a.at),S=myStats();
+  const me=Store.me,mine=Store.posts.filter(p=>p.by===me).sort((a,b)=>b.at-a.at);
   const cnt=p=>Store.alerts.filter(a=>a.type==='lostmatch'&&a.postId===p.id).length;
   const ic=d=>`<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg></span>`;
   const el=openSheet(`${topBar('마이페이지')}<div class="sheet-body gut">
-    <div class="kpis"><div class="fact"><b>${S.mine.length}</b><span>내가 만든 카드</span></div><div class="fact"><b>${mine.length}</b><span>내가 등록한 찾기 글</span></div></div>
-    <div class="sec">내가 등록한 찾기 글 <small>${mine.length}건</small></div>
+    <div class="sec" style="margin-top:6px">내가 등록한 찾기 글 <small>${mine.length}건</small></div>
     ${mine.length?mine.map(p=>`<button class="cand-row" data-post="${h(p.id)}" style="margin-bottom:8px"><img src="${p.photos[0]||''}" alt=""><div><b>${h(p.name)}</b><small>${p.status==='found'?'찾았어요':'찾는 중'} · ${whenLabel(p.at)} 등록 · 닮은 기록 ${cnt(p)}건</small></div><span class="more">›</span></button>`).join(''):'<div class="tip">아직 등록한 글이 없어요. 찾기 탭에서 등록할 수 있어요.</div>'}
     <button class="btn soft wide" style="margin-top:8px" id="mpNew">찾기 글 등록하기</button>
     <div class="sec">내 활동</div>
-    <div class="list"><button class="lrow" id="mpAlerts">${ic('<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>')}<div><b>알림</b><span>단서가 된 카드, 닮은 기록, 위치 열람 요청</span></div><span>›</span></button>
-      <button class="lrow" id="mpContrib">${ic('<path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/>')}<div><b>내 기여</b><span>단서가 된 횟수, 귀가 도움, 감사 메시지</span></div><span>›</span></button></div>
-    <div class="sec">앱 정보</div>
-    <div class="list"><button class="lrow" id="mpEngine">${ic('<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>')}<div><b>식별 엔진 · 실험실</b><span>어떻게 같은 고양이를 알아보는지, 정확도 측정</span></div><span>›</span></button>
-      <button class="lrow" id="mpCred">${ic('<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5L5 20"/>')}<div><b>샘플 사진 출처</b><span>자유 이용 허가 사진과 촬영자 표시</span></div><span>›</span></button>
-      <button class="lrow" id="mpInst">${ic('<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>')}<div><b>홈 화면에 앱으로 두기</b><span>누르면 바로 카메라가 열려요</span></div><span>›</span></button></div>
+    <div class="list">
+      <button class="lrow" id="mpDex">${ic('<rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><path d="M14 15h6M14 19h6"/>')}<div><b>내 도감</b><span>내가 수집한 고양이 ${Store.cards.length}마리 · 도감으로 가기</span></div><span>›</span></button>
+      <button class="lrow" id="mpAlerts">${ic('<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>')}<div><b>알림</b><span>단서가 된 카드, 닮은 기록, 위치 열람 요청</span></div><span>›</span></button>
+      <button class="lrow" id="mpContrib">${ic('<path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/>')}<div><b>내 기여</b><span>단서가 된 횟수, 귀가 도움, 감사 메시지</span></div><span>›</span></button>
+    </div>
   </div>`);
   wireClose(el);
   el.querySelectorAll('[data-post]').forEach(b=>b.onclick=()=>openPost(b.dataset.post));
   $('#mpNew').onclick=()=>{closeSheet();F=newFind();F.mode='register';lsSet('wander2.find',{...F});show('find')};
+  $('#mpDex').onclick=()=>{closeSheet();show('dex')};
   $('#mpAlerts').onclick=()=>openAlerts();$('#mpContrib').onclick=()=>openContrib();
-  $('#mpEngine').onclick=()=>openEngine();$('#mpCred').onclick=()=>openCredits();$('#mpInst').onclick=()=>openInstall();
 }
 
 /* ---------- views ---------- */
@@ -1587,9 +1376,9 @@ function tilt(el){
 
 function renderHome(){
   const cards=Store.cards,n=cards.length;
-  $('#homeTitle').innerHTML=`${NB}에서 <em>${n}마리</em>를<br>알아봤어요`;
+  $('#homeTitle').innerHTML=`지금까지 <em>${n}마리</em>의<br>친구를 만났어요`;
   $('#homeSub').textContent=n?`${speciesCount(cards)}종을 만났어요`:'카메라로 첫 친구를 찍어 보세요';
-  $('#homeDexTitle').textContent=NB+' 도감';
+  $('#homeDexTitle').textContent='도감';
   const byNo=cards.slice().sort((a,b)=>(b.lastSeen||0)-(a.lastSeen||0));
   $('#homeStrip').innerHTML=byNo.slice(0,5).map(c=>`<button class="t" data-card="${h(c.id)}" style="background:${COATS[c.coat].bg}">${imgOrArt(c)}</button>`).join('');
   const rec=byNo.slice(0,3);$('#recentMore').textContent=rec.length+'장 ›';
@@ -1600,7 +1389,7 @@ function renderHome(){
 }
 function renderDex(){
   const cards=Store.cards,n=cards.length;
-  $('#dexZone').textContent=ZONE;$('#dexTitle').textContent=NB+' 도감';
+  $('#dexTitle').textContent='도감';
   $('#dexSub').innerHTML=`수집 <b class="hl">${n}마리</b> · <b class="hl">${speciesCount(cards)}종</b>`;
   const F=[['all','전체'],['recent','최근 만남']];
   if(!F.some(f=>f[0]===dexF))dexF='all';
@@ -1719,7 +1508,7 @@ function editCard(d){
 function revealCard(c,kind){
   const up=kind==='level';
   const el=openSheet(`<div class="sheet-body gut" style="display:flex;flex-direction:column;justify-content:center">
-    <div class="done-hero"><h2>${up?`${h(c.name)} 또 만났어요`:'도감에 새 친구가 생겼어요'}</h2><p>${up?`${c.seen}번째 만남이에요`:`${ZONE}에서 ${Store.cards.length}번째로 알아본 친구예요`}</p></div>
+    <div class="done-hero"><h2>${up?`${h(c.name)} 또 만났어요`:'도감에 새 친구가 생겼어요'}</h2><p>${up?`${c.seen}번째 만남이에요`:`도감에서 ${Store.cards.length}번째 친구예요`}</p></div>
     <div class="reveal-wrap" style="position:relative;margin-top:18px">${bigCard(c,{id:'revCard'})}<div class="sparkle"></div></div>
   </div><div class="foot gut"><div class="row2"><button class="btn light" id="moreShot">계속 찍기</button><button class="btn primary" id="toDex">도감에서 보기</button></div></div>`);
   setTimeout(()=>tilt($('#revCard')),900);
@@ -1831,7 +1620,7 @@ function renderFind(){
     log+=bot('고마워요. 식별 엔진이 이웃이 찍은 사진과 비교하고 있어요… <span id="engProg"></span>');
   }
   v.innerHTML=`<div class="sheet-top" style="padding-top:10px;grid-template-columns:44px 1fr auto"><button class="icon-btn" id="fBack" aria-label="뒤로">${ICON.back}</button><b>${reg?'찾기 글 등록':(F.name?h(F.name)+' 찾기':'찾기')}</b><button class="more" id="fReset" style="padding:8px">처음부터</button></div>
-    ${F.name?`<div class="profile">${firstPhoto?`<img src="${firstPhoto.photo}" alt="">`:'<span class="noimg"></span>'}<div><b>${h(F.name)}</b><span>${h([speciesLabel(F),...F.traits].slice(0,3).join(' · '))} · ${h(NB)}</span></div>${F.since?`<span class="pill-pink">${h(F.since[1])} 못 봤어요</span>`:''}</div>`:''}
+    ${F.name?`<div class="profile">${firstPhoto?`<img src="${firstPhoto.photo}" alt="">`:'<span class="noimg"></span>'}<div><b>${h(F.name)}</b><span>${h([speciesLabel(F),...F.traits].slice(0,3).join(' · '))}</span></div>${F.since?`<span class="pill-pink">${h(F.since[1])} 못 봤어요</span>`:''}</div>`:''}
     <div class="msgs">${log}</div><div style="height:12px"></div>
     <div class="chatfoot">${foot}</div>`;
   $('#fBack').onclick=()=>{if(F.step>0){F.step--}else{F.mode=null}save();renderFind()};
@@ -1934,20 +1723,12 @@ function showClue(cardId,lostName){
 /* ---------- small sheets ---------- */
 $('#bellBtn').onclick=()=>openAlerts();
 $('#meBtn').onclick=()=>openMyPage();
-const openCredits=()=>{const el=openSheet(`${topBar('샘플 사진 출처')}<div class="sheet-body gut"><p class="notice" style="padding-top:0">앱에 들어 있는 샘플 고양이 사진은 위키미디어 커먼즈의 자유 이용 허가(CC0 · CC BY) 사진이에요. 정사각형으로 잘라 사용했어요. 웹 버전 지도는 © OpenStreetMap contributors 자료예요.</p><div class="list">${CREDITS.map(c=>`<a class="lrow" href="${h(c.page)}" target="_blank" rel="noopener"><img src="assets/cats/${h(c.file)}.jpg" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex:none"><div><b>${h(c.label)}</b><span>${h(c.artist)} · ${h(c.license)}</span></div><span>›</span></a>`).join('')}</div></div>`);wireClose(el)};
-const openInstall=()=>{const el=openSheet(`${topBar('홈 화면에 앱으로 두기')}<div class="sheet-body gut"><div class="steps">
-  <div class="tip"><b>Safari로 열기</b>WANDER 웹 주소를 아이폰 Safari에서 열어요.</div>
-  <div class="tip"><b>공유 버튼</b>화면 아래 가운데 네모에 화살표가 있는 버튼을 눌러요.</div>
-  <div class="tip"><b>홈 화면에 추가</b>목록에서 ‘홈 화면에 추가’를 누르면 WANDER 아이콘이 생겨요.</div>
-  <div class="tip"><b>아이콘을 누르면</b>주소창 없이 앱처럼 열리고, 바로 카메라가 켜져요. 처음 한 번은 카메라와 위치를 허용해 주세요.</div></div>
-  <p class="notice">Claude 링크에서는 보안 때문에 화면 안 카메라가 막혀 있어요. 시연은 웹 주소로 연 홈 화면 앱에서 해 주세요.</p></div>`);wireClose(el)};
-
 /* ---------- real neighbourhood name ----------
    GPS -> OpenStreetMap reverse geocoding (Nominatim) -> 동 이름. Cached; asked again only after moving ~300m or a day later.
    Coordinates are rounded to ~100m before they leave the phone. Without GPS the last known name (or 궁동) stays. */
 function setNB(n){
   if(!n)return;NB=n;ZONE=n+' 일대';
-  $('#camZone').innerHTML='<i></i>'+h(ZONE);$('#mapTitle').textContent=ZONE;
+  $('#camZone').innerHTML='<i></i>'+h(ZONE);
   renderHome();renderDex();
 }
 async function locateHood(){
@@ -1968,7 +1749,7 @@ async function locateHood(){
 }
 
 /* ---------- boot: open straight into the camera ---------- */
-$('#camZone').innerHTML='<i></i>'+h(ZONE);$('#mapTitle').textContent=ZONE;
+$('#camZone').innerHTML='<i></i>'+h(ZONE);
 renderHome();renderDex();
 Store.init();
 AI.init();
@@ -1976,6 +1757,25 @@ show('home');
 camOpen();
 locateHood();
 if(REAL)loadLeaflet();
+
+/* ---------- 150m 구역 설명 (i 버튼) ---------- */
+function openZoneInfo(){
+  const el=openSheet(`${topBar('150m 구역이 뭐예요?')}<div class="sheet-body gut">
+    <div class="tip" style="font-size:15px"><b>내 위치 기준이 아니에요</b>고양이가 있던 정확한 자리를 숨기려고, 지도를 바둑판처럼 150m 칸으로 나눠서 “그 칸 안 어딘가”로만 보여 줘요.</div>
+    <div class="sec">예를 들어</div>
+    <div class="steps">
+      <div class="tip">내가 편의점 앞에서 고양이를 찍었어요. 정확한 자리는 <b style="display:inline">나만</b> 알아요.</div>
+      <div class="tip">지도에는 그 자리가 아니라 <b style="display:inline">그 칸의 가운데에 지름 150m 원</b>으로 표시돼요.</div>
+      <div class="tip">다른 사람은 “이 원 안 어딘가에서 찍혔구나”까지만 알고, 어느 골목인지는 몰라요.</div>
+      <div class="tip">누가 어디서 지도를 보든 같은 칸은 늘 같은 원으로 보여요.</div></div>
+    <div class="sec">지도에서 보이는 것</div>
+    <div class="list"><div class="lrow"><span style="color:#2F6BFF;font-size:22px;width:36px;text-align:center">●</span><div><b>파란 점</b><span>내 현재 위치예요</span></div></div>
+      <div class="lrow"><span style="color:#6573E3;font-size:22px;width:36px;text-align:center">◯</span><div><b>사진 + 보라색 원</b><span>고양이 카드가 찍힌 150m 구역이에요</span></div></div></div>
+    <div class="sec">정확한 위치가 필요하면</div>
+    <div class="tip">찾는 보호자가 열람을 요청하고, 찍은 사람이 승인하면 <b style="display:inline">72시간 동안만</b> 정확한 위치가 열려요. 고양이가 학대나 포획에 악용되지 않도록 만든 규칙이에요.</div>
+  </div>`);wireClose(el);
+}
+document.addEventListener('click',e=>{if(e.target.closest('[data-zoneinfo]')){e.preventDefault();e.stopPropagation();openZoneInfo()}},true);
 
 </script>
 </body>
